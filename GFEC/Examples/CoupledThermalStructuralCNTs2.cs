@@ -219,7 +219,7 @@ namespace GFEC
 
             }
 
-            //Contact elements
+            //Contact Elements
             for (int i = 1; i <= totalContactElements-1; i++)
             {
                 int lowerMiddleNode = 2 * nodesInXCoor * nodesInYCoor - nodesInXCoor + i + 1;
