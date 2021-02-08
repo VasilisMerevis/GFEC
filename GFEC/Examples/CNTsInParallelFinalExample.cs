@@ -49,7 +49,7 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.6/100;
+        const double externalStructuralLoad = -2.6 / 100;
         const double externalHeatLoad = 2500.0 * 1e-9;
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
@@ -104,30 +104,32 @@ namespace GFEC
         private static void CreateStructuralBoundaryConditions()
         {
             List<int> boundedDofs = new List<int>();
-            for (int i = 0; i < nodesInYCoor; i++)
-            {
-                boundedDofs.Add(i * 2 * nodesInXCoor + 1); //upper beam left side support
-            }
+            //for (int i = 0; i < nodesInYCoor; i++)
+            //{
+            //    boundedDofs.Add(i * 2 * nodesInXCoor + 1); //upper beam left side support in x 
+            //    boundedDofs.Add((i + 1) * 2 * nodesInXCoor - 1); //upper beam right side support in x
+            //}
 
             //for (int i = 0; i < nodesInYCoor; i++)
             //{
             //    boundedDofs.Add(i * 2 * nodesInXCoor + 2 * nodesInXCoor - 1); //upper beam right side support
             //}
 
-            //for (int i = 0; i < nodesInYCoor; i++) //upper beam left side support
+            for (int i = 0; i < nodesInYCoor; i++) //upper beam left side support
+            {
+                boundedDofs.Add(i * nodesInXCoor * 2 + 1);
+                boundedDofs.Add(i * nodesInXCoor * 2 + 2);
+            }
+
+            //for (int i = 1; i <= totalContactElements; i++)
             //{
-            //    boundedDofs.Add(i * nodesInXCoor * 2 + 1);
-            //    boundedDofs.Add(i * nodesInXCoor * 2 + 2);
+            //    boundedDofs.Add(nodesInXCoor * nodesInYCoor * 2 + 2 * i); //lower beam lower side support
             //}
 
-            for (int i = 1; i <= totalContactElements; i++)
+            for (int i = 0; i < nodesInYCoor; i++)
             {
-                boundedDofs.Add(nodesInXCoor * nodesInYCoor * 2 + 2 * i); //lower beam lower side support
+                boundedDofs.Add(nodesInYCoor * nodesInXCoor * 2 + nodesInXCoor * 2 * (i + 1) ); //lower beam right side support
             }
-            //for (int i = 0; i < nodesInYCoor; i++)
-            //{
-            //    boundedDofs.Add(nodesInYCoor * nodesInXCoor * 2 + nodesInXCoor * 2 * (i+1) - 1); //lower beam right side support
-            //}
 
             //for (int i = 0; i < totalNodes; i++)
             //{
@@ -370,9 +372,9 @@ namespace GFEC
             ///structuralSolution = new StaticSolver();
             structuralSolution.LinearScheme = new LUFactorization();
             //structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
-            structuralSolution.NonLinearScheme.Tolerance = 1e-5;
+            structuralSolution.NonLinearScheme.Tolerance = 1e-4;
             structuralSolution.ActivateNonLinearSolver = true;
-            structuralSolution.NonLinearScheme.numberOfLoadSteps = 20;
+            structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;
 
             double[] externalForces3 = externalForcesStructuralVector;
             foreach (var dof in loadedStructuralDOFs)

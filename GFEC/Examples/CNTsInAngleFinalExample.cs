@@ -10,7 +10,7 @@ namespace GFEC
     public static class CNTsInAngleFinalExample
     {
         private const int totalNodes = 648;
-        private const int totalContactElements = 60;//20;//8;
+        private const int totalContactElements = 30;//20;//8;
         private const int totalElements = 480;
         private const int nodesInXCoor = 81;
         private const int nodesInYCoor = 4;
@@ -20,7 +20,7 @@ namespace GFEC
  
         public static ISolver structuralSolution;
         public static ISolver thermalSolution;
-        private const double angleInDegrees = 80;
+        private const double angleInDegrees = 85;
         private const double angle = (Math.PI / 180) * angleInDegrees; //tested: 2.2, 2.57, 2.40, 2.12
         private static double offset = (nodesInXCoor - 1) * xIntervals * Math.Sin(angle) - totalContactElements * xIntervals; //6.95;//8.1;//9.3// tested: 7.0 - 0.05, 7.0 -0.45, 7.0 -0.25, 7.0 -0.0
         private static double offsetInY = (nodesInXCoor - 1) * xIntervals * Math.Cos(angle);
@@ -415,7 +415,7 @@ namespace GFEC
 
 
             ///structuralSolution = new StaticSolver();
-            structuralSolution.LinearScheme = new PCGSolver();
+            structuralSolution.LinearScheme = new LUFactorization();
             //structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
             structuralSolution.NonLinearScheme.Tolerance = 1e-5;
             structuralSolution.ActivateNonLinearSolver = true;
