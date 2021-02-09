@@ -55,8 +55,8 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -10000.0 * 2;
-        const double externalHeatLoad = 2500.0 * 1e-6;
+        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;
+        const double externalHeatLoad = 2500.0 * 1e-9;
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
         //const double externalHeatLoad = 2500.0 * 1e-9;
@@ -86,13 +86,13 @@ namespace GFEC
         //const double yieldStrength = 60000000000.0;
 
         //CNT values scaled
-        const double YoungMod = 1.0 * 1e9;
+        const double YoungMod = 1.45e6;
         const double density = 8000.0;
         const double area = 0.01;
-        const double thickness = 0.1;
-        const double solidThermalCond = 3300 * 1.0e-6;
-        const double roughness = 2.81 * 1.0e-6;
-        const double contactCond = 3300 * 1.0e-6;
+        const double thickness = 0.38;
+        const double solidThermalCond = 3300 * 1.0e-9;
+        const double roughness = 0.0075;
+        const double contactCond = 3300 * 1.0e-9;
         const double yieldStrength = 60.0 * 1e6;
 
         //----------------------------------------------------------------------
