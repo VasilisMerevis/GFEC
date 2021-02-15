@@ -32,6 +32,12 @@ namespace GFEC
             ElementType = elementType;
         }
 
+        public ElementProperties(double youngMod, string elementType)
+        {
+            YoungMod = youngMod;
+            ElementType = elementType;
+        }
+
         public ElementProperties(double youngMod, double sectionArea, double momentOfInertia, string elementType)
         {
             YoungMod = youngMod;

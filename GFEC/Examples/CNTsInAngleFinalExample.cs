@@ -10,7 +10,8 @@ namespace GFEC
     public static class CNTsInAngleFinalExample
     {
         private const int totalNodes = 648;
-        private const int totalContactElements = 30;//20;//8;
+        private const int totalContactElements = 42;//20;//8;
+        private static int actualTotalContactElements;
         private const int totalElements = 480;
         private const int nodesInXCoor = 81;
         private const int nodesInYCoor = 4;
@@ -55,8 +56,8 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;
-        const double externalHeatLoad = 2500.0 * 1e-9;
+        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;//-2.6
+        const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
         //const double externalHeatLoad = 2500.0 * 1e-9;
@@ -87,13 +88,13 @@ namespace GFEC
 
         //CNT values scaled
         const double YoungMod = 1.45e6;
-        const double density = 8000.0;
-        const double area = 0.01;
+        //const double density = 8000.0;
+        //const double area = 0.01;
         const double thickness = 0.38;
-        const double solidThermalCond = 3300 * 1.0e-9;
+        const double solidThermalCond = 3300.0;
         const double roughness = 0.0075;
-        const double contactCond = 3300 * 1.0e-9;
-        const double yieldStrength = 60.0 * 1e6;
+        const double contactCond = 3300.0;
+        const double yieldStrength = 60.0e3;
 
         //----------------------------------------------------------------------
         //const double YoungMod = 1.0e-6;
@@ -274,7 +275,7 @@ namespace GFEC
                 int upperNode = nodesInXCoor - totalContactElements + i + 1 + 1 + 1 + 1;
                 connectivity[count + i] = new Dictionary<int, int>() { { 1, lowerLeftNode }, { 2, lowerRightNode }, { 3, upperNode } };
             }
-
+            actualTotalContactElements = totalContactElements * 4 - 1 - 2 - 3 - 4;
             return connectivity;
         }
 
@@ -301,26 +302,26 @@ namespace GFEC
         private static Dictionary<int, IElementProperties> CreateElementProperties()
         {
             double E = YoungMod;
-            double A = area;
+            //double A = area;
             string type = "Quad4";
             string type2 = "ContactNtS2D";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             for (int i = 1; i <= totalElements; i++)
             {
-                elementProperties[i] = new ElementProperties(E, A, type);
+                elementProperties[i] = new ElementProperties(E, type);
             }
 
             for (int i = 1; i <= totalElements; i++)
             {
-                elementProperties[i].Density = density;
+                //elementProperties[i].Density = density;
                 elementProperties[i].Thickness = thickness;
             }
 
             for (int i = totalElements + 1; i <= totalElements + totalContactElements - 1 + totalContactElements - 2 + totalContactElements - 3 + totalContactElements - 4; i++)
             {
-                elementProperties[i] = new ElementProperties(E, A, type2);
-                elementProperties[i].Density = density;
+                elementProperties[i] = new ElementProperties(E, type2);
+                //elementProperties[i].Density = density;
                 elementProperties[i].Thickness = thickness;
             }
             return elementProperties;
@@ -329,7 +330,7 @@ namespace GFEC
         private static Dictionary<int, IElementProperties> CreateThermalElementProperties()
         {
             double thermalCond = solidThermalCond;
-            double A = area;
+            double A = thickness * xIntervals;
             string type = "Quad4Th";
             string type2 = "ContactNtS2DTh";
 

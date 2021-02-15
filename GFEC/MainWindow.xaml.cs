@@ -235,6 +235,9 @@ namespace GFEC
                     CNTsInAngleFinalExample.structuralSolution = new StaticSolver();
                     CNTsInAngleFinalExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     CNTsInAngleFinalExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    CNTsInAngleFinalExample.thermalSolution = new StaticSolver();
+                    CNTsInAngleFinalExample.thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    CNTsInAngleFinalExample.thermalSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = CNTsInAngleFinalExample.RunStaticExample();
                     break;
                 default:
