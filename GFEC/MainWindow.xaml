@@ -17,11 +17,36 @@
         <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,104,33,0" VerticalAlignment="Top" Width="126" Click="Button_Click" Height="32"/>
         <Button Content="GraphicsPlot" Margin="0,67,33,0" VerticalAlignment="Top" Height="32" Click="Button_Click_Gnuplot" HorizontalAlignment="Right" Width="126"/>
         <Image Name="gnuplotImage" Height="239" Margin="31,276,710,0" VerticalAlignment="Top"/>
-        <Button Content="Test" Margin="0,67,164,0" VerticalAlignment="Top" Height="32" Click="Button_Test" HorizontalAlignment="Right" Width="116"/>
-        <TextBox x:Name="LogTool" x:FieldModifier="public" HorizontalAlignment="Right" Height="166" Margin="0,311,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
-        <Label Content="Convergence Results" HorizontalAlignment="Right" Margin="0,276,33,0" Width="375" Height="30" VerticalAlignment="Top"/>
-        <lvc:CartesianChart Series="{Binding Something}" Margin="279,311,441,64" />
+        <TextBox x:Name="LogTool" x:FieldModifier="public" Margin="31,445,33,10" TextWrapping="Wrap"/>
+        <Label Content="Convergence Results" HorizontalAlignment="Right" Margin="0,264,545,0" Width="375" Height="30" VerticalAlignment="Top"/>
         <Button Content="ParallelTest" HorizontalAlignment="Right" Margin="0,67,285,0" VerticalAlignment="Top" Width="123" Height="32" Click="Button_ParallelTest"/>
+        <lvc:CartesianChart AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}" Margin="31,294,33,96">
+            <lvc:CartesianChart.Series>
+                <lvc:LineSeries Values="{Binding ChartValues}" 
+                    PointGeometry="{x:Null}" 
+                    LineSmoothness="1"
+                    StrokeThickness="3" 
+                    Stroke="#F34336"
+                    Fill="Transparent"/>
+            </lvc:CartesianChart.Series>
+            <lvc:CartesianChart.AxisX>
+                <lvc:Axis LabelFormatter="{Binding DateTimeFormatter}" 
+                    MaxValue="{Binding AxisMax}" 
+                    MinValue="{Binding AxisMin}"
+                    Unit="{Binding AxisUnit}">
+                    <lvc:Axis.Separator>
+                        <lvc:Separator Step="{Binding AxisStep}" />
+                    </lvc:Axis.Separator>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisX>
+            <lvc:CartesianChart.AxisY>
+                <lvc:Axis MaxValue="1000" MinValue="-10" Unit="1000" >
+                    <lvc:Axis.Sections>
+                        <lvc:AxisSection Value="0" StrokeThickness="3" Stroke="#303030"></lvc:AxisSection>
+                    </lvc:Axis.Sections>
+                </lvc:Axis>
+            </lvc:CartesianChart.AxisY>
+        </lvc:CartesianChart>
 
     </Grid>
 </Window>

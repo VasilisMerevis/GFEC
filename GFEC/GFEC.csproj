@@ -147,6 +147,7 @@
     <Compile Include="Solver\Linear\LinearSolution.cs" />
     <Compile Include="Solver\Linear\LUFactorization.cs" />
     <Compile Include="Solver\Linear\PCGSolver.cs" />
+    <Compile Include="Solver\NonLinear\ConvergenceValues.cs" />
     <Compile Include="Solver\NonLinear\INonLinearSolution.cs" />
     <Compile Include="Solver\NonLinear\LoadControlledNewtonRaphson.cs" />
     <Compile Include="Solver\NonLinear\NewtonIterations.cs" />

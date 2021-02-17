@@ -17,7 +17,7 @@ namespace GFEC
         protected ILinearSolution linearSolver;
         public Dictionary<int, double[]> InternalForces { get; set; }
         public Dictionary<int, double[]> Solutions { get; set; }
-        public event EventHandler<string> convergenceResult;
+        public event EventHandler<ConvergenceValues> convergenceResult;
         public List<string> LoadStepConvergence { get; set; }
 
         public virtual double[] Solve(IAssembly assembly, ILinearSolution linearScheme, double[] forceVector)
@@ -25,11 +25,11 @@ namespace GFEC
             throw new Exception("LinearSolution.Solve not implemented");
         }
 
-        protected void OnConvergenceResult(string message)
+        protected void OnConvergenceResult(ConvergenceValues convergenceValues)
         {
             if (convergenceResult != null)
             {
-                convergenceResult.Invoke(this, message);
+                convergenceResult.Invoke(this, convergenceValues);
             }
             
         }

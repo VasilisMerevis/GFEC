@@ -491,8 +491,8 @@ namespace GFEC
                 //ISolver thermalSolution = new StaticSolver();
                 thermalSolution.LinearScheme = new LUFactorization();
                 //thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
-                thermalSolution.NonLinearScheme.Tolerance = 1e-7;
-                thermalSolution.ActivateNonLinearSolver = true;
+                thermalSolution.NonLinearScheme.Tolerance = 1e-5;
+                thermalSolution.ActivateNonLinearSolver = false;
                 thermalSolution.NonLinearScheme.numberOfLoadSteps = 20;
 
                 thermalSolution.AssemblyData = elementsAssembly2;

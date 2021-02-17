@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using LiveCharts;
+using LiveCharts.Configurations;
 using LiveCharts.Wpf;
 using Microsoft.Win32;
 
@@ -23,7 +25,7 @@ namespace GFEC
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public SeriesCollection Graph { get; set; }
         public SeriesCollection Mesh { get; set; }
@@ -32,14 +34,16 @@ namespace GFEC
         private Dictionary<int, Dictionary<int, int>> elementsConnectivity = new Dictionary<int, Dictionary<int, int>>();
         public string selectedExample;
         public SeriesCollection Something { get; set; }
+        public ChartValues<ConvergenceValues> ChartValues { get; set; }
 
-        
+
 
         public MainWindow()
         {
             InitializeComponent();
             LoadComboBox();
             gnuplotImage.Source = null;
+            ConvergenceResults();
 
 
         }
@@ -47,6 +51,7 @@ namespace GFEC
         private void RunButton(object sender, RoutedEventArgs args)
         {
             //SolveSelectedExample();
+           
             CoupledThermalStructural.diagramData = new ShowToGUI();
             CoupledThermalStructural.diagramData.TestEvent += TestEventMethod;
             CoupledThermalStructural.diagramData.TestEventMethod();
@@ -54,7 +59,7 @@ namespace GFEC
             Thread thread1 = new Thread(SolveSelectedExample);
             thread1.SetApartmentState(ApartmentState.STA);
             thread1.Start();
-            
+
             
             //thread1.Join();
             //Graph = ShowToGUI.ShowResults(solverResults);
@@ -82,8 +87,10 @@ namespace GFEC
             //Mesh = ShowToGUI.DrawMesh(nodes, connectivity);
 
             DataContext = this;
-
+            
             return;
+
+
         }
 
         private void LoadComboBox()
@@ -238,7 +245,9 @@ namespace GFEC
                     CNTsInAngleFinalExample.thermalSolution = new StaticSolver();
                     CNTsInAngleFinalExample.thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     CNTsInAngleFinalExample.thermalSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    
                     finalResults = CNTsInAngleFinalExample.RunStaticExample();
+
                     break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();
@@ -249,12 +258,20 @@ namespace GFEC
             solverResults = finalResults;
         }
 
-        public void NonLinearScheme_convergenceResult(object sender, string e)
+        public void NonLinearScheme_convergenceResult(object sender, ConvergenceValues e)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                LogTool.Text = e;
+                LogTool.Text = "Load Step " + e.LoadStep + "-Iteration " + e.Iteration + " : Convergence State: " + e.ConvergenceResult + " with residual " + e.ResidualNorm;
+                ChartValues.Add(new ConvergenceValues
+                {
+                    Iteration = e.Iteration,
+                    ResidualNorm = e.ResidualNorm,
+
+                });
             }));
+            SetAxisLimits(e.Iteration);
+            if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
         }
 
         private void PrintResultOnUI(object sender, string e)
@@ -422,26 +439,76 @@ namespace GFEC
             gnuplotImage.Source = new BitmapImage(new Uri("file://" + AppContext.BaseDirectory + "gnuplot.png"));
         }
 
-        private void Button_Test(object sender, RoutedEventArgs e)
-        {
-            double[] testVector = new double[75];
-            for (int i = 0; i < 5; i++)
-            {
-                for (int j = 0; j < 15; j++)
-                {
-                    testVector[i * 15 + j] = i;
-                }
-            }
-            string path = @"C:\Users\Public\Documents\ContourDataY.dat";
-            ExportToFile.CreateContourDataForMatlab(testVector, testVector, testVector, 5, 15, path);
-        }
-
+        
         private void Button_ParallelTest(object sender, RoutedEventArgs e)
         {
             MultiThreadingExample test1 = new MultiThreadingExample();
             test1.timeElapsed += PrintResultOnUI;
             test1.RunExample();
         }
+
+        private double _axisMax;
+        private double _axisMin;
+
+        
+        public Func<double, string> DateTimeFormatter { get; set; }
+        public double AxisStep { get; set; }
+        public double AxisUnit { get; set; }
+        public bool IsReading { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void ConvergenceResults()
+        {
+            var mapper = Mappers.Xy<ConvergenceValues>()
+                .X(model => model.Iteration)   //use DateTime.Ticks as X
+                .Y(model => model.ResidualNorm);           //use the value property as Y
+
+            //lets save the mapper globally.
+            Charting.For<ConvergenceValues>(mapper);
+
+            //the values property will store our values array
+            ChartValues = new ChartValues<ConvergenceValues>();
+
+            //lets set how to display the X Labels
+            //DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
+
+            //AxisStep forces the distance between each separator in the X axis
+            AxisStep = 1;// TimeSpan.FromSeconds(1).Ticks;
+            //AxisUnit forces lets the axis know that we are plotting seconds
+            //this is not always necessary, but it can prevent wrong labeling
+            AxisUnit = 100;// TimeSpan.TicksPerSecond;
+        }
+
+        public double AxisMax
+        {
+            get { return _axisMax; }
+            set
+            {
+                _axisMax = value;
+                OnPropertyChanged("AxisMax");
+            }
+        }
+        public double AxisMin
+        {
+            get { return _axisMin; }
+            set
+            {
+                _axisMin = value;
+                OnPropertyChanged("AxisMin");
+            }
+        }
+
+        private void SetAxisLimits(int now)
+        {
+            AxisMax = now + 1;
+            AxisMin = now - 8;
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName = null)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
     }
 
 
