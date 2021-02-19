@@ -11,7 +11,6 @@
         <TextBox Name="Results"  HorizontalAlignment="Right" Height="91" Margin="0,141,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
         <Button Content="Run" Click="RunButton" Margin="0,26,33,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="85"/>
         <ComboBox Name="ComboBox1" Margin="0,26,123,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="285"/>
-        <lvc:CartesianChart Name="CartChart" Series="{Binding Graph}" Margin="31,26,441,0" Height="232" VerticalAlignment="Top" />
         <Button Content="Import Nodes" Margin="0,104,164,0" VerticalAlignment="Top" Click="Import_Nodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
         <Button Content="Import Connectivity" HorizontalAlignment="Right" Margin="0,104,285,0" VerticalAlignment="Top" Width="123" Click="Import_Connectivity_Button_Click" Height="32"/>
         <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,104,33,0" VerticalAlignment="Top" Width="126" Click="Button_Click" Height="32"/>
@@ -47,6 +46,7 @@
                 </lvc:Axis>
             </lvc:CartesianChart.AxisY>
         </lvc:CartesianChart>
+        <Viewport3D Name="myViewport3D2"  Margin="31,26,413,309"/>
 
     </Grid>
 </Window>
