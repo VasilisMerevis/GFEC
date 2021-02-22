@@ -27,6 +27,10 @@ namespace GFEC
         private static double offsetInY = (nodesInXCoor - 1) * xIntervals * Math.Cos(angle);
         private static double gap = offsetInY + 0.05; //tested: 1.14, 2.75, 2.10, 0.75
         private static int loadStepsNumber = 40;
+
+        private const int ThermalDof1 = 2;
+        private const int ThermalDof2 = nodesInXCoor * (nodesInYCoor - 1) + 2;
+
         //private const double angle = Math.PI * 0.48485;
 
         //--------------------------------------------
@@ -57,7 +61,10 @@ namespace GFEC
 
         //External loads
         const double externalStructuralLoad = -2.6 * 4 - totalContactElements;//-2.6
-        const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
+        //const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
+        const double T0 = 100.0;
+        const double cond = 3300 * 1.0e-9;
+        static double externalHeatLoad = -2 * T0 * (cond / (6 * xIntervals * yIntervals)) * ((Math.Pow(xIntervals, 2) - 2 * Math.Pow(yIntervals, 2)) - (Math.Pow(xIntervals, 2) + Math.Pow(yIntervals, 2)));
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
         //const double externalHeatLoad = 2500.0 * 1e-9;
@@ -331,7 +338,7 @@ namespace GFEC
         {
             double thermalCond = solidThermalCond;
             double A = thickness * xIntervals;
-            string type = "Quad4Th";
+            string type = "Quad4Th2";
             string type2 = "ContactNtS2DTh";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
@@ -505,7 +512,15 @@ namespace GFEC
 
                 foreach (var dof in loadedThermalDOFs)
                 {
-                    externalHeatFlux[dof - 1] = externalHeatLoad;
+                    //externalHeatFlux[dof - 1] = externalHeatLoad;
+                    if ((dof == ThermalDof1 | dof == ThermalDof2))
+                    {
+                        externalHeatFlux[dof - 1] = externalHeatLoad / 2;
+                    }
+                    else
+                    {
+                        externalHeatFlux[dof - 1] = externalHeatLoad;
+                    }
                 }
                 //for (int i = 61; i <= 75; i++)
                 //{
