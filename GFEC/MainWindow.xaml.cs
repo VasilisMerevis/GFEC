@@ -36,6 +36,7 @@ namespace GFEC
         public string selectedExample;
         public SeriesCollection Something { get; set; }
         public ChartValues<ConvergenceValues> ChartValues { get; set; }
+        private int LoadStepNumber { get; set; }
 
 
 
@@ -264,15 +265,21 @@ namespace GFEC
             Application.Current.Dispatcher.Invoke(new Action(() =>
             { 
                 LogTool.Text = "Load Step " + e.LoadStep + "-Iteration " + e.Iteration + " : Convergence State: " + e.ConvergenceResult + " with residual " + e.ResidualNorm;
-                ChartValues.Add(new ConvergenceValues
+                if (e.LoadStep > LoadStepNumber)
                 {
-                    Iteration = e.Iteration,
-                    ResidualNorm = e.ResidualNorm
-
-                });
+                    ChartValues.Clear();
+                }
+                //ChartValues.Add(new ConvergenceValues
+                //{
+                //    Iteration = e.Iteration,
+                //    ResidualNorm = e.ResidualNorm
+                //});
+                
+                LoadStepNumber = e.LoadStep;
             }));
             SetAxisLimits(e.Iteration);
-            if (ChartValues.Count > 150) ChartValues.RemoveAt(0);
+            
+            if (ChartValues.Count > 50) ChartValues.RemoveAt(0);
         }
 
         private void PrintResultOnUI(object sender, string e)

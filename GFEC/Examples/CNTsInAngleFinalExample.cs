@@ -60,7 +60,7 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;//-2.6
+        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;//-2.6, -2,85
         //const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
         const double T0 = 100.0;
         const double cond = 3300 * 1.0e-9;
@@ -347,6 +347,8 @@ namespace GFEC
                 elementProperties[i] = new ElementProperties();
                 elementProperties[i].ElementType = type;
                 elementProperties[i].ThermalConductivity = thermalCond;
+                elementProperties[i].A = xIntervals;
+                elementProperties[i].B = yIntervals;
             }
             for (int i = totalElements + 1; i <= totalElements + totalContactElements - 1 + totalContactElements - 2 + totalContactElements - 3 + totalContactElements - 4; i++)
             {
@@ -499,8 +501,8 @@ namespace GFEC
                 thermalSolution.LinearScheme = new LUFactorization();
                 //thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                 thermalSolution.NonLinearScheme.Tolerance = 1e-5;
-                thermalSolution.ActivateNonLinearSolver = false;
-                thermalSolution.NonLinearScheme.numberOfLoadSteps = 20;
+                thermalSolution.ActivateNonLinearSolver = true;
+                thermalSolution.NonLinearScheme.numberOfLoadSteps = 3;
 
                 thermalSolution.AssemblyData = elementsAssembly2;
                 double[] externalHeatFlux = externalHeatLoafVector;
