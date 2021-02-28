@@ -147,12 +147,22 @@ namespace GFEC
             //    boundedDofs.Add(i * 2 + 1); //support for all nodes at X direction
             //}
 
-            for (int i = totalNodes / 2 + 1; i < totalNodes; i++)
+            //for (int i = totalNodes / 2 + 1; i < totalNodes; i++)
+            //{
+            //    boundedDofs.Add(i * 2 + 0);
+            //    boundedDofs.Add(i * 2 + 1); //lower beam support for all nodes
+            //}
+
+            for (int i = 0; i < nodesInXCoor; i++) 
             {
-                boundedDofs.Add(i * 2 + 0);
-                boundedDofs.Add(i * 2 + 1); //lower beam support for all nodes
+                boundedDofs.Add((totalNodes / 2 + i) * 2 + 2); //lower beam lower side y support
             }
 
+            for (int i = 0; i < nodesInYCoor; i++) 
+            {
+                boundedDofs.Add((totalNodes / 2 + (i + 1) * nodesInXCoor) * 2 - 1); //lower beam right side x support
+                boundedDofs.Add((totalNodes / 2 + i * nodesInXCoor) * 2 + 1); //lower beam left side x support
+            }
             structuralBoundaryConditions = boundedDofs.ToArray<int>();
         }
 
@@ -163,6 +173,7 @@ namespace GFEC
             for (int i = 0; i < nodesInYCoor; i++)
             {
                 boundedDofs.Add(nodesInYCoor * nodesInXCoor + nodesInXCoor * (i + 1)); //lower beam right side support
+                boundedDofs.Add(nodesInXCoor * i + 1); //upper beam left side
             }
             thermalBoundaryConditions = boundedDofs.ToArray<int>();
         }
@@ -186,7 +197,7 @@ namespace GFEC
             loadedThermalDOFs = new List<int>();
             for (int i = 0; i < nodesInYCoor; i++)
             {
-                loadedThermalDOFs.Add(nodesInXCoor * i + 1);
+                loadedThermalDOFs.Add(nodesInXCoor * i + 1+1);
             }
             externalHeatLoafVector = new double[totalNodes];
         }
@@ -501,7 +512,7 @@ namespace GFEC
                 thermalSolution.LinearScheme = new LUFactorization();
                 //thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                 thermalSolution.NonLinearScheme.Tolerance = 1e-5;
-                thermalSolution.ActivateNonLinearSolver = true;
+                thermalSolution.ActivateNonLinearSolver = false;
                 thermalSolution.NonLinearScheme.numberOfLoadSteps = 3;
 
                 thermalSolution.AssemblyData = elementsAssembly2;
