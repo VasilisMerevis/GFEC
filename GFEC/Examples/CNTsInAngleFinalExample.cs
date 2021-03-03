@@ -23,7 +23,7 @@ namespace GFEC
         public static ISolver thermalSolution;
         private const double angleInDegrees = 85;
         private const double angle = (Math.PI / 180) * angleInDegrees; //tested: 2.2, 2.57, 2.40, 2.12
-        private static double offset = (nodesInXCoor - 1) * xIntervals * Math.Sin(angle) - totalContactElements * xIntervals; //6.95;//8.1;//9.3// tested: 7.0 - 0.05, 7.0 -0.45, 7.0 -0.25, 7.0 -0.0
+        private static double offset = (nodesInXCoor - 1) * xIntervals * Math.Sin(angle) - totalContactElements * xIntervals+0.1; //6.95;//8.1;//9.3// tested: 7.0 - 0.05, 7.0 -0.45, 7.0 -0.25, 7.0 -0.0
         private static double offsetInY = (nodesInXCoor - 1) * xIntervals * Math.Cos(angle);
         private static double gap = offsetInY + 0.05; //tested: 1.14, 2.75, 2.10, 0.75
         private static int loadStepsNumber = 40;
@@ -60,10 +60,10 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.6 * 4 - totalContactElements;//-2.6, -2,85
+        const double externalStructuralLoad = -2.85;//-2.6 * 4 - totalContactElements;//-2.6, -2,85
         //const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
         const double T0 = 100.0;
-        const double cond = 3300 * 1.0e-9;
+        const double cond = 3300;// * 1.0e-9;
         static double externalHeatLoad = -2 * T0 * (cond / (6 * xIntervals * yIntervals)) * ((Math.Pow(xIntervals, 2) - 2 * Math.Pow(yIntervals, 2)) - (Math.Pow(xIntervals, 2) + Math.Pow(yIntervals, 2)));
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
@@ -181,14 +181,15 @@ namespace GFEC
         private static void CreateStructuralLoadVector()
         {
             loadedStructuralDOFs = new List<int>();
-            for (int i = 0; i < totalContactElements; i++)
-            {
-                loadedStructuralDOFs.Add(nodesInXCoor * nodesInYCoor * 2 - 2 * i);
-            }
-            //for (int i = 1; i <= nodesInYCoor; i++)
+            //for (int i = 0; i < totalContactElements; i++)
             //{
-            //    loadedStructuralDOFs.Add((nodesInXCoor * (nodesInYCoor - 1) + i) * 2); //load at upper surface of upper beam
+            //    loadedStructuralDOFs.Add(nodesInXCoor * nodesInYCoor * 2 - 2 * i); //load in contact area
             //}
+
+            for (int i = 0; i < nodesInXCoor - 1; i++)
+            {
+                loadedStructuralDOFs.Add((nodesInXCoor * (nodesInYCoor - 1) + i) * 2 + 2); //load at upper surface of upper beam
+            }
             externalForcesStructuralVector = new double[totalNodes * 2];
         }
 
