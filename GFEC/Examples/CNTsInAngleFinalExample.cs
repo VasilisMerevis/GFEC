@@ -10,7 +10,7 @@ namespace GFEC
     public static class CNTsInAngleFinalExample
     {
         private const int totalNodes = 648;
-        private const int totalContactElements = 42;//20;//8;
+        private const int totalContactElements = 30;//42;//20;//8;
         private static int actualTotalContactElements;
         private const int totalElements = 480;
         private const int nodesInXCoor = 81;
@@ -21,7 +21,7 @@ namespace GFEC
  
         public static ISolver structuralSolution;
         public static ISolver thermalSolution;
-        private const double angleInDegrees = 85;
+        private const double angleInDegrees = 75;
         private const double angle = (Math.PI / 180) * angleInDegrees; //tested: 2.2, 2.57, 2.40, 2.12
         private static double offset = (nodesInXCoor - 1) * xIntervals * Math.Sin(angle) - totalContactElements * xIntervals+0.1; //6.95;//8.1;//9.3// tested: 7.0 - 0.05, 7.0 -0.45, 7.0 -0.25, 7.0 -0.0
         private static double offsetInY = (nodesInXCoor - 1) * xIntervals * Math.Cos(angle);
@@ -60,7 +60,7 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.85;//-2.6 * 4 - totalContactElements;//-2.6, -2,85
+        const double externalStructuralLoad = -2.85 *4;//-2.6 * 4 - totalContactElements;//-2.6, -2,85
         //const double externalHeatLoad = 3300 * 100.0/2;//2500.0 * 1e-9;
         const double T0 = 100.0;
         const double cond = 3300;// * 1.0e-9;
