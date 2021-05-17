@@ -119,6 +119,7 @@ namespace GFEC
             exampleList.Add("CNTExample");
             exampleList.Add("CNTsInParallelFinalExample");
             exampleList.Add("CNTsInAngleFinalExample");
+            exampleList.Add("TwoBlocksInContact3D");
 
             ComboBox1.ItemsSource = exampleList;
         }
@@ -247,8 +248,15 @@ namespace GFEC
                     CNTsInAngleFinalExample.thermalSolution = new StaticSolver();
                     CNTsInAngleFinalExample.thermalSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     CNTsInAngleFinalExample.thermalSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
-                    
                     finalResults = CNTsInAngleFinalExample.RunStaticExample();
+                    break;
+                    
+                case "TwoBlocksInContact3D":
+                    TwoBlocksInContact3D.newSolu = new StaticSolver();
+                    TwoBlocksInContact3D.newSolu.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    TwoBlocksInContact3D.newSolu.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+
+                    finalResults = TwoBlocksInContact3D.RunStaticExample();
 
                     break;
                 default:

@@ -322,9 +322,40 @@ namespace GFEC
             throw new Exception("Not implemented");
         }
 
+        private double[] CalculateStressVector(double[,] E, double[] strain)
+        {
+            double[] stressVector = VectorOperations.MatrixVectorProduct(E, strain);
+            return stressVector;
+        }
+
         public double[] CreateInternalGlobalForcesVector()
         {
-            return new double[24];
+            double[] F = new double[24];
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, 0.30); //needs fixing in poisson v
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        double[] gP = GaussPoints(i, j, k).Item1;
+                        double[] gW = GaussPoints(i, j, k).Item2;
+                        Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
+                        double[,] J = CalculateJacobian(localdN);
+                        double[,] invJ = CalculateInverseJacobian(J).Item1;
+                        double detJ = CalculateInverseJacobian(J).Item2;
+                        Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
+                        double[,] B = CalculateBMatrix(globaldN);
+                        double[] strainVector = CalculateStrainsVector(B);
+                        double[] stressVector = CalculateStressVector(E, strainVector);
+                        F = VectorOperations.VectorVectorAddition(F, VectorOperations.VectorScalarProductNew(
+                            VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * gW[2]));
+                    }
+                    
+                }
+            }
+            return F;
         }
     }
 }

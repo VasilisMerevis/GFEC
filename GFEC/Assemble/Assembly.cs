@@ -118,6 +118,12 @@ namespace GFEC
                     case "ContactNtN2DTh":
                         ElementsAssembly[elem] = new ContactNtN2DTh(ElementsProperties[elem], elementNodes);
                         break;
+                    case "Hex8":
+                        ElementsAssembly[elem] = new Hex8(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "ContactNtS3D":
+                        ElementsAssembly[elem] = new ContactNtS3D(ElementsProperties[elem], elementNodes);
+                        break;
                 }
                 Dictionary<int, bool[]> efs = ElementsAssembly[elem].ElementFreedomSignature;
                 Dictionary<int, int> elemConnectivity = ElementsConnectivity[elem];

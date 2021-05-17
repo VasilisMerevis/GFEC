@@ -88,6 +88,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
+    <Compile Include="Elements\ContactNtS3D.cs" />
     <Compile Include="Elements\Quad4Th2.cs" />
     <Compile Include="Elements\ContactNtS2DTh.cs" />
     <Compile Include="Elements\ContactNtN2DTh.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Examples\TwoBeamsInContactQuadsExample.cs" />
     <Compile Include="Examples\TwoBeamsInFrContactQuadsExample.cs" />
     <Compile Include="Examples\TwoBlocksInContact.cs" />
+    <Compile Include="Examples\TwoBocksInContact3D.cs" />
     <Compile Include="Examples\TwoQuadsDynamicExample.cs" />
     <Compile Include="Examples\TwoQuadsExample.cs" />
     <Compile Include="Examples\TwoQuadsInContactNewExample.cs" />
