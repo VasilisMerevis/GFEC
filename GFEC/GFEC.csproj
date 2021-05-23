@@ -113,6 +113,7 @@
     <Compile Include="Examples\CoupledThermalStructuralCNTsInAngle5.cs" />
     <Compile Include="Examples\DynamicExample.cs" />
     <Compile Include="Examples\ExplicitLinearExample.cs" />
+    <Compile Include="Examples\Hexa8TestExample.cs" />
     <Compile Include="Examples\LinearFrameExample.cs" />
     <Compile Include="Examples\LinearFrameTrussHybridExample.cs" />
     <Compile Include="Examples\LinearTrussExample.cs" />

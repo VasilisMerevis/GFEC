@@ -28,6 +28,7 @@ namespace GFEC
             ElementFreedomSignature[6] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[7] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[8] = new bool[] { true, true, true, false, false, false };
+            DisplacementVector = new double[24];
         }
 
         public double ClosestPointProjection()
@@ -119,7 +120,7 @@ namespace GFEC
         private double[,] CalculateJacobian(Dictionary<string, double[]> dN)
         {
             double[,] jacobianMatrix = new double[3, 3];
-            DisplacementVector = new double[24];
+            //DisplacementVector = new double[24];
             double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
 
             int k = 0;
@@ -330,7 +331,7 @@ namespace GFEC
 
         public double[] CreateInternalGlobalForcesVector()
         {
-            double[] F = new double[24];
+            double[] fInt = new double[24];
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, 0.30); //needs fixing in poisson v
 
             for (int i = 0; i < 2; i++)
@@ -349,13 +350,18 @@ namespace GFEC
                         double[,] B = CalculateBMatrix(globaldN);
                         double[] strainVector = CalculateStrainsVector(B);
                         double[] stressVector = CalculateStressVector(E, strainVector);
-                        F = VectorOperations.VectorVectorAddition(F, VectorOperations.VectorScalarProductNew(
+                        fInt = VectorOperations.VectorVectorAddition(fInt, VectorOperations.VectorScalarProductNew(
                             VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * gW[2]));
                     }
-                    
+
                 }
             }
-            return F;
+
+            //double[,] Kstiff = CreateGlobalStiffnessMatrix();
+            //double[] uDisp = DisplacementVector;
+            //double[] fInt = VectorOperations.MatrixVectorProduct(Kstiff, uDisp);
+            //fInt = VectorOperations.VectorScalarProductNew(fInt, 1.0);
+            return fInt;
         }
     }
 }

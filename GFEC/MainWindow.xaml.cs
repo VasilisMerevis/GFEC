@@ -120,6 +120,7 @@ namespace GFEC
             exampleList.Add("CNTsInParallelFinalExample");
             exampleList.Add("CNTsInAngleFinalExample");
             exampleList.Add("TwoBlocksInContact3D");
+            exampleList.Add("Hxa8TestExample");
 
             ComboBox1.ItemsSource = exampleList;
         }
@@ -255,9 +256,13 @@ namespace GFEC
                     TwoBlocksInContact3D.newSolu = new StaticSolver();
                     TwoBlocksInContact3D.newSolu.NonLinearScheme = new LoadControlledNewtonRaphson();
                     TwoBlocksInContact3D.newSolu.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
-
                     finalResults = TwoBlocksInContact3D.RunStaticExample();
-
+                    break;
+                case "Hxa8TestExample":
+                    Hxa8TestExample.newSolu = new StaticSolver();
+                    Hxa8TestExample.newSolu.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    Hxa8TestExample.newSolu.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = Hxa8TestExample.RunStaticExample();
                     break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();
