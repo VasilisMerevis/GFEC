@@ -8,7 +8,7 @@ namespace GFEC
     public static class TwoBlocksInContact3D
     {
         private const double BlockLength = 1.0;
-        private const double ElementSize  = 0.1;
+        private const double ElementSize  = 1.0;
         private static int ElementsNumber = 9;
         private const double Gap  = 0.01;
         private const int nodesPerSide = 3;
@@ -17,104 +17,61 @@ namespace GFEC
 
         private static Dictionary<int, INode> CreateNodes()
         {
-            //nodesPerSide = (int)(BlockLength / ElementSize + 1.0);
-            //ElementsNumber = (int)Math.Pow(BlockLength / ElementSize, 2.0);
+            
             nodes = new Dictionary<int, INode>();
 
-            int nodeNumber = 0;
-            for (int k = 0; k < 2; k++)
-            {
-                for (int i = 0; i < nodesPerSide; i++)
-                {
-                    for (int j = 0; j < nodesPerSide; j++)
-                    {
-                        nodeNumber = nodeNumber + 1;
-                        double x = i * ElementSize;
-                        double y = j * ElementSize;
-                        double z = k * ElementSize;
-                        nodes[nodeNumber] = new Node(x, y, z);
-                    }
-                }
-            }
+            nodes[1] = new Node(0.0, 0.0, 0.0);
+            nodes[2] = new Node(ElementSize, 0.0, 0.0);
+            nodes[3] = new Node(2.0*ElementSize, 0.0, 0.0);
 
-            nodes[19] = new Node(ElementSize / 2.0, ElementSize / 2.0, ElementSize + Gap);
-            nodes[20] = new Node(3.0 * ElementSize / 2.0, ElementSize / 2.0, ElementSize + Gap);
-            nodes[21] = new Node(ElementSize / 2.0, 3.0 * ElementSize / 2.0, ElementSize + Gap);
-            nodes[22] = new Node(3.0 * ElementSize / 2.0, 3.0 * ElementSize / 2.0, ElementSize + Gap);
+            nodes[4] = new Node(0.0, 0.0, ElementSize);
+            nodes[5] = new Node(ElementSize, 0.0, ElementSize);
+            nodes[6] = new Node(2.0*ElementSize, 0.0, ElementSize);
 
-            nodes[23] = new Node(ElementSize / 2.0, ElementSize / 2.0, 2.0 * ElementSize + Gap);
-            nodes[24] = new Node(3.0 * ElementSize / 2.0, ElementSize / 2.0, 2.0 * ElementSize + Gap);
-            nodes[25] = new Node(ElementSize / 2.0, 3.0 * ElementSize / 2.0, 2.0 * ElementSize + Gap);
-            nodes[26] = new Node(3.0 * ElementSize / 2.0, 3.0 * ElementSize / 2.0, 2.0 * ElementSize + Gap);
-            //for (int k = 0; k < nodesPerSide; k++)
-            //{
-            //    for (int i = 0; i < nodesPerSide; i++)
-            //    {
-            //        for (int j = 0; j < nodesPerSide; j++)
-            //        {
-            //            nodeNumber = nodeNumber + 1;
-            //            double x = i * ElementSize;
-            //            double y = j * ElementSize;
-            //            double z = k * ElementSize + BlockLength + Gap;
-            //            nodes[nodeNumber] = new Node(x, y, z);
-            //        }
-            //    }
-            //}
+            nodes[7] = new Node(0.0, 0.0, 2.0 * ElementSize);
+            nodes[8] = new Node(ElementSize, 0.0, 2.0*ElementSize);
+            nodes[9] = new Node(2.0 * ElementSize, 0.0, 2.0*ElementSize);
+
+            nodes[10] = new Node(0.0, ElementSize, 0.0);
+            nodes[11] = new Node(ElementSize, ElementSize, 0.0);
+            nodes[12] = new Node(2.0 * ElementSize, ElementSize, 0.0);
+
+            nodes[13] = new Node(0.0, ElementSize, ElementSize);
+            nodes[14] = new Node(ElementSize, ElementSize, ElementSize);
+            nodes[15] = new Node(2.0 * ElementSize, ElementSize, ElementSize);
+
+            nodes[16] = new Node(0.0, ElementSize, 2.0 * ElementSize);
+            nodes[17] = new Node(ElementSize, ElementSize, 2.0 * ElementSize);
+            nodes[18] = new Node(2.0 * ElementSize, ElementSize, 2.0 * ElementSize);
+
+            nodes[19] = new Node(ElementSize / 2.0, ElementSize+Gap, ElementSize/2.0);
+            nodes[20] = new Node(1.5 * ElementSize, ElementSize+Gap, ElementSize/2.0);
+            nodes[21] = new Node(ElementSize / 2.0, ElementSize+Gap, 1.5*ElementSize);
+            nodes[22] = new Node(1.5 * ElementSize, ElementSize+Gap, 1.5*ElementSize);
+
+            nodes[23] = new Node(ElementSize / 2.0,2.0* ElementSize + Gap, ElementSize / 2.0);
+            nodes[24] = new Node(1.5 * ElementSize,2.0* ElementSize + Gap, ElementSize / 2.0);
+            nodes[25] = new Node(ElementSize / 2.0,2.0* ElementSize + Gap, 1.5 * ElementSize);
+            nodes[26] = new Node(1.5 * ElementSize,2.0* ElementSize + Gap, 1.5 * ElementSize);
+
             return nodes;
         }
 
         private static Dictionary<int, Dictionary<int, int>> CreateConnectivity()
         {
             Dictionary<int, Dictionary<int, int>> connectivity = new Dictionary<int, Dictionary<int, int>>();
-            //int element = 1;
-            //for (int i = 1; i < nodesPerSide; i++)
-            //{
-            //    for (int j = 1; j < nodesPerSide; j++)
-            //    {
-            //        int localNode1 = (i - 1) * nodesPerSide + j;
-            //        int localNode2 = (i - 1) * nodesPerSide + j + 1;
-            //        int localNode3 = i * nodesPerSide + j;
-            //        int localNode4 = i * nodesPerSide + j + 1;
-            //        int localNode5 = i * nodesPerSide + j + 1;
-            //        int localNode6 = i * nodesPerSide + j + 1;
-            //        int localNode7 = i * nodesPerSide + j + 1;
-            //        int localNode8 = i * nodesPerSide + j + 1;
-            //        connectivity[element] = new Dictionary<int, int>() { { 1, localNode1 }, { 2, localNode2 }, { 3, localNode3 }, { 4, localNode4 } };
-            //        element = element + 1;
-            //    }
-            //}
-            //int firstBodyTotalNodes = nodesPerSide * nodesPerSide;
-            //for (int i = 1; i < nodesPerSide; i++)
-            //{
-            //    for (int j = 1; j < nodesPerSide; j++)
-            //    {
-            //        int localNode1 = (i - 1) * nodesPerSide + j + firstBodyTotalNodes;
-            //        int localNode2 = (i - 1) * nodesPerSide + j + 1 + firstBodyTotalNodes;
-            //        int localNode3 = i * nodesPerSide + j + firstBodyTotalNodes;
-            //        int localNode4 = i * nodesPerSide + j + 1 + firstBodyTotalNodes;
-            //        connectivity[element] = new Dictionary<int, int>() { { 1, localNode1 }, { 2, localNode2 }, { 3, localNode3 }, { 4, localNode4 } };
-            //        element = element + 1;
-            //    }
-            //}
+           
+            connectivity[1] = new Dictionary<int, int>() { { 1, 7 }, { 2, 8 }, { 3, 5 }, { 4, 4 }, { 5, 16 }, { 6, 17 }, { 7, 14 }, { 8, 13 } };
+            connectivity[2] = new Dictionary<int, int>() { { 1, 8 }, { 2, 9 }, { 3, 6 }, { 4, 5 }, { 5, 17 }, { 6, 18 }, { 7, 15 }, { 8, 14 } };
+            connectivity[3] = new Dictionary<int, int>() { { 1, 4 }, { 2, 5 }, { 3, 2 }, { 4, 1 }, { 5, 13 }, { 6, 14 }, { 7, 11 }, { 8, 10 } };
+            connectivity[4] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 3 }, { 4, 2 }, { 5, 14 }, { 6, 15 }, { 7, 12 }, { 8, 11 } };
 
-            //for (int i = 1; i <= nodesPerSide; i++)
-            //{
-            //    int localNode1 = i + firstBodyTotalNodes - nodesPerSide;
-            //    int localNode2 = i + firstBodyTotalNodes;
-            //    connectivity[element] = new Dictionary<int, int>() { { 1, localNode1 }, { 2, localNode2 } };
-            //    element = element + 1;
-            //}
-            connectivity[1] = new Dictionary<int, int>() { { 1, 1 }, { 2, 2 }, { 3, 4 }, { 4, 5 }, { 5, 10 }, { 6, 11 }, { 7, 13 }, { 8, 14 } };
-            connectivity[2] = new Dictionary<int, int>() { { 1, 2 }, { 2, 3 }, { 3, 5 }, { 4, 6 }, { 5, 11 }, { 6, 12 }, { 7, 14 }, { 8, 15 } };
-            connectivity[3] = new Dictionary<int, int>() { { 1, 4 }, { 2, 5 }, { 3, 7 }, { 4, 8 }, { 5, 13 }, { 6, 14 }, { 7, 16 }, { 8, 17 } };
-            connectivity[4] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 8 }, { 4, 9 }, { 5, 14 }, { 6, 15 }, { 7, 17 }, { 8, 18 } };
+            connectivity[5] = new Dictionary<int, int>() { { 1, 21 }, { 2, 22 }, { 3, 20 }, { 4, 19 }, { 5, 25 }, { 6, 26}, { 7, 24 }, { 8, 23 } };
 
-            connectivity[5] = new Dictionary<int, int>() { { 1, 19 }, { 2, 20 }, { 3, 21 }, { 4, 22 }, { 5, 23 }, { 6, 24}, { 7, 25 }, { 8, 26 } };
-
-            connectivity[6] = new Dictionary<int, int>() { { 1, 10 }, { 2, 11 }, { 3, 13 }, { 4, 14 }, { 5, 19 } };
-            connectivity[7] = new Dictionary<int, int>() { { 1, 11 }, { 2, 12 }, { 3, 14 }, { 4, 15 }, { 5, 20 } };
-            connectivity[8] = new Dictionary<int, int>() { { 1, 13 }, { 2, 14 }, { 3, 16 }, { 4, 17 }, { 5, 21 } };
-            connectivity[9] = new Dictionary<int, int>() { { 1, 14 }, { 2, 15 }, { 3, 17 }, { 4, 18 }, { 5, 22 } };
+            connectivity[6] = new Dictionary<int, int>() { { 1, 16 }, { 2, 17 }, { 3, 14 }, { 4, 13 }, { 5, 21 } };
+            connectivity[7] = new Dictionary<int, int>() { { 1, 17 }, { 2, 18 }, { 3, 15 }, { 4, 14 }, { 5, 22 } };
+            connectivity[8] = new Dictionary<int, int>() { { 1, 13 }, { 2, 14 }, { 3, 11 }, { 4, 10 }, { 5, 19 } };
+            connectivity[9] = new Dictionary<int, int>() { { 1, 14 }, { 2, 15 }, { 3, 12 }, { 4, 11 }, { 5, 20 } };
 
 
             ElementsNumber = connectivity.Count;
@@ -176,16 +133,14 @@ namespace GFEC
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
 
             //ISolver newSolu = new StaticSolver();
-            newSolu.LinearScheme = new PCGSolver();
+            newSolu.LinearScheme = new LUFactorization();
             //newSolu.NonLinearScheme = new LoadControlledNewtonRaphson();
             newSolu.ActivateNonLinearSolver = true;
             newSolu.NonLinearScheme.numberOfLoadSteps = 20;
 
             double[] externalForces = new double[78];
-            externalForces[67] = -100.0;
-            externalForces[70] = -100.0;
-            externalForces[73] = -100.0;
-            externalForces[76] = -100.0;
+            externalForces[76] = -1000000000.0;
+
 
             double[] reducedExternalFVector = BoundaryConditionsImposition.ReducedVector(externalForces, elementsAssembly.BoundedDOFsVector);
 
