@@ -667,7 +667,14 @@ namespace GFEC
                         else if(fields[0] == "f")
                         {
                             connectivityIndex = connectivityIndex + 1;
-                            elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { 1, }
+                            string separatorForNode = "/";
+                            int[] elementNodes = new int[4];
+                            for (int i = 0; i < 4; i++)
+                            {
+                                string[] fieldsForNode = fields[i+1].Split(separatorForNode.ToCharArray());
+                                elementNodes[i] = Int16.Parse(fieldsForNode[0]);
+                            }
+                            elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
                         }
                         
                     }
