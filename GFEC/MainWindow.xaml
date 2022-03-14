@@ -47,6 +47,7 @@
             </lvc:CartesianChart.AxisY>
         </lvc:CartesianChart>
         <Viewport3D Name="myViewport3D2"  Margin="31,26,413,309"/>
+        <Button Content="Import OBJ File" HorizontalAlignment="Left" Margin="671,67,0,0" VerticalAlignment="Top" Width="116" Height="32" Click="ImportOBJFile"/>
 
     </Grid>
 </Window>

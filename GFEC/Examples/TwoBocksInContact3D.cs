@@ -9,6 +9,7 @@ namespace GFEC
     {
         private const double BlockLength = 1.0;
         private const double ElementSize  = 1.0;
+        private const double ElementSizeb = 1.0;
         private static int ElementsNumber = 9;
         private const double Gap  = 0.01;
         private const int nodesPerSide = 3;
@@ -22,37 +23,23 @@ namespace GFEC
 
             nodes[1] = new Node(0.0, 0.0, 0.0);
             nodes[2] = new Node(ElementSize, 0.0, 0.0);
-            nodes[3] = new Node(2.0*ElementSize, 0.0, 0.0);
-
+            nodes[3] = new Node(ElementSize, 0.0, ElementSize);
             nodes[4] = new Node(0.0, 0.0, ElementSize);
-            nodes[5] = new Node(ElementSize, 0.0, ElementSize);
-            nodes[6] = new Node(2.0*ElementSize, 0.0, ElementSize);
 
-            nodes[7] = new Node(0.0, 0.0, 2.0 * ElementSize);
-            nodes[8] = new Node(ElementSize, 0.0, 2.0*ElementSize);
-            nodes[9] = new Node(2.0 * ElementSize, 0.0, 2.0*ElementSize);
+            nodes[5] = new Node(0.0, ElementSize, 0.0);
+            nodes[6] = new Node(ElementSize, ElementSize, 0.0);
+            nodes[7] = new Node(ElementSize, ElementSize, ElementSize);
+            nodes[8] = new Node(0.0, ElementSize, ElementSize);
 
-            nodes[10] = new Node(0.0, ElementSize, 0.0);
-            nodes[11] = new Node(ElementSize, ElementSize, 0.0);
-            nodes[12] = new Node(2.0 * ElementSize, ElementSize, 0.0);
+            nodes[9] = new Node(0.0+0.2, ElementSize+Gap, 0.0);
+            nodes[10] = new Node(ElementSize-0.2, ElementSize + Gap, 0.0);
+            nodes[11] = new Node(ElementSize-0.2, ElementSize + Gap, ElementSize);
+            nodes[12] = new Node(0.0+0.2, ElementSize + Gap, ElementSize);
 
-            nodes[13] = new Node(0.0, ElementSize, ElementSize);
-            nodes[14] = new Node(ElementSize, ElementSize, ElementSize);
-            nodes[15] = new Node(2.0 * ElementSize, ElementSize, ElementSize);
-
-            nodes[16] = new Node(0.0, ElementSize, 2.0 * ElementSize);
-            nodes[17] = new Node(ElementSize, ElementSize, 2.0 * ElementSize);
-            nodes[18] = new Node(2.0 * ElementSize, ElementSize, 2.0 * ElementSize);
-
-            nodes[19] = new Node(ElementSize / 2.0, ElementSize+Gap, ElementSize/2.0);
-            nodes[20] = new Node(1.5 * ElementSize, ElementSize+Gap, ElementSize/2.0);
-            nodes[21] = new Node(ElementSize / 2.0, ElementSize+Gap, 1.5*ElementSize);
-            nodes[22] = new Node(1.5 * ElementSize, ElementSize+Gap, 1.5*ElementSize);
-
-            nodes[23] = new Node(ElementSize / 2.0,2.0* ElementSize + Gap, ElementSize / 2.0);
-            nodes[24] = new Node(1.5 * ElementSize,2.0* ElementSize + Gap, ElementSize / 2.0);
-            nodes[25] = new Node(ElementSize / 2.0,2.0* ElementSize + Gap, 1.5 * ElementSize);
-            nodes[26] = new Node(1.5 * ElementSize,2.0* ElementSize + Gap, 1.5 * ElementSize);
+            nodes[13] = new Node(0.0+0.2, 2*ElementSize + Gap, 0.0);
+            nodes[14] = new Node(ElementSize-0.2, 2*ElementSize + Gap, 0.0);
+            nodes[15] = new Node(ElementSize-0.2, 2*ElementSize + Gap, ElementSize);
+            nodes[16] = new Node(0.0+0.2, 2*ElementSize + Gap, ElementSize);
 
             return nodes;
         }
@@ -61,18 +48,13 @@ namespace GFEC
         {
             Dictionary<int, Dictionary<int, int>> connectivity = new Dictionary<int, Dictionary<int, int>>();
            
-            connectivity[1] = new Dictionary<int, int>() { { 1, 7 }, { 2, 8 }, { 3, 5 }, { 4, 4 }, { 5, 16 }, { 6, 17 }, { 7, 14 }, { 8, 13 } };
-            connectivity[2] = new Dictionary<int, int>() { { 1, 8 }, { 2, 9 }, { 3, 6 }, { 4, 5 }, { 5, 17 }, { 6, 18 }, { 7, 15 }, { 8, 14 } };
-            connectivity[3] = new Dictionary<int, int>() { { 1, 4 }, { 2, 5 }, { 3, 2 }, { 4, 1 }, { 5, 13 }, { 6, 14 }, { 7, 11 }, { 8, 10 } };
-            connectivity[4] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 3 }, { 4, 2 }, { 5, 14 }, { 6, 15 }, { 7, 12 }, { 8, 11 } };
-
-            connectivity[5] = new Dictionary<int, int>() { { 1, 21 }, { 2, 22 }, { 3, 20 }, { 4, 19 }, { 5, 25 }, { 6, 26}, { 7, 24 }, { 8, 23 } };
-
-            connectivity[6] = new Dictionary<int, int>() { { 1, 16 }, { 2, 17 }, { 3, 14 }, { 4, 13 }, { 5, 21 } };
-            connectivity[7] = new Dictionary<int, int>() { { 1, 17 }, { 2, 18 }, { 3, 15 }, { 4, 14 }, { 5, 22 } };
-            connectivity[8] = new Dictionary<int, int>() { { 1, 13 }, { 2, 14 }, { 3, 11 }, { 4, 10 }, { 5, 19 } };
-            connectivity[9] = new Dictionary<int, int>() { { 1, 14 }, { 2, 15 }, { 3, 12 }, { 4, 11 }, { 5, 20 } };
-
+            connectivity[1] = new Dictionary<int, int>() { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 } };
+            connectivity[2] = new Dictionary<int, int>() { { 1, 9 }, { 2, 10 }, { 3, 11 }, { 4, 12 }, { 5, 13 }, { 6, 14 }, { 7, 15 }, { 8, 16 } };
+            
+            connectivity[3] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }, { 5, 9 } };
+            connectivity[4] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }, { 5, 10 } };
+            connectivity[5] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }, { 5, 11 } };
+            connectivity[6] = new Dictionary<int, int>() { { 1, 5 }, { 2, 6 }, { 3, 7 }, { 4, 8 }, { 5, 12 } };
 
             ElementsNumber = connectivity.Count;
             return connectivity;
@@ -93,16 +75,16 @@ namespace GFEC
             double E = 200.0e9;
             double A = 1.0;
             string type = "Hex8";
-            string type2 = "ContactNtS3D";
+            string type2 = "ContactNtS3Df";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 2; i++)
             {
                 elementProperties[i] = new ElementProperties(E, A, type);
                 elementProperties[i].Density = 8000.0;
                 //elementProperties[i].Thickness = 0.1;
             }
-            for (int i = 6; i <= 9; i++)
+            for (int i = 3; i <= 6; i++)
             {
                 elementProperties[i] = new ElementProperties(E, A, type2);
             }
@@ -117,8 +99,8 @@ namespace GFEC
             assembly.ElementsProperties = CreateElementProperties();
             assembly.NodeFreedomAllocationList = CreateNodeFAT();
 
-            assembly.BoundedDOFsVector = new int[27];
-            for (int i = 1; i <= 27; i++)
+            assembly.BoundedDOFsVector = new int[12];
+            for (int i = 1; i <= 12; i++)
             {
                 assembly.BoundedDOFsVector[i - 1] = i;
             }
@@ -133,19 +115,20 @@ namespace GFEC
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
 
             //ISolver newSolu = new StaticSolver();
-            newSolu.LinearScheme = new LUFactorization();
+            newSolu.LinearScheme = new BiCGSTABSolver();
             //newSolu.NonLinearScheme = new LoadControlledNewtonRaphson();
             newSolu.ActivateNonLinearSolver = true;
-            newSolu.NonLinearScheme.numberOfLoadSteps = 20;
+            newSolu.NonLinearScheme.numberOfLoadSteps = 10;
 
-            double[] externalForces = new double[78];
-            externalForces[76] = -1000000000.0;
+            double[] externalForces = new double[48];
+            externalForces[46] = -1000.0;
 
 
             double[] reducedExternalFVector = BoundaryConditionsImposition.ReducedVector(externalForces, elementsAssembly.BoundedDOFsVector);
 
             newSolu.AssemblyData = elementsAssembly;
             newSolu.Solve(reducedExternalFVector);
+            double[] solutionVector = newSolu.GetSolution();
             newSolu.PrintSolution();
 
             return new Results() { NonlinearSolution = new List<double[]>(), SelectedDOF = 2, SolutionType = "Nonlinear" };

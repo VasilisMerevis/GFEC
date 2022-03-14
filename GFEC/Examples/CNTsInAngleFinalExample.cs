@@ -10,7 +10,7 @@ namespace GFEC
     public static class CNTsInAngleFinalExample
     {
         private const int totalNodes = 648;
-        private const int totalContactElements = 30;//42;//20;//8;
+        private const int totalContactElements = 40;//42;//20;//8;
         private static int actualTotalContactElements;
         private const int totalElements = 480;
         private const int nodesInXCoor = 81;

@@ -124,6 +124,9 @@ namespace GFEC
                     case "ContactNtS3D":
                         ElementsAssembly[elem] = new ContactNtS3D(ElementsProperties[elem], elementNodes);
                         break;
+                    case "ContactNtS3Df":
+                        ElementsAssembly[elem] = new ContactNtS3Df(ElementsProperties[elem], elementNodes);
+                        break;
                 }
                 Dictionary<int, bool[]> efs = ElementsAssembly[elem].ElementFreedomSignature;
                 Dictionary<int, int> elemConnectivity = ElementsConnectivity[elem];

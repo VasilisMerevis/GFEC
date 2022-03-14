@@ -46,8 +46,6 @@ namespace GFEC
             LoadComboBox();
             gnuplotImage.Source = null;
             ConvergenceResults();
-
-            
         }
 
         private void RunButton(object sender, RoutedEventArgs args)
@@ -641,6 +639,47 @@ namespace GFEC
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        private void ImportOBJFile(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog dialog1 = new OpenFileDialog();
+                if (dialog1.ShowDialog() == true)
+                {
+                    string selectedFilePath = dialog1.FileName;
+                    List<string> allLines = new List<string>(File.ReadAllLines(selectedFilePath));
+
+                    //List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+                    allLines.RemoveRange(0, 4);
+                    int nodeIndex = 0;
+                    int connectivityIndex = 0;
+                    foreach (var line in allLines)
+                    {
+                        // in case of first line ...
+                        string separator = " ";
+                        string[] fields = line.Split(separator.ToCharArray()); //(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                        if (fields[0] == "v")
+                        {
+                            nodeIndex = nodeIndex + 1;
+                            var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
+                            nodes[nodeIndex] = node;
+                        }
+                        else if(fields[0] == "f")
+                        {
+                            connectivityIndex = connectivityIndex + 1;
+                            elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { 1, }
+                        }
+                        
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 
 
