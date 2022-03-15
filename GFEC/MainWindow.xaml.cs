@@ -46,6 +46,7 @@ namespace GFEC
             LoadComboBox();
             gnuplotImage.Source = null;
             ConvergenceResults();
+            
         }
 
         private void RunButton(object sender, RoutedEventArgs args)
@@ -686,6 +687,16 @@ namespace GFEC
             {
                 throw ex;
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            PlotOBJMesh plotMesh = new PlotOBJMesh();
+            plotMesh.Window_Loaded();
+            ViewportGraphics = plotMesh.MainViewport;
+            ViewportGraphics.UpdateLayout();
+            //ViewportGraphics.InvalidateVisual();
+            //ViewportGraphics.Children.Add(plotMesh.finalModel);
         }
     }
 
