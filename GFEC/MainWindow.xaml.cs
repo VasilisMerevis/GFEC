@@ -693,8 +693,12 @@ namespace GFEC
         {
             PlotOBJMesh plotMesh = new PlotOBJMesh();
             plotMesh.Window_Loaded();
-            ViewportGraphics = plotMesh.MainViewport;
-            ViewportGraphics.UpdateLayout();
+            //ViewportGraphics = plotMesh.MainViewport;
+            //ViewportGraphics.UpdateLayout();
+            Window secondWindow = new Window();
+            secondWindow.Show();
+            secondWindow.KeyDown += plotMesh.Window_KeyDown;
+            secondWindow.Content = plotMesh.MainViewport;
             //ViewportGraphics.InvalidateVisual();
             //ViewportGraphics.Children.Add(plotMesh.finalModel);
         }

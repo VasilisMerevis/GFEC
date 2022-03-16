@@ -178,7 +178,7 @@ namespace GFEC
         }
 
         // Adjust the camera's position.
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        public void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
