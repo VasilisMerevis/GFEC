@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -662,7 +663,7 @@ namespace GFEC
                         if (fields[0] == "v")
                         {
                             nodeIndex = nodeIndex + 1;
-                            var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
+                            var node = new Node(double.Parse(fields[1], CultureInfo.InvariantCulture), double.Parse(fields[2], CultureInfo.InvariantCulture), double.Parse(fields[3], CultureInfo.InvariantCulture));
                             nodes[nodeIndex] = node;
                         }
                         else if(fields[0] == "f")
@@ -692,6 +693,18 @@ namespace GFEC
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             PlotOBJMesh plotMesh = new PlotOBJMesh();
+            Dictionary<int, INode> nodesSmallerList = new Dictionary<int, INode>();
+            Dictionary<int, Dictionary<int, int>> elementsConnectivitySmallerList = new Dictionary<int, Dictionary<int, int>>();
+            for (int i = 1; i <= 10; i++)
+            {
+                nodesSmallerList[i] = nodes[i];
+            }
+            for (int i = 1; i <= 4; i++)
+            {
+                elementsConnectivitySmallerList[i] = elementsConnectivity[i];
+            }
+            plotMesh.elementsConnectivity = elementsConnectivity;
+            plotMesh.nodes = nodes;
             plotMesh.Window_Loaded();
             //ViewportGraphics = plotMesh.MainViewport;
             //ViewportGraphics.UpdateLayout();

@@ -27,6 +27,8 @@ namespace GFEC
     {
         public Viewport3D MainViewport = new Viewport3D();
         public ModelVisual3D finalModel = new ModelVisual3D();
+        public Dictionary<int, INode> nodes = new Dictionary<int, INode>();
+        public Dictionary<int, Dictionary<int, int>> elementsConnectivity = new Dictionary<int, Dictionary<int, int>>();
         // The main object model group.
         private Model3DGroup MainModel3Dgroup = new Model3DGroup();
 
@@ -49,7 +51,7 @@ namespace GFEC
         private const double CameraDTheta = 0.1;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1;
+        private const double CameraDR = 0.1*100;
 
         // Create the scene.
         // MainViewport is the Viewport3D defined
@@ -92,38 +94,65 @@ namespace GFEC
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
 
-            // Make the surface's points and triangles.
-#if SURFACE2
-            const double xmin = -1.5;
-            const double xmax = 1.5;
-            const double dx = 0.05;
-            const double zmin = -1.5;
-            const double zmax = 1.5;
-            const double dz = 0.05;
-#else
-            const double xmin = -5;
-            const double xmax = 5;
-            const double dx = 0.5;
-            const double zmin = -5;
-            const double zmax = 5;
-            const double dz = 0.5;
-#endif
-            for (double x = xmin; x <= xmax - dx; x += dx)
+            foreach (var element in elementsConnectivity)
             {
-                for (double z = zmin; z <= zmax - dz; z += dx)
-                {
-                    // Make points at the corners of the surface
-                    // over (x, z) - (x + dx, z + dz).
-                    Point3D p00 = new Point3D(x, F(x, z), z);
-                    Point3D p10 = new Point3D(x + dx, F(x + dx, z), z);
-                    Point3D p01 = new Point3D(x, F(x, z + dz), z + dz);
-                    Point3D p11 = new Point3D(x + dx, F(x + dx, z + dz), z + dz);
+                int globalPointIndex1 = element.Value[1];
+                int globalPointIndex2 = element.Value[2];
+                int globalPointIndex3 = element.Value[3];
 
-                    // Add the triangles.
-                    AddTriangle(mesh, p00, p01, p11);
-                    AddTriangle(mesh, p00, p11, p10);
-                }
+                double localPoint1X = nodes[globalPointIndex1].XCoordinate;
+                double localPoint1Y = nodes[globalPointIndex1].YCoordinate;
+                double localPoint1Z = nodes[globalPointIndex1].ZCoordinate;
+
+                double localPoint2X = nodes[globalPointIndex2].XCoordinate;
+                double localPoint2Y = nodes[globalPointIndex2].YCoordinate;
+                double localPoint2Z = nodes[globalPointIndex2].ZCoordinate;
+
+                double localPoint3X = nodes[globalPointIndex3].XCoordinate;
+                double localPoint3Y = nodes[globalPointIndex3].YCoordinate;
+                double localPoint3Z = nodes[globalPointIndex3].ZCoordinate;
+
+                Point3D point1 = new Point3D(localPoint1X-70, localPoint1Y+200, localPoint1Z);
+                Point3D point2 = new Point3D(localPoint2X-70, localPoint2Y+200, localPoint2Z);
+                Point3D point3 = new Point3D(localPoint3X-70, localPoint3Y+200, localPoint3Z);
+                AddTriangle(mesh, point1, point2, point3);
             }
+            //Point3D point1 = new Point3D(89-70, -215+200, 34);
+            //Point3D point2 = new Point3D(99-70, -200+200, 25);
+            //Point3D point3 = new Point3D(79-70, -180+200, 15);
+            //AddTriangle(mesh, point1, point2, point3);
+            //            // Make the surface's points and triangles.
+            //#if SURFACE2
+            //            const double xmin = -1.5;
+            //            const double xmax = 1.5;
+            //            const double dx = 0.05;
+            //            const double zmin = -1.5;
+            //            const double zmax = 1.5;
+            //            const double dz = 0.05;
+            //#else
+            //            const double xmin = -5;
+            //            const double xmax = 5;
+            //            const double dx = 0.5;
+            //            const double zmin = -5;
+            //            const double zmax = 5;
+            //            const double dz = 0.5;
+            //#endif
+            //            for (double x = xmin; x <= xmax - dx; x += dx)
+            //            {
+            //                for (double z = zmin; z <= zmax - dz; z += dx)
+            //                {
+            //                    // Make points at the corners of the surface
+            //                    // over (x, z) - (x + dx, z + dz).
+            //                    Point3D p00 = new Point3D(x, F(x, z), z);
+            //                    Point3D p10 = new Point3D(x + dx, F(x + dx, z), z);
+            //                    Point3D p01 = new Point3D(x, F(x, z + dz), z + dz);
+            //                    Point3D p11 = new Point3D(x + dx, F(x + dx, z + dz), z + dz);
+
+            //                    // Add the triangles.
+            //                    AddTriangle(mesh, p00, p01, p11);
+            //                    AddTriangle(mesh, p00, p11, p10);
+            //                }
+            //            }
             Console.WriteLine(mesh.Positions.Count + " points");
             Console.WriteLine(mesh.TriangleIndices.Count / 3 + " triangles");
 
