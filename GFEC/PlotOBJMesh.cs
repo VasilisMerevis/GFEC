@@ -36,12 +36,12 @@ namespace GFEC
         private PerspectiveCamera TheCamera;
 
         // The camera's current location.
-        private double CameraPhi = Math.PI / 6.0;       // 30 degrees
-        private double CameraTheta = Math.PI / 6.0;     // 30 degrees
+        private double CameraPhi = 0; //Math.PI / 6.0;       // 30 degrees
+        private double CameraTheta = 0;// Math.PI / 6.0;     // 30 degrees
 #if SURFACE2
         private double CameraR = 3.0;
 #else
-        private double CameraR = 13.0;
+        private double CameraR = 300.0;
 #endif
 
         // The change in CameraPhi when you press the up and down arrows.
@@ -94,11 +94,31 @@ namespace GFEC
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
 
+            List<double> nodesX = new List<double>();
+            List<double> nodesY = new List<double>();
+            List<double> nodesZ = new List<double>();
+            foreach (var node in nodes)
+            {
+                nodesX.Add(node.Value.XCoordinate);
+                nodesY.Add(node.Value.YCoordinate);
+                nodesZ.Add(node.Value.ZCoordinate);
+            }
+            double minX = nodesX.Min();
+            double maxX = nodesX.Max();
+            double centerX = (maxX + minX) / 2.0;
+            double minY = nodesY.Min();
+            double maxY = nodesY.Max();
+            double centerY = (maxY + minY) / 2.0;
+            double minZ = nodesZ.Min();
+            double maxZ = nodesZ.Max();
+            double centerZ = (maxZ + minZ) / 2.0;
+
             foreach (var element in elementsConnectivity)
             {
                 int globalPointIndex1 = element.Value[1];
                 int globalPointIndex2 = element.Value[2];
                 int globalPointIndex3 = element.Value[3];
+                int globalPointIndex4 = element.Value[4];
 
                 double localPoint1X = nodes[globalPointIndex1].XCoordinate;
                 double localPoint1Y = nodes[globalPointIndex1].YCoordinate;
@@ -112,10 +132,16 @@ namespace GFEC
                 double localPoint3Y = nodes[globalPointIndex3].YCoordinate;
                 double localPoint3Z = nodes[globalPointIndex3].ZCoordinate;
 
-                Point3D point1 = new Point3D(localPoint1X-70, localPoint1Y+200, localPoint1Z);
-                Point3D point2 = new Point3D(localPoint2X-70, localPoint2Y+200, localPoint2Z);
-                Point3D point3 = new Point3D(localPoint3X-70, localPoint3Y+200, localPoint3Z);
+                double localPoint4X = nodes[globalPointIndex4].XCoordinate;
+                double localPoint4Y = nodes[globalPointIndex4].YCoordinate;
+                double localPoint4Z = nodes[globalPointIndex4].ZCoordinate;
+
+                Point3D point1 = new Point3D(localPoint1X - centerX, localPoint1Y -centerY, localPoint1Z -centerZ);
+                Point3D point2 = new Point3D(localPoint2X - centerX, localPoint2Y -centerY, localPoint2Z -centerZ);
+                Point3D point3 = new Point3D(localPoint3X - centerX, localPoint3Y -centerY, localPoint3Z -centerZ);
+                Point3D point4 = new Point3D(localPoint4X - centerX, localPoint4Y -centerY, localPoint4Z -centerZ);
                 AddTriangle(mesh, point1, point2, point3);
+                AddTriangle(mesh, point1, point3, point4);
             }
             //Point3D point1 = new Point3D(89-70, -215+200, 34);
             //Point3D point2 = new Point3D(99-70, -200+200, 25);
