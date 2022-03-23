@@ -23,6 +23,8 @@ namespace GFEC
         //const int elementsOfType1Number = 40;
         //const int elementsOfType2Number = 30;
         const int contactElements = 8;
+        const int addedContactElementsFrictionalCase = 16;
+
         const double xInterv1 = 0.20;
         const double xInterv2 = 0.10;
         const double xInterv3 = 0.20;
@@ -42,6 +44,9 @@ namespace GFEC
         const double area = 1.0;
         const double contactArea = thickness * xInterv2;
 
+        //Friction coefficients
+        const double miS = 0.20;
+        const double miD = 0.20;
 
 
         private static void CreateStructuralBoundaryConditions()
@@ -164,6 +169,23 @@ namespace GFEC
                 k += 1;
                 firstMasterNode += 2;
             }
+            //Added contacts for frictional case
+            firstMasterNode = 246;
+            for (int i = 3; i <= 17; i += 2)
+            {
+                connectivity[k] = new Dictionary<int, int>() { { 1, firstMasterNode }, { 2, firstMasterNode + 1 }, { 3, firstMasterNode + 2 },
+                                                             {4, i }, {5, i + 1 }, {6, i + 2 } };
+                k += 1;
+                firstMasterNode += 2;
+            }
+            firstMasterNode = 250;
+            for (int i = 3; i <= 17; i += 2)
+            {
+                connectivity[k] = new Dictionary<int, int>() { { 1, firstMasterNode }, { 2, firstMasterNode + 1 }, { 3, firstMasterNode + 2 },
+                                                             {4, i }, {5, i + 1 }, {6, i + 2 } };
+                k += 1;
+                firstMasterNode += 2;
+            }
             return connectivity;
         }
 
@@ -181,10 +203,11 @@ namespace GFEC
             double E = YoungMod;
 
             double A = area;
-            double CA = contactArea;
+            //double CA = contactArea;
 
             string type = "Quad8";
-            string type3 = "ContactStS2D";
+            //string type3 = "ContactStS2D";
+            string type3 = "ContactStS2Df";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             for (int i = 1; i <= 40; i++)
@@ -196,9 +219,11 @@ namespace GFEC
             {
                 elementProperties[i] = new ElementProperties(E, poissonRatio, A, thickness, density, type);
             }
-            for(int i =elementsNumber + 1; i<= elementsNumber + contactElements; i++)
+            for(int i =elementsNumber + 1; i<= elementsNumber + contactElements +addedContactElementsFrictionalCase; i++)
             {
-                elementProperties[i] = new ElementProperties(E, CA, type3, 10.0, 10, 2, 2);
+                //elementProperties[i] = new ElementProperties(E, CA, type3, 10.0, 10, 2, 2);
+                elementProperties[i] = new ElementProperties(E, type3, 10.0, 10, 2, 2, 100.0,
+            miS, miD);
                 elementProperties[i].Density = density;
             }
             return elementProperties;
@@ -227,7 +252,7 @@ namespace GFEC
             structuralSolution.LinearScheme = new LUFactorization();
             structuralSolution.NonLinearScheme.Tolerance = 1e-5;
             structuralSolution.ActivateNonLinearSolver = true;
-            structuralSolution.NonLinearScheme.numberOfLoadSteps = 30;
+            structuralSolution.NonLinearScheme.numberOfLoadSteps = 50;
 
             double[] externalForces3 = externalForcesStructuralVector;
             foreach (var dof in loadedStructuralDOFs)
@@ -247,7 +272,6 @@ namespace GFEC
             for (int i = 1; i <= allStepsSolutions.Count; i++)
             {
                 string name = "NodalCoordinates" + i.ToString() + ".dat";
-                ExportToFile.ExportUpdatedNodalCoordinates(elementsAssembly, BoundaryConditionsImposition.CreateFullVectorFromReducedVector(allStepsSolutions.Single(m => m.Key == i).Value, elementsAssembly.BoundedDOFsVector), name);
                 gPointsStress = elementsAssembly.GetElementsStresses(allStepsSolutions[i]);
                 gPointsStrain = elementsAssembly.GetElementsStains(allStepsSolutions[i]);
                 gPoints = elementsAssembly.GetElementsGaussPoints(allStepsSolutions[i]);
@@ -259,11 +283,20 @@ namespace GFEC
                 string name4 = "NodalStress" + i.ToString() + ".dat";
                 string name5 = "NodalStrain" + i.ToString() + ".dat";
 
-                VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStress, @"C:\Users\Public\Documents\" + name1);
-                VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStrain, @"C:\Users\Public\Documents\" + name2);
-                VectorOperations.PrintDictionaryofListsofVectorsToFile(gPoints, @"C:\Users\Public\Documents\" + name3);
-                VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStress, @"C:\Users\Public\Documents\" + name4);
-                VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStrain, @"C:\Users\Public\Documents\" + name5);
+                //VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStress, @"C:\Users\Public\Documents\" + name1);
+                //VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStrain, @"C:\Users\Public\Documents\" + name2);
+                //VectorOperations.PrintDictionaryofListsofVectorsToFile(gPoints, @"C:\Users\Public\Documents\" + name3);
+                //VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStress, @"C:\Users\Public\Documents\" + name4);
+                //VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStrain, @"C:\Users\Public\Documents\" + name5);
+                if(i == allStepsSolutions.Count)
+                {
+                    ExportToFile.ExportUpdatedNodalCoordinates(elementsAssembly, BoundaryConditionsImposition.CreateFullVectorFromReducedVector(allStepsSolutions.Single(m => m.Key == i).Value, elementsAssembly.BoundedDOFsVector), name);
+                    VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStress, @"C:\Users\Public\Documents\" + name1);
+                    VectorOperations.PrintDictionaryofListsofVectorsToFile(gPointsStrain, @"C:\Users\Public\Documents\" + name2);
+                    VectorOperations.PrintDictionaryofListsofVectorsToFile(gPoints, @"C:\Users\Public\Documents\" + name3);
+                    VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStress, @"C:\Users\Public\Documents\" + name4);
+                    VectorOperations.PrintDictionaryofListsofVectorsToFile(nodalStrain, @"C:\Users\Public\Documents\" + name5);
+                }
             }
             elementsAssembly.UpdateDisplacements(solvector3);
             ShowToGUI.PlotFinalGeometry(elementsAssembly);
@@ -278,15 +311,15 @@ namespace GFEC
             {
                 elementsInternalContactForcesVector = new Dictionary<int, double[]>();
                 elementsAssembly.UpdateDisplacements(allStepsSolutions[i]);
-                for(int j = 1;j<=contactElements; j++)
+                for(int j = 1;j<=contactElements + addedContactElementsFrictionalCase; j++)
                 {
                     elementsInternalContactForcesVector[elementsNumber + j] = elementsAssembly.ElementsAssembly[elementsNumber + j].CreateInternalGlobalForcesVector();
                 }
                 allStepsContactForces[i] = elementsInternalContactForcesVector;
                 string name = "ContactForces" + i.ToString() + ".dat";
-                double[] Vector = new double[contactElements*12];
+                double[] Vector = new double[contactElements*12 + addedContactElementsFrictionalCase * 12];
                 int count = 0;
-                for (int j = 1; j <= contactElements; j++)
+                for (int j = 1; j <= contactElements + addedContactElementsFrictionalCase; j++)
                 {
                     Vector[count] = allStepsContactForces.Single(m => m.Key == i).Value.Single(n => n.Key == elementsNumber + j).Value[0];
                     count += 1;
@@ -313,7 +346,12 @@ namespace GFEC
                     Vector[count] = allStepsContactForces.Single(m => m.Key == i).Value.Single(n => n.Key == elementsNumber + j).Value[11];
                     count += 1;
                 }
-                VectorOperations.PrintVectorToFile(Vector, @"C:\Users\Public\Documents\" + name);
+                //VectorOperations.PrintVectorToFile(Vector, @"C:\Users\Public\Documents\" + name);
+                if (i == allStepsSolutions.Count)
+                {
+                    VectorOperations.PrintVectorToFile(Vector, @"C:\Users\Public\Documents\" + name);
+
+                }
             }
 
             for (int i = 0; i < allStepsSolutions.Count; i++)
@@ -321,7 +359,12 @@ namespace GFEC
                 allStepsFullSolutions.Add(i + 1, BoundaryConditionsImposition.CreateFullVectorFromReducedVector(allStepsSolutions.Single(m => m.Key == i + 1).Value, elementsAssembly.BoundedDOFsVector));
                 int j = i + 1;
                 string name = "solution" + j.ToString() + ".dat";
-                VectorOperations.PrintVectorToFile(allStepsFullSolutions.Single(m => m.Key == i + 1).Value, @"C:\Users\Public\Documents\" + name);
+                //VectorOperations.PrintVectorToFile(allStepsFullSolutions.Single(m => m.Key == i + 1).Value, @"C:\Users\Public\Documents\" + name);
+                if (i == allStepsSolutions.Count - 1)
+                {
+                    VectorOperations.PrintVectorToFile(allStepsFullSolutions.Single(m => m.Key == i + 1).Value, @"C:\Users\Public\Documents\" + name);
+
+                }
             }
             List<double[]> structuralSolutions = new List<double[]>();
 

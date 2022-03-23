@@ -24,7 +24,10 @@ namespace GFEC
         {
             throw new Exception("LinearSolution.Solve not implemented");
         }
-
+        //public virtual double[] Solve(IAssembly assembly, double[] totalForceVector)
+        //{
+        //    throw new Exception("LinearSolution.Solve not implemented");
+        //}
         protected void OnConvergenceResult(string message)
         {
             if (convergenceResult != null)

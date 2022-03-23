@@ -16,6 +16,26 @@ namespace GFEC
         public double kc;
         private double A { get; set; }
         private double B { get; set; }
+        public void InitializeTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void InitializeContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateIncrementalDisplacements(double[] deltaU)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
         //private double thickness = 1.0; //To be included in Element Properties
         //private double density = 1.0; //To be included in Element Properties
 
@@ -31,7 +51,56 @@ namespace GFEC
             A = properties.A;
             B = properties.B;
         }
-
+        public void CalculateElementEASMatrices()
+        {
+            throw new Exception("This method is to be used only for EAS method elements");
+        }
+        public void InitializeElementEASParameters()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateElementEASParameters(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public List<double[]> GetStressFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> StessVectorsList = new List<double[]>();
+            StessVectorsList.Add(new double[] { 0.0, 0.0 });
+            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
+            //int count = parametricCoordinatesVector.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] nodalParamCoord = parametricCoordinatesVector[i];
+            //    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(nodalParamCoord);
+            //    double[,] J = CalculateJacobian(localdN);
+            //    double[,] invJ = CalculateInverseJacobian(J).Item1;
+            //    Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
+            //    double[,] B = CalculateBMatrix(globaldN);
+            //    double[] strainVector = CalculateStrainsVector(B);
+            //    double[] stressVector = CalculateStressVector(E, strainVector);
+            //    StessVectorsList.Add(stressVector);
+            //}
+            return StessVectorsList;
+        }
+        public List<double[]> GetphysicalCoordinatesFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> PositionVectorsList = new List<double[]>();
+            //double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            PositionVectorsList.Add(new double[] { 0.0, 0.0 });
+            //int count = parametricCoordinatesVector.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] parametricCoordinatesVec = parametricCoordinatesVector[i];
+            //    double[] positionVector = VectorOperations.MatrixVectorProduct(CalculateShapeFunctionMatrix(parametricCoordinatesVec[0], parametricCoordinatesVec[1]), xUpdated);
+            //    PositionVectorsList.Add(positionVector);
+            //}
+            return PositionVectorsList;
+        }
         public double ClosestPointProjection()
         {
             throw new Exception("Needs to be removed. Has beeb used only for testing purposes");

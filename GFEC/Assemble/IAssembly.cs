@@ -15,6 +15,9 @@ namespace GFEC
         double[,] CreateTotalStiffnessMatrix();
         bool ActivateBoundaryConditions { get; set; }
         int[] BoundedDOFsVector { get; set; }
+        int[] ContactDOFsVector { get; set; }
+        int[] NoContactDOFsVector { get; set; }
+
         void UpdateDisplacements(double[] totalDisplacementVector);
         void UpdateAccelerations(double[] totalAccelerationsVector);
         double[] CreateTotalInternalForcesVector();
@@ -26,14 +29,26 @@ namespace GFEC
         Dictionary<int, List<double[]>> GetElementsNodesStresses(double[] totalDisplacementVector);
         Dictionary<int, List<double[]>> GetElementsNodesStains(double[] totalDisplacementVector);
         Dictionary<int, List<double[]>> GetElementsGaussPoints(double[] totalDisplacementVector);
-
-
+        void InitializeContactTangentialProperties();
+        void UpdateContactTangentialProperties();
+        void InitializeContactSurfaceVectors();
+        void UpdateContactSurfaceVectors();
+        void UpdateElementsIncrementalDisplacements(double[] deltaU);
         List<string> GetElementsType();
         Dictionary<int, IElement> ElementsAssembly { get; set; }
         int CountElementsOfSameType(Type elementType);
-
-
-
+        Tuple<double[,], double[,], double[,], double[,]> MMCPCGCreateTotalStiffnessMatrix();
+        double[] MMCPCGCreateTotalInternalForcesVectors();
+        void SeperateContactDoF();
+        Tuple<double[], double[]> MMCPCGSeperateReducedExternalForcesVectors(double[] extForces);
+        void MMCPCGUpdateDisplacements(double[] totalDisplacementVector);
+        void MMCPCGUpdateElementsIncrementalDisplacements(double[] deltaU);
+        double[] MMCPCGRearrange(double[] vector);
+        double[] MMCPGCreateReducedFromFullVector(double[] fullVector);
+        void CalculateEASMatrices();
+        void InitializeEASParameters();
+        void UpdateEASParameters(double[] solutionVector);
+        void StoreFinalStepDisplacementVector(double[] solutionVector);
 
         //void UpdateValues(double[] totalDisplacementVector);
         //double[,] CreateTotalStiffnessMatrix();

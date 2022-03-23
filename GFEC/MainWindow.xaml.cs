@@ -129,6 +129,26 @@ namespace GFEC
             exampleList.Add("BendingBeamContact2d");
             exampleList.Add("BendingOveraRigidCylinder");
             exampleList.Add("TwoBlocksHigherOrderNTS");
+            exampleList.Add("BendingBeamContact3d");
+            exampleList.Add("BendingBeamContact3dWithFriction");
+            exampleList.Add("BendingBeamContact3dWithFrictionRefinedMesh");
+            exampleList.Add("BeamsInAngleContact3dWithFriction");
+            exampleList.Add("Blocks3dContactSliding");
+            exampleList.Add("BendingBeamContact3dWithFrictionRefinedMesh2");
+            exampleList.Add("Blocks3dContactSlidingMeshRefined");
+            exampleList.Add("BendingBeamContact3dWithFrictionQuadraticShapeFunctions");
+            exampleList.Add("Blocks3dContactSlidingQuadratic");
+            exampleList.Add("shell2DExample");
+            exampleList.Add("Impactshell2DExample");
+            exampleList.Add("Impact3dSolids");
+            exampleList.Add("DegenerateShellElementsLinearExample");
+            exampleList.Add("DegenerateShellElementsContactQSExample");
+            exampleList.Add("Cantilever3dCheck");
+            exampleList.Add("DegenerateShellElementsImpactExample");
+            exampleList.Add("CNTsInParallelFinalSensitivityAnalysis");
+            exampleList.Add("CNTsInParallelFinalSensitivityAnalysis2");
+            exampleList.Add("SolidShellLinearExample");
+            exampleList.Add("SolidShellElementsContactExample");
             ComboBox1.ItemsSource = exampleList;
         }
 
@@ -342,6 +362,118 @@ namespace GFEC
                     TwoBlocksHigherOrderNTS.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = TwoBlocksHigherOrderNTS.RunStaticExample();
                     break;
+                case "BendingBeamContact3d":
+                    BendingBeamContact3d.structuralSolution = new StaticSolver();
+                    BendingBeamContact3d.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    BendingBeamContact3d.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BendingBeamContact3d.RunStaticExample();
+                    break;
+                case "BendingBeamContact3dWithFriction":
+                    BendingBeamContact3dWithFriction.structuralSolution = new StaticSolver();
+                    BendingBeamContact3dWithFriction.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    BendingBeamContact3dWithFriction.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BendingBeamContact3dWithFriction.RunStaticExample();
+                    break;
+                case "BendingBeamContact3dWithFrictionRefinedMesh":
+                    BendingBeamContact3dWithFrictionRefinedMesh.structuralSolution = new StaticSolver();
+                    BendingBeamContact3dWithFrictionRefinedMesh.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    BendingBeamContact3dWithFrictionRefinedMesh.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BendingBeamContact3dWithFrictionRefinedMesh.RunStaticExample();
+                    break;
+                case "BeamsInAngleContact3dWithFriction":
+                    BeamsInAngleContact3dWithFriction.structuralSolution = new StaticSolver();
+                    //BeamsInAngleContact3dWithFriction.structuralSolution.NonLinearScheme = new ModifiedNewtonRaphson();
+                    BeamsInAngleContact3dWithFriction.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    BeamsInAngleContact3dWithFriction.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BeamsInAngleContact3dWithFriction.RunStaticExample();
+                    break;
+                case "Blocks3dContactSliding":
+                    Blocks3dContactSliding.structuralSolution = new StaticSolver();
+                    Blocks3dContactSliding.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    Blocks3dContactSliding.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = Blocks3dContactSliding.RunStaticExample();
+                    break;
+                case "BendingBeamContact3dWithFrictionRefinedMesh2":
+                    BendingBeamContact3dWithFrictionRefinedMesh2.structuralSolution = new StaticSolver();
+                    BendingBeamContact3dWithFrictionRefinedMesh2.structuralSolution.NonLinearScheme = new MMCPCGLoadControlledNewtonRaphson();
+                    BendingBeamContact3dWithFrictionRefinedMesh2.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BendingBeamContact3dWithFrictionRefinedMesh2.RunStaticExample();
+                    break;
+                case "Blocks3dContactSlidingMeshRefined":
+                    Blocks3dContactSlidingMeshRefined.structuralSolution = new StaticSolver();
+                    Blocks3dContactSlidingMeshRefined.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    Blocks3dContactSlidingMeshRefined.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = Blocks3dContactSlidingMeshRefined.RunStaticExample();
+                    break;
+                case "BendingBeamContact3dWithFrictionQuadraticShapeFunctions":
+                    BendingBeamContact3dWithFrictionQuadraticShapeFunctions.structuralSolution = new StaticSolver();
+                    BendingBeamContact3dWithFrictionQuadraticShapeFunctions.structuralSolution.NonLinearScheme = new ModifiedNewtonRaphson();
+                    BendingBeamContact3dWithFrictionQuadraticShapeFunctions.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = BendingBeamContact3dWithFrictionQuadraticShapeFunctions.RunStaticExample();
+                    break;
+                case "Blocks3dContactSlidingQuadratic":
+                    Blocks3dContactSlidingQuadratic.structuralSolution = new StaticSolver();
+                    Blocks3dContactSlidingQuadratic.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    Blocks3dContactSlidingQuadratic.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = Blocks3dContactSlidingQuadratic.RunStaticExample();
+                    break;
+                case "shell2DExample":
+                    shell2DExample.structuralSolution = new StaticSolver();
+                    shell2DExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    shell2DExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = shell2DExample.RunStaticExample();
+                    break;
+                case "Impactshell2DExample":
+                    finalResults = Impactshell2DExample.RunDynamicExample();
+                    break;
+                case "Impact3dSolids":
+                    finalResults = Impact3dSolids.RunDynamicExample();
+                    break;
+                case "DegenerateShellElementsLinearExample":
+                    DegenerateShellElementsLinearExample.structuralSolution = new StaticSolver();
+                    DegenerateShellElementsLinearExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    DegenerateShellElementsLinearExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = DegenerateShellElementsLinearExample.RunStaticExample();
+                    break;
+                case "DegenerateShellElementsContactQSExample":
+                    DegenerateShellElementsContactQSExample.structuralSolution = new StaticSolver();
+                    DegenerateShellElementsContactQSExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    DegenerateShellElementsContactQSExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = DegenerateShellElementsContactQSExample.RunStaticExample();
+                    break;
+                case "Cantilever3dCheck":
+                    Cantilever3dCheck.structuralSolution = new StaticSolver();
+                    //Cantilever3dCheck.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    //DegenerateShellElementsContactQSExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = Cantilever3dCheck.RunStaticExample();
+                    break;
+                case "DegenerateShellElementsImpactExample":
+                    finalResults = DegenerateShellElementsImpactExample.RunDynamicExample();
+                    break;
+                case "CNTsInParallelFinalSensitivityAnalysis":
+                    CNTsInParallelFinalSensitivityAnalysis.structuralSolution = new StaticSolver();
+                    CNTsInParallelFinalSensitivityAnalysis.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    CNTsInParallelFinalSensitivityAnalysis.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = CNTsInParallelFinalSensitivityAnalysis.RunStaticExample();
+                    break;
+                case "CNTsInParallelFinalSensitivityAnalysis2":
+                    CNTsInParallelFinalSensitivityAnalysis2.structuralSolution = new StaticSolver();
+                    CNTsInParallelFinalSensitivityAnalysis2.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    CNTsInParallelFinalSensitivityAnalysis2.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = CNTsInParallelFinalSensitivityAnalysis2.RunStaticExample();
+                    break;
+                case "SolidShellLinearExample":
+                    SolidShellLinearExample.structuralSolution = new StaticSolver();
+                    SolidShellLinearExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    SolidShellLinearExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = SolidShellLinearExample.RunStaticExample();
+                    break;
+                case "SolidShellElementsContactExample":
+                    SolidShellElementsContactExample.structuralSolution = new StaticSolver();
+                    SolidShellElementsContactExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
+                    SolidShellElementsContactExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = SolidShellElementsContactExample.RunStaticExample();
+                    break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();
                     break;
@@ -544,6 +676,131 @@ namespace GFEC
             test1.timeElapsed += PrintResultOnUI;
             test1.RunExample();
         }
+        //--------------------------------------------------------------------------
+        //private double _axisMax;
+        //private double _axisMin;
+
+
+        //public Func<double, string> DateTimeFormatter { get; set; }
+        //public double AxisStep { get; set; }
+        //public double AxisUnit { get; set; }
+        //public bool IsReading { get; set; }
+        //public event PropertyChangedEventHandler PropertyChanged;
+        //public void ConvergenceResults()
+        //{
+        //    var mapper = Mappers.Xy<ConvergenceValues>()
+        //        .X(model => model.Iteration)   //use DateTime.Ticks as X
+        //        .Y(model => model.ResidualNorm);           //use the value property as Y
+
+        //    //lets save the mapper globally.
+        //    Charting.For<ConvergenceValues>(mapper);
+
+        //    //the values property will store our values array
+        //    ChartValues = new ChartValues<ConvergenceValues>();
+
+        //    //lets set how to display the X Labels
+        //    //DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
+
+        //    //AxisStep forces the distance between each separator in the X axis
+        //    AxisStep = 1;// TimeSpan.FromSeconds(1).Ticks;
+        //    //AxisUnit forces lets the axis know that we are plotting seconds
+        //    //this is not always necessary, but it can prevent wrong labeling
+        //    AxisUnit = 100;// TimeSpan.TicksPerSecond;
+        //}
+
+        //public double AxisMax
+        //{
+        //    get { return _axisMax; }
+        //    set
+        //    {
+        //        _axisMax = value;
+        //        OnPropertyChanged("AxisMax");
+        //    }
+        //}
+        //public double AxisMin
+        //{
+        //    get { return _axisMin; }
+        //    set
+        //    {
+        //        _axisMin = value;
+        //        OnPropertyChanged("AxisMin");
+        //    }
+        //}
+
+        //private void SetAxisLimits(int now)
+        //{
+        //    AxisMax = now + 1;
+        //    AxisMin = now - 8;
+        //}
+
+        //protected virtual void OnPropertyChanged(string propertyName = null)
+        //{
+        //    if (PropertyChanged != null)
+        //        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        //}
+
+        //private void ImportOBJFile(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        OpenFileDialog dialog1 = new OpenFileDialog();
+        //        if (dialog1.ShowDialog() == true)
+        //        {
+        //            string selectedFilePath = dialog1.FileName;
+        //            List<string> allLines = new List<string>(File.ReadAllLines(selectedFilePath));
+
+        //            //List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+        //            allLines.RemoveRange(0, 4);
+        //            int nodeIndex = 0;
+        //            int connectivityIndex = 0;
+        //            foreach (var line in allLines)
+        //            {
+        //                // in case of first line ...
+        //                string separator = " ";
+        //                string[] fields = line.Split(separator.ToCharArray()); //(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
+        //                if (fields[0] == "v")
+        //                {
+        //                    nodeIndex = nodeIndex + 1;
+        //                    var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
+        //                    nodes[nodeIndex] = node;
+        //                }
+        //                else if (fields[0] == "f")
+        //                {
+        //                    connectivityIndex = connectivityIndex + 1;
+        //                    string separatorForNode = "/";
+        //                    int[] elementNodes = new int[4];
+        //                    for (int i = 0; i < 4; i++)
+        //                    {
+        //                        string[] fieldsForNode = fields[i + 1].Split(separatorForNode.ToCharArray());
+        //                        elementNodes[i] = Int16.Parse(fieldsForNode[0]);
+        //                    }
+        //                    elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
+        //                }
+
+        //            }
+        //        }
+
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        //private void Button_Click_1(object sender, RoutedEventArgs e)
+        //{
+        //    PlotOBJMesh plotMesh = new PlotOBJMesh();
+        //    plotMesh.Window_Loaded();
+        //    //ViewportGraphics = plotMesh.MainViewport;
+        //    //ViewportGraphics.UpdateLayout();
+        //    Window secondWindow = new Window();
+        //    secondWindow.Show();
+        //    secondWindow.KeyDown += plotMesh.Window_KeyDown;
+        //    secondWindow.Content = plotMesh.MainViewport;
+        //    //ViewportGraphics.InvalidateVisual();
+        //    //ViewportGraphics.Children.Add(plotMesh.finalModel);
+        //}
     }
 
 

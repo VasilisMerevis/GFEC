@@ -28,8 +28,34 @@ namespace GFEC
         int SlaveSegmentPolynomialDegree { get; set; }
         int IntegrationPoints { get; set; }
         double PenaltyFactorRatio { get; set; }
+        double TangentialPenaltyFactorRatio { get; set; }
+        double StickingCoefficient { get; set; }
+        double SlidingCoefficient { get; set; }
+        Dictionary<int, double> AllIntegrationPointsStickingPoints { get; set; }
+        Dictionary<int, double> AllIntegrationPointsTangentialTractions { get; set; }
+        Dictionary<int, double> AllIntegrationPointsStickingPoints2 { get; set; }
+        Dictionary<int, double> AllIntegrationPointsTangentialTractions2 { get; set; }
+        Dictionary<int, double[]> AllIntegrationPointsSurfaceVectors1 { get; set; }
+        Dictionary<int, double[]> AllIntegrationPointsSurfaceVectors2 { get; set; }
+        Dictionary<int, double> StoredTrialTangentialTractions1 { get; set; }
+        Dictionary<int, double> StoredTrialTangentialTractions2 { get; set; }
+        Dictionary<int, double> StoredIntegrationPointsStickingPoints { get; set; }
+        Dictionary<int, double> StoredIntegrationPointsStickingPoints2 { get; set; }
+        List<double> DU { get; set; }
+        List<double> Xprev { get; set; }
 
+        Dictionary<int, double> DegenerateShellNodalThicknesses { get; set; }
+        Dictionary<int, double[]> DegenerateShellNodalNormalUnitVectors { get; set; }
+        double[] EASVector { get; set; }
+        double[] EASFEnhancedVector { get; set; }
+        double[,] EASLMatrix { get; set; }
+        double[,] EASDMatrix { get; set; }
+        double[] DisplacementVectorPreviousStep { get; set; }
 
+        //Dictionary<int, double> TangentMatrixInitStickPointUpdSlideCase1 { get; set; }
+        //Dictionary<int, double> TangentMatrixinitStickPointUpdSlideCase2 { get; set; }
+        //Dictionary<int, double> ResidualInitStickPointUpdSlideCase1 { get; set; }
+        //Dictionary<int, double> ResidualInitStickPointUpdSlideCase2 { get; set; }
     }
 }
 

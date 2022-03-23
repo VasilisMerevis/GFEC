@@ -12,7 +12,7 @@ namespace GFEC
         public double[] ExternalForcesVector { get; set; }
         public InitialConditions InitialValues { get; set; }
         private int numberOfLoadSteps = 20;
-        private double tolerance = 10.0e-2;
+        private double tolerance = 1.0e-6;
         private int maxIterations = 1000;
         private double lambda;
         private double totalTime;
@@ -365,15 +365,14 @@ namespace GFEC
 
         private double[] CalculateHatRVectorNL(int i)
         {
-
-            Assembler.UpdateDisplacements(explicitSolution[i - 1]);
-
+            double[] solutionVector = explicitSolution.Values.Last();
+            Assembler.UpdateDisplacements(solutionVector);
             double[,] totalMassMatrix = Assembler.CreateTotalMassMatrix();
             double[,] totalDampingMatrix = Assembler.CreateTotalDampingMatrix();
             double[,] a2M = MatrixOperations.ScalarMatrixProductNew(a2, totalMassMatrix);
             double[,] a0M = MatrixOperations.ScalarMatrixProductNew(a0, totalMassMatrix);
-            double[,] a1C = MatrixOperations.ScalarMatrixProductNew(-a1, totalDampingMatrix);
-            double[,] hutM = MatrixOperations.MatrixAddition(a0M, a1C);
+            double[,] a1C = MatrixOperations.ScalarMatrixProductNew(a1, totalDampingMatrix);
+            double[,] hutM = MatrixOperations.MatrixAddition(MatrixOperations.ScalarMatrixProductNew(-1.0, a0M), a1C);
 
             double[] F = Assembler.CreateTotalInternalForcesVector();
             double[] hatPreviousU = VectorOperations.MatrixVectorProduct(hutM, explicitSolution[i - 2]);
@@ -381,7 +380,7 @@ namespace GFEC
 
 
             double[] hatR1 = VectorOperations.VectorVectorSubtraction(ExternalForcesVector, F);
-            double[] hatR2 = VectorOperations.VectorVectorSubtraction(a2Mut, hatPreviousU);
+            double[] hatR2 = VectorOperations.VectorVectorAddition(a2Mut, hatPreviousU);
             double[] hatRtotal = VectorOperations.VectorVectorAddition(hatR1, hatR2);
             return hatRtotal;
         }
@@ -396,6 +395,7 @@ namespace GFEC
             TimeAtEachStep.Add(-1, -1 * timeStep + InitialValues.InitialTime);
             TimeAtEachStep.Add(0, 0.0);
             double[] nextSolution;
+            //Assembler.CalculateEASMatrices();//added EAS
             for (int i = 1; i < timeStepsNumber; i++)
             {
                 double time = i * timeStep + InitialValues.InitialTime;
@@ -566,6 +566,8 @@ namespace GFEC
             explicitAcceleration.Add(0, CalculateInitialAccelerationsNewmark());
             TimeAtEachStep.Add(0, 0.0);
             double[] nextSolution;
+            Assembler.InitializeEASParameters();//Added EAS
+            Assembler.CalculateEASMatrices();//added EAS
             for (int i = 1; i < timeStepsNumber; i++)
             {
                 double time = i * timeStep + InitialValues.InitialTime;
@@ -579,6 +581,7 @@ namespace GFEC
                 }
                 else
                 {
+                    Assembler.StoreFinalStepDisplacementVector(explicitSolution.Values.Last());//Added EAS
                     nextSolution = NewtonIterationsNewmark(ExternalForcesVector, i, aConstants);
                     Console.WriteLine("Solution for Load Step {0} is:", i);
                     VectorOperations.PrintVector(nextSolution);
@@ -672,6 +675,7 @@ namespace GFEC
             internalForcesTotalVector = Assembler.CreateTotalInternalForcesVector();
             residual = VectorOperations.VectorVectorSubtraction(hatR, internalForcesTotalVector);
             residual = VectorOperations.VectorVectorSubtraction(forceVector, Assembler.CreateTotalInternalForcesVector());
+            residualNorm = VectorOperations.VectorNorm2(residual);
             int iteration = 0;
             Array.Clear(deltaU, 0, deltaU.Length);
 
@@ -681,6 +685,7 @@ namespace GFEC
                 deltaU = LinearSolver.Solve(tangentMatrix, residual);
                 solutionVector = VectorOperations.VectorVectorAddition(solutionVector, deltaU);
                 Assembler.UpdateDisplacements(solutionVector);
+                Assembler.UpdateEASParameters(solutionVector);//added EAS
                 //Assembler.UpdateAccelerations(CalculateAccelerations());
                 hatR = CalculateHatRVectorNewmarkNL(stepNumber, aConstants, solutionVector);
                 internalForcesTotalVector = Assembler.CreateTotalInternalForcesVector();
@@ -691,9 +696,10 @@ namespace GFEC
                     break;
                 }
                 iteration = iteration + 1;
+                Assembler.CalculateEASMatrices();//added EAS
             }
             //Console.WriteLine(iteration);
-            if (iteration >= maxIterations) Console.WriteLine("Newton-Raphson: Solution not converged at current iterations");
+            if (iteration >= maxIterations && residualNorm > tolerance) throw new Exception("Newton-Raphson: Solution not converged at current iterations");
 
             return solutionVector;
         }

@@ -37,12 +37,35 @@ namespace GFEC
                 size += rows;
             }
             string[] dataToPrint = new string[size];
+            int count = 0;
             foreach (var vector in vectors)
             {
                 int rows = vector.Length;
                 for (int i = 0; i < rows; i++)
                 {
-                    dataToPrint[i] = vector[i].ToString();
+                    dataToPrint[count] = vector[i].ToString();
+                    count += 1;
+                }
+            }
+            File.WriteAllLines(path, dataToPrint);
+        }
+        public static void PrintDictionaryOfVectorsToFile(Dictionary<int, double[]> vectors, string path)
+        {
+            int size = new int();
+            foreach (var v in vectors)
+            {
+                int rows = v.Value.Length;
+                size += rows;
+            }
+            string[] dataToPrint = new string[size];
+            int k = 0;
+            foreach (var v in vectors)
+            {
+                int rows = v.Value.Length;
+                for (int i = 0; i < rows; i++)
+                {
+                    dataToPrint[k] = v.Value[i].ToString();
+                    k += 1;
                 }
             }
             File.WriteAllLines(path, dataToPrint);
@@ -267,6 +290,41 @@ namespace GFEC
             {
                 throw new Exception("Vectors Dot Product: Not equally sized vectors or wrong size vector");
             }
+        }
+        public static double[] CreateFullVectorFromTwoVectors(double[] vector1, double[] vector2)
+        {
+            double[] result = new double[vector1.Length + vector2.Length];
+            for(int i = 0; i< result.Length; i++)
+            {
+                if(i < vector1.Length)
+                {
+                    result[i] = vector1[i];
+
+                }
+                else
+                {
+                    result[i] = vector2[i - vector1.Length];
+                }
+            }
+            return result;
+        }
+        public static Tuple<double[], double[]> SeperateVectorToTwoVectors(double[] vector, int length)
+        {
+            double[] result1 = new double[length];
+            double[] result2 = new double[vector.Length - length];
+            for (int i = 0; i < vector.Length; i++)
+            {
+                if (i < length)
+                {
+                    result1[i] = vector[i];
+
+                }
+                else
+                {
+                    result2[i - length] = vector[i];
+                }
+            }
+            return new Tuple<double[], double[]>(result1, result2);
         }
 
     }

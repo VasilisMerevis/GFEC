@@ -8,6 +8,8 @@ namespace GFEC
     public interface INonLinearSolution
     {
         double[] Solve(IAssembly assembly, ILinearSolution linearScheme, double[] forceVector);
+        //double[] Solve(IAssembly assembly, double[] totalForceVector);
+
         int numberOfLoadSteps { get; set; }
         Dictionary<int, double[]> InternalForces { get; set; }
         Dictionary<int, double[]> Solutions { get; set; }

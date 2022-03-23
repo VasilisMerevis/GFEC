@@ -14,7 +14,60 @@ namespace GFEC
         public double[] DisplacementVector { get; set; }
         public double[] AccelerationVector { get; set; }
         private double PenaltyFactor { get; set; }
-
+        public void InitializeTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void InitializeContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateIncrementalDisplacements(double[] deltaU)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public List<double[]> GetStressFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> StessVectorsList = new List<double[]>();
+            StessVectorsList.Add(new double[] { 0.0, 0.0 });
+            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
+            //int count = parametricCoordinatesVector.Count;           
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] nodalParamCoord = parametricCoordinatesVector[i];
+            //    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(nodalParamCoord);
+            //    double[,] J = CalculateJacobian(localdN);
+            //    double[,] invJ = CalculateInverseJacobian(J).Item1;
+            //    Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
+            //    double[,] B = CalculateBMatrix(globaldN);
+            //    double[] strainVector = CalculateStrainsVector(B);
+            //    double[] stressVector = CalculateStressVector(E, strainVector);
+            //    StessVectorsList.Add(stressVector);
+            //}
+            return StessVectorsList;
+        }
+        public List<double[]> GetphysicalCoordinatesFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> PositionVectorsList = new List<double[]>();
+            //double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            PositionVectorsList.Add(new double[] { 0.0, 0.0 });
+            //int count = parametricCoordinatesVector.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] parametricCoordinatesVec = parametricCoordinatesVector[i];
+            //    double[] positionVector = VectorOperations.MatrixVectorProduct(CalculateShapeFunctionMatrix(parametricCoordinatesVec[0], parametricCoordinatesVec[1], parametricCoordinatesVec[2]), xUpdated);
+            //    PositionVectorsList.Add(positionVector);
+            //}
+            return PositionVectorsList;
+        }
         public ContactStS2D(IElementProperties properties, Dictionary<int, INode> nodes)
         {
             Properties = properties;
@@ -27,6 +80,22 @@ namespace GFEC
             }
             DisplacementVector = new double[2* amountOfNodes];
             PenaltyFactor = properties.YoungMod * properties.PenaltyFactorRatio;
+        }
+        public void CalculateElementEASMatrices()
+        {
+            throw new Exception("This method is to be used only for EAS method elements");
+        }
+        public void InitializeElementEASParameters()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateElementEASParameters(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
         }
         public Dictionary<int, INode> NodesAtFinalState()
         {
@@ -531,7 +600,7 @@ namespace GFEC
                 gaussWeights[7] = 0.18064;
                 gaussWeights[8] = 0.08127;
             }
-            else
+            else if (iP == 10)
             {
                 gaussPoints[0] = -0.97390;
                 gaussPoints[1] = -0.86506;
@@ -553,6 +622,151 @@ namespace GFEC
                 gaussWeights[7] = 0.21908;
                 gaussWeights[8] = 0.14945;
                 gaussWeights[9] = 0.06667;
+            }
+            else if (iP == 11)
+            {
+                gaussPoints[0] = -0.97823;
+                gaussPoints[1] = -0.88706;
+                gaussPoints[2] = -0.73015;
+                gaussPoints[3] = -0.51909;
+                gaussPoints[4] = -0.26954;
+                gaussPoints[5] = 0.0;
+                gaussPoints[6] = 0.26954;
+                gaussPoints[7] = 0.51909;
+                gaussPoints[8] = 0.73015;
+                gaussPoints[9] = 0.88706;
+                gaussPoints[10] = 0.97823;
+                gaussWeights[0] = 0.05567;
+                gaussWeights[1] = 0.12558;
+                gaussWeights[2] = 0.18629;
+                gaussWeights[3] = 0.23319;
+                gaussWeights[4] = 0.26280;
+                gaussWeights[5] = 0.27292;
+                gaussWeights[6] = 0.26280;
+                gaussWeights[7] = 0.23319;
+                gaussWeights[8] = 0.18629;
+                gaussWeights[9] = 0.12558;
+                gaussWeights[10] = 0.05567;
+            }
+            else if (iP == 12)
+            {
+                gaussPoints[0] = -0.98156;
+                gaussPoints[1] = -0.90411;
+                gaussPoints[2] = -0.76990;
+                gaussPoints[3] = -0.58732;
+                gaussPoints[4] = -0.36783;
+                gaussPoints[5] = -0.12523;
+                gaussPoints[6] = 0.12523;
+                gaussPoints[7] = 0.36783;
+                gaussPoints[8] = 0.58732;
+                gaussPoints[9] = 0.76990;
+                gaussPoints[10] = 0.90411;
+                gaussPoints[11] = 0.98156;
+                gaussWeights[0] = 0.047175;
+                gaussWeights[1] = 0.106939;
+                gaussWeights[2] = 0.16008;
+                gaussWeights[3] = 0.20317;
+                gaussWeights[4] = 0.23349;
+                gaussWeights[5] = 0.249147;
+                gaussWeights[6] = 0.249147;
+                gaussWeights[7] = 0.23349;
+                gaussWeights[8] = 0.20317;
+                gaussWeights[9] = 0.16008;
+                gaussWeights[10] = 0.106939;
+                gaussWeights[11] = 0.047175;
+            }
+            else if (iP == 13)
+            {
+                gaussPoints[0] = -0.98418;
+                gaussPoints[1] = -0.917598;
+                gaussPoints[2] = -0.801578;
+                gaussPoints[3] = -0.642349;
+                gaussPoints[4] = -0.448493;
+                gaussPoints[5] = -0.230458;
+                gaussPoints[6] = 0.0;
+                gaussPoints[7] = 0.230458;
+                gaussPoints[8] = 0.448493;
+                gaussPoints[9] = 0.642349;
+                gaussPoints[10] = 0.801578;
+                gaussPoints[11] = 0.917598;
+                gaussPoints[12] = 0.98418;
+                gaussWeights[0] = 0.040484;
+                gaussWeights[1] = 0.0921215;
+                gaussWeights[2] = 0.138874;
+                gaussWeights[3] = 0.178146;
+                gaussWeights[4] = 0.207816;
+                gaussWeights[5] = 0.226283;
+                gaussWeights[6] = 0.232552;
+                gaussWeights[7] = 0.226283;
+                gaussWeights[8] = 0.207816;
+                gaussWeights[9] = 0.178146;
+                gaussWeights[10] = 0.138874;
+                gaussWeights[11] = 0.0921215;
+                gaussWeights[12] = 0.040484;
+            }
+            else if (iP == 14)
+            {
+                gaussPoints[0] = -0.986284;
+                gaussPoints[1] = -0.928435;
+                gaussPoints[2] = -0.827201;
+                gaussPoints[3] = -0.687293;
+                gaussPoints[4] = -0.515249;
+                gaussPoints[5] = -0.319112;
+                gaussPoints[6] = -0.108055;
+                gaussPoints[7] = 0.108055;
+                gaussPoints[8] = 0.319112;
+                gaussPoints[9] = 0.515249;
+                gaussPoints[10] = 0.687293;
+                gaussPoints[11] = 0.827201;
+                gaussPoints[12] = 0.928435;
+                gaussPoints[13] = 0.986284;
+                gaussWeights[0] = 0.0351195;
+                gaussWeights[1] = 0.0801581;
+                gaussWeights[2] = 0.121519;
+                gaussWeights[3] = 0.157203;
+                gaussWeights[4] = 0.185538;
+                gaussWeights[5] = 0.205198;
+                gaussWeights[6] = 0.215264;
+                gaussWeights[7] = 0.215264;
+                gaussWeights[8] = 0.205198;
+                gaussWeights[9] = 0.185538;
+                gaussWeights[10] = 0.157203;
+                gaussWeights[11] = 0.121519;
+                gaussWeights[12] = 0.0801581;
+                gaussWeights[13] = 0.0351195;
+            }
+            else
+            {
+                gaussPoints[0] = -0.987993;
+                gaussPoints[1] = -0.937273;
+                gaussPoints[2] = -0.848207;
+                gaussPoints[3] = -0.724418;
+                gaussPoints[4] = -0.570972;
+                gaussPoints[5] = -0.394151;
+                gaussPoints[6] = -0.201194;
+                gaussPoints[7] = 0.0;
+                gaussPoints[8] = 0.201194;
+                gaussPoints[9] = 0.394151;
+                gaussPoints[10] = 0.570972;
+                gaussPoints[11] = 0.724418;
+                gaussPoints[12] = 0.848207;
+                gaussPoints[13] = 0.937273;
+                gaussPoints[14] = 0.987993;
+                gaussWeights[0] = 0.0307532;
+                gaussWeights[1] = 0.070366;
+                gaussWeights[2] = 0.107159;
+                gaussWeights[3] = 0.139571;
+                gaussWeights[4] = 0.166269;
+                gaussWeights[5] = 0.186161;
+                gaussWeights[6] = 0.198431;
+                gaussWeights[7] = 0.202578;
+                gaussWeights[8] = 0.198431;
+                gaussWeights[9] = 0.186161;
+                gaussWeights[10] = 0.166269;
+                gaussWeights[11] = 0.139571;
+                gaussWeights[12] = 0.107159;
+                gaussWeights[13] = 0.070366;
+                gaussWeights[14] = 0.0307532;
             }
             double GaussPoint = gaussPoints[i];
             double Weight = gaussWeights[i];

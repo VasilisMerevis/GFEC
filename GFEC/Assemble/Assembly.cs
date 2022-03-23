@@ -16,6 +16,8 @@ namespace GFEC
         public Dictionary<int, bool[]> NodeFreedomAllocationList { get; set; }
         public bool ActivateBoundaryConditions { get; set; }
         public int[] BoundedDOFsVector { get; set; }
+        public int[] ContactDOFsVector { get; set; }
+        public int[] NoContactDOFsVector { get; set; }
         //private int[] boundedDOFsVector;
 
         //public int[] BoundedDOFsVector
@@ -58,19 +60,47 @@ namespace GFEC
             return nodeFMT;
         }
 
-        private List<int> CreateElementFreedomList(Dictionary<int, int> singleElementConnectivity, Dictionary<int, int> nodeFMT, Dictionary<int, bool[]> elementFreedomSignature)
+        private List<int> CreateElementFreedomList(Dictionary<int, int> singleElementConnectivity, Dictionary<int, int> nodeFMT,
+            Dictionary<int, bool[]> elementFreedomSignature, string type, int degenerateElementsNodesCount)
         {
             List<int> globalDOFs = new List<int>();
-            foreach (KeyValuePair<int, int> node in singleElementConnectivity)
+            if (!(type== "IsoparamShell18"))
             {
-                int localNode = node.Key;
-                int globalNode = node.Value;
-                int countActiveDOFs = elementFreedomSignature[localNode].Count(c => c == true);
-                for (int i = 0; i < countActiveDOFs; i++)
+                foreach (KeyValuePair<int, int> node in singleElementConnectivity)
                 {
-                    globalDOFs.Add(nodeFMT[globalNode] + i);
-                }
+                    int localNode = node.Key;
+                    int globalNode = node.Value;
+                    int countActiveDOFs = elementFreedomSignature[localNode].Count(c => c == true);
+                    for (int i = 0; i < countActiveDOFs; i++)
+                    {
+                        //
+                        if (globalNode > degenerateElementsNodesCount / 2)
+                        {
+                            globalDOFs.Add(nodeFMT[globalNode - degenerateElementsNodesCount / 2] + i);//Needs fixing. Another method must be added to work for degenerate elements!!!
 
+                        }
+                        else
+                        {
+                            globalDOFs.Add(nodeFMT[globalNode] + i);//Needs fixing. Another method must be added to work for degenerate elements!!!
+
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                for (int i =1; i<=9;i++)
+                {
+                    int localNode = i;
+                    int globalNode = singleElementConnectivity[i];
+                    int countActiveDOFs = elementFreedomSignature[localNode].Count(c => c == true);
+                    for (int j = 0; j < countActiveDOFs; j++)
+                    {
+                        globalDOFs.Add(nodeFMT[globalNode] + j);
+                    }
+
+                }
             }
             return globalDOFs;
         }
@@ -79,6 +109,7 @@ namespace GFEC
         {
             ElementsAssembly = new Dictionary<int, IElement>();
             Dictionary<int, int> nodefmt = CreateNodeFreedomMapList();
+            var degenerateElementsNodesCount = DegenerateElementsCounts().Item2;
             for (int elem = 1; elem <= ElementsConnectivity.Count; elem++)
             {
                 Dictionary<int, INode> elementNodes = AssignElementNodes(ElementsConnectivity[elem]);
@@ -106,8 +137,14 @@ namespace GFEC
                     case "Quad8":
                         ElementsAssembly[elem] = new Quad8(ElementsProperties[elem], elementNodes);
                         break;
+                    case "Quad9":
+                        ElementsAssembly[elem] = new Quad9(ElementsProperties[elem], elementNodes);
+                        break;
                     case "Triangle3":
                         ElementsAssembly[elem] = new Triangle3(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "Triangle6":
+                        ElementsAssembly[elem] = new Triangle6(ElementsProperties[elem], elementNodes);
                         break;
                     case "ContactNtS2Df":
                         ElementsAssembly[elem] = new ContactNtS2Df(ElementsProperties[elem], elementNodes);
@@ -127,6 +164,9 @@ namespace GFEC
                     case "Hex8":
                         ElementsAssembly[elem] = new Hex8(ElementsProperties[elem], elementNodes);
                         break;
+                    case "Hex27":
+                        ElementsAssembly[elem] = new Hex27(ElementsProperties[elem], elementNodes);
+                        break;
                     case "ContactNtS3D":
                         ElementsAssembly[elem] = new ContactNtS3D(ElementsProperties[elem], elementNodes);
                         break;
@@ -136,12 +176,53 @@ namespace GFEC
                     case "ContactStS2D":
                         ElementsAssembly[elem] = new ContactStS2D(ElementsProperties[elem], elementNodes);
                         break;
+                    case "ContactStS2Df":
+                        ElementsAssembly[elem] = new ContactStS2Df(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "ContactStS3D":
+                        ElementsAssembly[elem] = new ContactStS3D(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "ContactStS3Df":
+                        ElementsAssembly[elem] = new ContactStS3Df(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "Shell2DQuadratic4":
+                        ElementsAssembly[elem] = new Shell2DQuadratic4(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "IsoparamShell18":
+                        ElementsAssembly[elem] = new IsoparamShell18(ElementsProperties[elem], elementNodes);
+                        break;
+                    case "ANSSolidShell8EAS":
+                        ElementsAssembly[elem] = new ANSSolidShell8EAS(ElementsProperties[elem], elementNodes);
+                        break;
                 }
                 Dictionary<int, bool[]> efs = ElementsAssembly[elem].ElementFreedomSignature;
                 Dictionary<int, int> elemConnectivity = ElementsConnectivity[elem];
-                List<int> eft = CreateElementFreedomList(elemConnectivity, nodefmt, efs);
+                List<int> eft = CreateElementFreedomList(elemConnectivity, nodefmt, efs, ElementsAssembly[elem].Properties.ElementType, degenerateElementsNodesCount);
                 ElementsAssembly[elem].ElementFreedomList = eft;
             }
+        }
+        private Tuple<int, int> DegenerateElementsCounts()
+        {
+            int countElements = 0;
+            int countNodes = 0;
+            List<INode> degenElNodes = new List<INode>();
+            for (int elem = 1; elem <= ElementsConnectivity.Count; elem++)
+            {
+                if (ElementsProperties[elem].ElementType == "IsoparamShell18")
+                {
+                    countElements += 1;
+                    Dictionary<int, INode> elementNodes = AssignElementNodes(ElementsConnectivity[elem]);
+                    for (int i = elementNodes.Keys.Min(); i <= elementNodes.Keys.Max(); i++)
+                    {
+                        if (!degenElNodes.Contains(elementNodes[i]))
+                        {
+                            degenElNodes.Add(elementNodes[i]);
+                        }
+                    }
+                }
+            }
+                countNodes = degenElNodes.Count();
+            return new Tuple<int, int>(countElements, countNodes);
         }
 
         public int CountElementsOfSameType(Type elementType)
@@ -175,7 +256,113 @@ namespace GFEC
                 ElementsAssembly[element].DisplacementVector = elementDisplacementVector;
             }
         }
+        public void UpdateElementsIncrementalDisplacements(double[] deltaU)
+        {
+            double[] fullTotalDisplacementVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(deltaU, BoundedDOFsVector);
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                    int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                    double[] elementDisplacementVector = new double[elementDofs];
+                    for (int i = 0; i < elementDofs; i++)
+                    {
+                        int localRow = i;
+                        int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                        elementDisplacementVector[localRow] = fullTotalDisplacementVector[globalRow];
+                    }
+                    if (ElementsAssembly[element].Properties.ElementType == "ContactStS3Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "Shell2DQuadratic4")
+                    {
+                        ElementsAssembly[element].UpdateIncrementalDisplacements(elementDisplacementVector);
+                    }   
+            }
+        }
+        public void MMCPCGUpdateDisplacements(double[] totalDisplacementVector)
+        {
+            double[] fullTotalDisplacementVector = BoundaryConditionsImposition.MMCPCGCreateFullVectorFromReducedVector(totalDisplacementVector, BoundedDOFsVector, ContactDOFsVector, NoContactDOFsVector);
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                double[] elementDisplacementVector = new double[elementDofs];
+                for (int i = 0; i < elementDofs; i++)
+                {
+                    int localRow = i;
+                    int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                    elementDisplacementVector[localRow] = fullTotalDisplacementVector[globalRow];
+                }
+                ElementsAssembly[element].DisplacementVector = elementDisplacementVector;
+            }
+        }
+        public void MMCPCGUpdateElementsIncrementalDisplacements(double[] deltaU)
+        {
+            double[] fullTotalDisplacementVector = BoundaryConditionsImposition.MMCPCGCreateFullVectorFromReducedVector(deltaU, BoundedDOFsVector, ContactDOFsVector, NoContactDOFsVector);
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                double[] elementDisplacementVector = new double[elementDofs];
+                for (int i = 0; i < elementDofs; i++)
+                {
+                    int localRow = i;
+                    int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                    elementDisplacementVector[localRow] = fullTotalDisplacementVector[globalRow];
+                }
+                if (ElementsAssembly[element].Properties.ElementType == "ContactStS3Df")
+                {
+                    ElementsAssembly[element].UpdateIncrementalDisplacements(elementDisplacementVector);
+                }
+            }
+        }
+        public double[] MMCPCGRearrange(double[] reducedVector)
+        {
+            double[] RearrangedVector = BoundaryConditionsImposition.MMCPCGRearrangeReducedVector(reducedVector, BoundedDOFsVector, ContactDOFsVector, NoContactDOFsVector);
+            return RearrangedVector;
+        }
+        public void InitializeContactTangentialProperties()
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ContactStS2Df" || 
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS3Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "Shell2DQuadratic4")
+                {
+                    ElementsAssembly[element].InitializeTangentialProperties();
 
+                }
+            }
+        }
+        public void UpdateContactTangentialProperties()
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ContactStS2Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS3Df")
+                {
+                    ElementsAssembly[element].UpdateTangentialProperties();
+
+                }
+            }
+        }
+        public void InitializeContactSurfaceVectors()
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ContactStS3Df")
+                {
+                    ElementsAssembly[element].InitializeContactSurfaceGeometry();
+
+                }
+            }
+        }
+        public void UpdateContactSurfaceVectors()
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ContactStS3Df")
+                {
+                    ElementsAssembly[element].UpdateContactSurfaceGeometry();
+
+                }
+            }
+        }
         public void UpdateAccelerations(double[] totalAccelerationsVector)
         {
             double[] fullTotalAccelerationsVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(totalAccelerationsVector, BoundedDOFsVector);
@@ -223,6 +410,90 @@ namespace GFEC
             {
                 return totalStiffnessMatrix;
             }
+        }
+
+        public Tuple<double[,], double[,], double[,], double[,]> MMCPCGCreateTotalStiffnessMatrix()
+        {
+            int[] contactDof = ContactDOFsVector;
+            int[] noContactDof = NoContactDOFsVector;
+            double[,] totalStiffnessMatrix = new double[totalDOF, totalDOF];
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                double[,] elementStiffnessMatrix = ElementsAssembly[element].CreateGlobalStiffnessMatrix();
+
+                for (int i = 0; i < elementDofs; i++)
+                {
+                    int localRow = i;
+                    int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                    for (int j = 0; j < elementDofs; j++)
+                    {
+                        int localColumn = j;
+                        int globalColumn = ElementsAssembly[element].ElementFreedomList[j];
+                        totalStiffnessMatrix[globalRow, globalColumn] = totalStiffnessMatrix[globalRow, globalColumn] + elementStiffnessMatrix[localRow, localColumn];
+                    }
+                }
+            }
+
+            Tuple<double[,], double[,], double[,], double[,]> reducedStiffnessMatrices = BoundaryConditionsImposition.MMCPCGReducedTotalStiffMatrices(totalStiffnessMatrix, BoundedDOFsVector,
+                contactDof, noContactDof);
+            return reducedStiffnessMatrices;
+        }
+
+        public void SeperateContactDoF()
+        {
+            List<int> contactDofList = new List<int>();
+            List<int> noContactDofList = new List<int>();
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if(ElementsAssembly[element].Properties.ElementType == "ContactNtN2D" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactNtN2Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactNtS2D" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactNtS2Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactNtS3D" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS2D" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS2Df" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS3D" ||
+                    ElementsAssembly[element].Properties.ElementType == "ContactStS3Df")
+                {
+                    var l = ElementsAssembly[element].ElementFreedomList;
+                    foreach(var elemDof in l)
+                    {
+                        if (!contactDofList.Contains(elemDof + 1))
+                        {
+                            contactDofList.Add(elemDof + 1);
+                        }
+                    }
+                }
+                //else
+                //{
+                //    var l = ElementsAssembly[element].ElementFreedomList;
+                //    foreach (var elemDof in l)
+                //    {
+                //        if (!noContactDofList.Contains(elemDof))
+                //        {
+                //            noContactDofList.Add(elemDof);
+                //        }
+                //    }
+                //}
+            }
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                var l = ElementsAssembly[element].ElementFreedomList;
+                foreach (var elemDof in l)
+                {
+                    if (!contactDofList.Contains(elemDof + 1) && !noContactDofList.Contains(elemDof + 1))
+                    {
+                        noContactDofList.Add(elemDof + 1);
+                    }
+                }
+            }
+            contactDofList = contactDofList.OrderBy(a => a).ToList();
+            noContactDofList = noContactDofList.OrderBy(a => a).ToList();
+            int[] contactDof = contactDofList.ToArray<int>();
+            int[] noContactDof = noContactDofList.ToArray<int>();
+            ContactDOFsVector = contactDof;
+            NoContactDOFsVector = noContactDof;
         }
 
         public double[,] CreateTotalMassMatrix()
@@ -325,6 +596,34 @@ namespace GFEC
                 return reducedInternalForcesVector;
             }
             return internalForcesTotalVector;
+        }
+        public double[] MMCPCGCreateTotalInternalForcesVectors()
+        {
+            int[] contactDof = ContactDOFsVector;
+            int[] noContactDof = NoContactDOFsVector;
+            double[] internalForcesTotalVector = new double[totalDOF];
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                double[] elementInternalGlobalForcesVector = ElementsAssembly[element].CreateInternalGlobalForcesVector();
+                for (int i = 0; i < elementDofs; i++)
+                {
+                    int localLine = i;
+                    int globalLine = ElementsAssembly[element].ElementFreedomList[i];
+                    internalForcesTotalVector[globalLine] = internalForcesTotalVector[globalLine] + elementInternalGlobalForcesVector[localLine];
+                }
+            }
+            double[] reducedInternalForcesVector = BoundaryConditionsImposition.MMCPCGReducedVector(internalForcesTotalVector, BoundedDOFsVector,
+                contactDof, noContactDof).Item3;
+            return reducedInternalForcesVector;
+        }
+        public Tuple<double[], double[]> MMCPCGSeperateReducedExternalForcesVectors(double[] extForces)
+        {
+            int[] contactDof = ContactDOFsVector;
+            int[] noContactDof = NoContactDOFsVector;
+            var reducedExternalForces = BoundaryConditionsImposition.MMCPCGSeperateReducedVectorMatrices(extForces, BoundedDOFsVector,
+            contactDof, noContactDof);
+            return new Tuple<double[], double[]>(reducedExternalForces.Item1, reducedExternalForces.Item2);
         }
 
         public static Dictionary<int, INode> CalculateFinalNodalCoordinates(Dictionary<int, INode> nodesList, double[] diplacements)
@@ -433,6 +732,74 @@ namespace GFEC
                 elementsStresses.Add(element, elementStress);
             }
             return elementsStresses;
+        }
+        public double[] MMCPGCreateReducedFromFullVector(double[] fullVector) 
+        {
+            int[] contactDof = ContactDOFsVector;
+            int[] noContactDof = NoContactDOFsVector;
+            double[] reducedInternalForcesVector = BoundaryConditionsImposition.MMCPCGReducedVector(fullVector, BoundedDOFsVector, contactDof, noContactDof).Item3;
+            return reducedInternalForcesVector;
+        }
+
+        public void CalculateEASMatrices() 
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if(ElementsAssembly[element].Properties.ElementType == "ANSSolidShell8EAS")
+                {
+                    ElementsAssembly[element].CalculateElementEASMatrices();
+                }
+            }
+        }
+        public void InitializeEASParameters()
+        {
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ANSSolidShell8EAS")
+                {
+                    ElementsAssembly[element].InitializeElementEASParameters();
+                }
+            }
+        }
+        public void UpdateEASParameters(double[] solutionVector) 
+        {
+            double[] fullTotalDisplacementVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solutionVector,
+                BoundedDOFsVector);
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ANSSolidShell8EAS")
+                {
+                    int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                    double[] elementDisplacementVector = new double[elementDofs];
+                    for (int i = 0; i < elementDofs; i++)
+                    {
+                        int localRow = i;
+                        int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                        elementDisplacementVector[localRow] = fullTotalDisplacementVector[globalRow];
+                    }
+                    ElementsAssembly[element].UpdateElementEASParameters(elementDisplacementVector);
+                }
+            }
+        }
+        public void StoreFinalStepDisplacementVector(double[] solutionVector) 
+        {
+            double[] fullTotalDisplacementVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solutionVector,
+                BoundedDOFsVector);
+            for (int element = 1; element <= ElementsConnectivity.Count; element++)
+            {
+                if (ElementsAssembly[element].Properties.ElementType == "ANSSolidShell8EAS")
+                {
+                    int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+                    double[] elementDisplacementVector = new double[elementDofs];
+                    for (int i = 0; i < elementDofs; i++)
+                    {
+                        int localRow = i;
+                        int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                        elementDisplacementVector[localRow] = fullTotalDisplacementVector[globalRow];
+                    }
+                    ElementsAssembly[element].StoreElementFinalStepDisplacementVector(elementDisplacementVector);
+                }
+            }
         }
     }
 }
