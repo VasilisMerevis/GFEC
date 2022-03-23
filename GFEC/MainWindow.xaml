@@ -8,20 +8,18 @@
         mc:Ignorable="d"
 
 
-        Title="MainWindow" Height="572" Width="959">
+        Title="GFEC" Height="572" Width="959">
     <Grid Name="gridBasic">
         <TextBox Name="Results"  HorizontalAlignment="Right" Height="91" Margin="0,141,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
         <Button Content="Run" Click="RunButton" Margin="0,26,33,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="85"/>
         <ComboBox Name="ComboBox1" Margin="0,26,123,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="285"/>
-        <Button Content="Import Nodes" Margin="0,104,164,0" VerticalAlignment="Top" Click="Import_Nodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
-        <Button Content="Import Connectivity" HorizontalAlignment="Right" Margin="0,104,285,0" VerticalAlignment="Top" Width="123" Click="Import_Connectivity_Button_Click" Height="32"/>
-        <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,104,33,0" VerticalAlignment="Top" Width="126" Click="Button_Click" Height="32"/>
-        <Button Content="GraphicsPlot" Margin="0,67,33,0" VerticalAlignment="Top" Height="32" Click="Button_Click_Gnuplot" HorizontalAlignment="Right" Width="126"/>
+        <Button Content="Import Nodes" Margin="0,67,33,0" VerticalAlignment="Top" Click="Import_Nodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
+        <Button Content="Import Connectivity" HorizontalAlignment="Right" Margin="0,104,33,0" VerticalAlignment="Top" Width="116" Click="Import_Connectivity_Button_Click" Height="32"/>
+        <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,104,154,0" VerticalAlignment="Top" Width="116" Click="Button_Click" Height="32"/>
         <Image Name="gnuplotImage" Height="239" Margin="31,276,710,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="LogTool" x:FieldModifier="public" Margin="31,445,33,10" TextWrapping="Wrap"/>
-        <Label Content="Convergence Results" HorizontalAlignment="Right" Margin="0,264,545,0" Width="375" Height="30" VerticalAlignment="Top"/>
-        <Button Content="ParallelTest" HorizontalAlignment="Right" Margin="0,67,285,0" VerticalAlignment="Top" Width="123" Height="32" Click="Button_ParallelTest"/>
-        <lvc:CartesianChart AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}" Margin="31,294,33,96">
+        <TextBox x:Name="LogTool" x:FieldModifier="public" Margin="31,0,33,10" TextWrapping="Wrap" Height="86" VerticalAlignment="Bottom"/>
+        <Label Content="Convergence Results" Margin="31,0,0,247" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="375"/>
+        <lvc:CartesianChart AnimationsSpeed="0:0:0.5" Hoverable="False" DataTooltip="{x:Null}" Margin="31,0,33,96" Height="151" VerticalAlignment="Bottom">
             <lvc:CartesianChart.Series>
                 <lvc:LineSeries Values="{Binding ChartValues}" 
                     PointGeometry="{x:Null}" 
@@ -48,12 +46,21 @@
                 </lvc:Axis>
             </lvc:CartesianChart.AxisY>
         </lvc:CartesianChart>
-        
-        <Button Content="Import OBJ File" HorizontalAlignment="Left" Margin="671,67,0,0" VerticalAlignment="Top" Width="116" Height="32" Click="ImportOBJFile"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="833,253,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+
+        <Button Content="Import OBJ File" Margin="0,67,154,0" VerticalAlignment="Top" Height="32" Click="ImportOBJFile" HorizontalAlignment="Right" Width="116"/>
+        <Button Content="Display object" Margin="0,67,275,0" VerticalAlignment="Top" Click="Button_Click_1" Height="32" HorizontalAlignment="Right" Width="133"/>
         <Grid Name="viewport3DGrid" Margin="31,26,413,309">
-            <Viewport3D Name="ViewportGraphics"  />
+            <Border BorderThickness="1" BorderBrush="Black">
+                <Viewport3D Name="ViewportGraphics"  />
+            </Border>
         </Grid>
+
+        <Button Content="Left" HorizontalAlignment="Left" Margin="161,0,0,285" VerticalAlignment="Bottom" Width="50" Click="MoveCameraLeft"/>
+        <Button Content="Right" HorizontalAlignment="Left" Margin="216,0,0,285" Width="50" Click="MoveCameraRight" Height="20" VerticalAlignment="Bottom"/>
+        <Button Content="Up" HorizontalAlignment="Left" Margin="31,0,0,285" Width="50" Click="MoveCameraUp" Height="20" VerticalAlignment="Bottom"/>
+        <Button Content="Down" HorizontalAlignment="Left" Margin="86,0,0,285" VerticalAlignment="Bottom" Width="50" Click="MoveCameraDown"/>
+        <Button Content="Zoom +" HorizontalAlignment="Left" Margin="295,0,0,285" Width="50" Click="ZoomInCamera" Height="20" VerticalAlignment="Bottom"/>
+        <Button Content="Zoom -" HorizontalAlignment="Left" Margin="350,0,0,285" VerticalAlignment="Bottom" Width="50" Click="ZoomOutCamera"/>
 
     </Grid>
 </Window>

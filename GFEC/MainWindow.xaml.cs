@@ -219,6 +219,47 @@ namespace GFEC
         }
 
         // Adjust the camera's position.
+
+        private void MoveCameraLeft(object sender, EventArgs e)
+        {
+            CameraTheta += CameraDTheta;
+            PositionCamera();
+        }
+
+        private void MoveCameraRight(object sender, EventArgs e)
+        {
+            CameraTheta -= CameraDTheta;
+            PositionCamera();
+        }
+
+        private void MoveCameraUp(object sender, EventArgs e)
+        {
+            CameraPhi += CameraDPhi;
+            if (CameraPhi > Math.PI / 2.0) CameraPhi = Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void MoveCameraDown(object sender, EventArgs e)
+        {
+            CameraPhi -= CameraDPhi;
+            if (CameraPhi < -Math.PI / 2.0) CameraPhi = -Math.PI / 2.0;
+            PositionCamera();
+        }
+
+        private void ZoomInCamera(object sender, EventArgs e)
+        {
+            CameraR -= CameraDR;
+            if (CameraR < CameraDR) CameraR = CameraDR;
+            PositionCamera();
+        }
+
+        private void ZoomOutCamera(object sender, EventArgs e)
+        {
+            CameraR += CameraDR;
+            PositionCamera();
+        }
+
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -942,28 +983,36 @@ namespace GFEC
             }
             plotMesh.elementsConnectivity = elementsConnectivity;
             plotMesh.nodes = nodes;
-            plotMesh.Window_Loaded();
+            //plotMesh.Window_Loaded();
 
 
             //ViewportGraphics = plotMesh.MainViewport;
-            neo = plotMesh.MainViewport;
+            //neo = plotMesh.MainViewport;
             //Window secondWindow = new Window();
             //secondWindow.Show();
             //secondWindow.KeyDown += plotMesh.Window_KeyDown;
             //secondWindow.Content = plotMesh.MainViewport;
             //ViewportGraphics.InvalidateVisual();
 
-            viewport3DGrid.Children.Remove(ViewportGraphics);
-            ViewportGraphics = plotMesh.MainViewport;
-            viewport3DGrid.Children.Add(ViewportGraphics);
+            ViewportGraphics.Children.Clear();
+            ViewportGraphics.InvalidateVisual();
+           
+            ViewportGraphics.Children.Add(plotMesh.GetModel());
+            //ViewportGraphics.InvalidateVisual();
+            //ViewportGraphics = plotMesh.MainViewport;
+            //viewport3DGrid.Children.Add(ViewportGraphics);
 
 
-            CompositionTarget.Rendering += TestMethod;
+            //CompositionTarget.Rendering += TestMethod;
         }
-       
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
         private void TestMethod(object sender, EventArgs e)
         {
-            ViewportGraphics = neo;
+            //ViewportGraphics = neo;
             ViewportGraphics.UpdateLayout();
         }
     }

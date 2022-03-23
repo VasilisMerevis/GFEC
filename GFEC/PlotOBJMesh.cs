@@ -78,6 +78,26 @@ namespace GFEC
             MainViewport.Children.Add(model_visual);
         }
 
+        public ModelVisual3D GetModel()
+        {
+            // Give the camera its initial position.
+            TheCamera = new PerspectiveCamera();
+            TheCamera.FieldOfView = 60;
+            MainViewport.Camera = TheCamera;
+            PositionCamera();
+
+            // Define lights.
+            DefineLights();
+
+            // Create the model.
+            DefineModel(MainModel3Dgroup);
+
+            // Add the group of models to a ModelVisual3D.
+            ModelVisual3D model_visual = new ModelVisual3D();
+            model_visual.Content = MainModel3Dgroup;
+            return model_visual;
+        }
+
         //Define the lights.
         private void DefineLights()
         {
