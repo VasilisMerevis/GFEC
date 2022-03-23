@@ -410,8 +410,8 @@ namespace GFEC
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
             int countContactElements = elementsAssembly.CountElementsOfSameType(typeof(ContactNtS2D));
             //Gnuplot graphs
-            ShowToGUI.PlotInitialGeometry(elementsAssembly);
-            ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
+            //ShowToGUI.PlotInitialGeometry(elementsAssembly);
+            //ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             Dictionary<int, INode> initialNodes = elementsAssembly.Nodes;
             double[] initialXCoord = Assembly.NodalCoordinatesToVectors(initialNodes).Item1;
             double[] initialYCoord = Assembly.NodalCoordinatesToVectors(initialNodes).Item2;
@@ -430,8 +430,8 @@ namespace GFEC
             Array.Copy(initialYCoord, totalNodes / 2, Yvec2Initial, 0, totalNodes / 2);
             string pathForContour1 = @"C:\Users\Public\Documents\Total\1";
             string pathForContour2 = @"C:\Users\Public\Documents\Total\2";
-            ExportToFile.CreateContourDataForMatlab(Xvec1Initial, Yvec1Initial, Ζvec1Initial, nodesInYCoor, nodesInXCoor, pathForContour1);
-            ExportToFile.CreateContourDataForMatlab(Xvec2Initial, Yvec2Initial, Ζvec2Initial, nodesInYCoor, nodesInXCoor, pathForContour2);
+            //ExportToFile.CreateContourDataForMatlab(Xvec1Initial, Yvec1Initial, Ζvec1Initial, nodesInYCoor, nodesInXCoor, pathForContour1);
+            //ExportToFile.CreateContourDataForMatlab(Xvec2Initial, Yvec2Initial, Ζvec2Initial, nodesInYCoor, nodesInXCoor, pathForContour2);
 
 
 
@@ -456,7 +456,7 @@ namespace GFEC
             structuralSolution.Solve(reducedExternalForces3);
             double[] solvector3 = structuralSolution.GetSolution();
             elementsAssembly.UpdateDisplacements(solvector3);
-            ShowToGUI.PlotFinalGeometry(elementsAssembly);
+            //ShowToGUI.PlotFinalGeometry(elementsAssembly);
             double[] fullSolVector3 = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solvector3, elementsAssembly.BoundedDOFsVector);
             Dictionary<int, INode> finalNodes = Assembly.CalculateFinalNodalCoordinates(elementsAssembly.Nodes, fullSolVector3);
             double[] xFinalNodalCoor = Assembly.NodalCoordinatesToVectors(finalNodes).Item1;
@@ -485,7 +485,7 @@ namespace GFEC
 
             List<double[]> structuralSolutions = new List<double[]>();
 
-            ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
+            //ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             #endregion
 
 

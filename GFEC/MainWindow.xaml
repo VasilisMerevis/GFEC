@@ -26,7 +26,7 @@
                     LineSmoothness="1"
                     StrokeThickness="3" 
                     Stroke="#F34336"
-                    Fill="Transparent"/>
+                    Fill="Black"/>
             </lvc:CartesianChart.Series>
             <lvc:CartesianChart.AxisX>
                 <lvc:Axis LabelFormatter="{Binding DateTimeFormatter}" 

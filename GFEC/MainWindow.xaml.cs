@@ -560,12 +560,12 @@ namespace GFEC
                 {
                     ChartValues.Clear();
                 }
-                //ChartValues.Add(new ConvergenceValues
-                //{
-                //    Iteration = e.Iteration,
-                //    ResidualNorm = e.ResidualNorm
-                //});
-                
+                ChartValues.Add(new ConvergenceValues
+                {
+                    Iteration = e.Iteration,
+                    ResidualNorm = e.ResidualNorm
+                });
+
                 LoadStepNumber = e.LoadStep;
             }));
             SetAxisLimits(e.Iteration);
