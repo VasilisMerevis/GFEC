@@ -10,7 +10,7 @@ namespace GFEC
     {
         public static ISolver structuralSolution;
         static int[] structuralBoundaryConditions;
-        const double thickness = 0.006;
+        const double shellThickness = 0.006;
         const int nodesInX = 21;
         const int nodesInY = 21;
         const int nodesInZ = 2;
@@ -107,7 +107,7 @@ namespace GFEC
             {
                 for (int j = 0; j < nodesInY; j++)
                 {
-                    nodes[l] = new Node(i * xInterv, j * yInterv, -thickness / 2.0);
+                    nodes[l] = new Node(i * xInterv, j * yInterv, -shellThickness / 2.0);
                     l += 1;
                 }
             }
@@ -115,7 +115,7 @@ namespace GFEC
             {
                 for (int j = 0; j < nodesInY; j++)
                 {
-                    nodes[l] = new Node(i * xInterv, j * yInterv, thickness / 2.0);
+                    nodes[l] = new Node(i * xInterv, j * yInterv, shellThickness / 2.0);
                     l += 1;
                 }
             }
@@ -167,7 +167,7 @@ namespace GFEC
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             for (int i = 1; i <= elementsNumber; i++)
             {
-                elementProperties[i] = new ElementProperties(E, poissonRatio, A, thickness, density, type);
+                elementProperties[i] = new ElementProperties(E, poissonRatio, A, shellThickness, density, type);
             }
             return elementProperties;
         }
