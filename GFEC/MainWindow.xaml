@@ -9,7 +9,7 @@
 
 
         Title="MainWindow" Height="572" Width="959">
-    <Grid>
+    <Grid Name="gridBasic">
         <TextBox Name="Results"  HorizontalAlignment="Right" Height="91" Margin="0,141,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
         <Button Content="Run" Click="RunButton" Margin="0,26,33,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="85"/>
         <ComboBox Name="ComboBox1" Margin="0,26,123,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="285"/>
@@ -48,9 +48,12 @@
                 </lvc:Axis>
             </lvc:CartesianChart.AxisY>
         </lvc:CartesianChart>
-        <Viewport3D Name="ViewportGraphics"  Margin="31,26,413,309"/>
+        
         <Button Content="Import OBJ File" HorizontalAlignment="Left" Margin="671,67,0,0" VerticalAlignment="Top" Width="116" Height="32" Click="ImportOBJFile"/>
         <Button Content="Button" HorizontalAlignment="Left" Margin="833,253,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Grid Name="viewport3DGrid" Margin="31,26,413,309">
+            <Viewport3D Name="ViewportGraphics"  />
+        </Grid>
 
     </Grid>
 </Window>
