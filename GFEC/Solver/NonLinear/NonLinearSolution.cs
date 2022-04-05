@@ -25,7 +25,11 @@ namespace GFEC
             throw new Exception("LinearSolution.Solve not implemented");
         }
 
+        //protected void OnConvergenceResult(string message)
+
+
         protected void OnConvergenceResult(ConvergenceValues convergenceValues)
+
         {
             if (convergenceResult != null)
             {

@@ -16,5 +16,8 @@ namespace GFEC
         bool RXDof { get; set; }
         bool RYDof { get; set; }
         bool RZDof { get; set; }
+        double RX { get; set; }
+        double RY { get; set; }
+        double RZ { get; set; }
     }
 }

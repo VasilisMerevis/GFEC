@@ -113,7 +113,7 @@ namespace GFEC
 
             foreach (var node in assembly.Nodes)
             {
-                coordinateData.Add(node.Key.ToString() + "\t" + node.Value.XCoordinate.ToString() + "\t" + node.Value.YCoordinate.ToString());
+                coordinateData.Add(node.Key.ToString() + "\t" + node.Value.XCoordinate.ToString() + "\t" + node.Value.YCoordinate.ToString() + "\t" + node.Value.ZCoordinate.ToString());
             }
 
             foreach (var element in assembly.ElementsAssembly)
@@ -138,9 +138,9 @@ namespace GFEC
                 }
             }
 
-            File.WriteAllLines("Results/coordinateData.dat", coordinateData);
-            File.WriteAllLines("Results/connectivityData.dat", connectivityData);
-            File.WriteAllLines("Results/contactConnectivityData.dat", contactConnectivityData);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Results/coordinateData.dat", coordinateData);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Results/connectivityData.dat", connectivityData);
+            File.WriteAllLines(@"C:\Users\Public\Documents\Results/contactConnectivityData.dat", contactConnectivityData);
         }
 
         public static void ExportMatlabFinalGeometry(IAssembly assembly, double[] displacements)
@@ -155,7 +155,18 @@ namespace GFEC
             }
             File.WriteAllLines(@"C:\Users\Public\Documents\finalCoordinateData.dat", finalCoordinateData);
         }
+        public static void ExportUpdatedNodalCoordinates(IAssembly assembly, double[] displacements, string fileName)
+        {
+            List<string> finalCoordinateData = new List<string>();
 
+            Dictionary<int, INode> nodesAtFinalState = Assembly.CalculateFinalNodalCoordinates(assembly.Nodes, displacements);
+
+            foreach (var node in nodesAtFinalState)
+            {
+                finalCoordinateData.Add(node.Key.ToString() + "\t" + node.Value.XCoordinate.ToString() + "\t" + node.Value.YCoordinate.ToString());
+            }
+            File.WriteAllLines(@"C:\Users\Public\Documents\"+ fileName+".dat", finalCoordinateData);
+        }
         public static void ExportCondactivityForAllLoadSteps(List<Dictionary<int, double>> contactContactivityForEachStep)
         {
             int k = 0;

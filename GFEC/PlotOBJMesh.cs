@@ -27,8 +27,10 @@ namespace GFEC
     {
         public Viewport3D MainViewport = new Viewport3D();
         public ModelVisual3D finalModel = new ModelVisual3D();
+
         public Dictionary<int, INode> nodes = new Dictionary<int, INode>();
         public Dictionary<int, Dictionary<int, int>> elementsConnectivity = new Dictionary<int, Dictionary<int, int>>();
+
         // The main object model group.
         private Model3DGroup MainModel3Dgroup = new Model3DGroup();
 
@@ -36,12 +38,15 @@ namespace GFEC
         private PerspectiveCamera TheCamera;
 
         // The camera's current location.
+
+
         private double CameraPhi = 0; //Math.PI / 6.0;       // 30 degrees
         private double CameraTheta = 0;// Math.PI / 6.0;     // 30 degrees
 #if SURFACE2
         private double CameraR = 3.0;
 #else
         private double CameraR = 300.0;
+
 #endif
 
         // The change in CameraPhi when you press the up and down arrows.
@@ -51,7 +56,9 @@ namespace GFEC
         private const double CameraDTheta = 0.1;
 
         // The change in CameraR when you press + or -.
+
         private const double CameraDR = 0.1*100;
+
 
         // Create the scene.
         // MainViewport is the Viewport3D defined
@@ -78,6 +85,7 @@ namespace GFEC
             MainViewport.Children.Add(model_visual);
         }
 
+
         public ModelVisual3D GetModel()
         {
             // Give the camera its initial position.
@@ -98,6 +106,7 @@ namespace GFEC
             return model_visual;
         }
 
+
         //Define the lights.
         private void DefineLights()
         {
@@ -113,6 +122,7 @@ namespace GFEC
         {
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
+
 
             List<double> nodesX = new List<double>();
             List<double> nodesY = new List<double>();
@@ -199,6 +209,7 @@ namespace GFEC
             //                    AddTriangle(mesh, p00, p11, p10);
             //                }
             //            }
+
             Console.WriteLine(mesh.Positions.Count + " points");
             Console.WriteLine(mesh.TriangleIndices.Count / 3 + " triangles");
 
@@ -308,4 +319,6 @@ namespace GFEC
 
 
     }
+
 }
+

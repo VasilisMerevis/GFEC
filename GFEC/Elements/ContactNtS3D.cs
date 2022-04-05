@@ -17,6 +17,61 @@ namespace GFEC
         private double PenaltyFactor { get; set; }
         double[] lastKsiVector;
 
+        public void InitializeTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateTangentialProperties()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void InitializeContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateContactSurfaceGeometry()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateIncrementalDisplacements(double[] deltaU)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public List<double[]> GetStressFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> StessVectorsList = new List<double[]>();
+            StessVectorsList.Add(new double[] { 0.0, 0.0 });
+            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
+            //int count = parametricCoordinatesVector.Count;           
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] nodalParamCoord = parametricCoordinatesVector[i];
+            //    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(nodalParamCoord);
+            //    double[,] J = CalculateJacobian(localdN);
+            //    double[,] invJ = CalculateInverseJacobian(J).Item1;
+            //    Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
+            //    double[,] B = CalculateBMatrix(globaldN);
+            //    double[] strainVector = CalculateStrainsVector(B);
+            //    double[] stressVector = CalculateStressVector(E, strainVector);
+            //    StessVectorsList.Add(stressVector);
+            //}
+            return StessVectorsList;
+        }
+        public List<double[]> GetphysicalCoordinatesFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            List<double[]> PositionVectorsList = new List<double[]>();
+            //double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            PositionVectorsList.Add(new double[] { 0.0, 0.0 });
+            //int count = parametricCoordinatesVector.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    double[] parametricCoordinatesVec = parametricCoordinatesVector[i];
+            //    double[] positionVector = VectorOperations.MatrixVectorProduct(CalculateShapeFunctionMatrix(parametricCoordinatesVec[0], parametricCoordinatesVec[1], parametricCoordinatesVec[2]), xUpdated);
+            //    PositionVectorsList.Add(positionVector);
+            //}
+            return PositionVectorsList;
+        }
+
         public ContactNtS3D(IElementProperties properties, Dictionary<int, INode> nodes)
         {
             Properties = properties;
@@ -27,9 +82,25 @@ namespace GFEC
             ElementFreedomSignature[4] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[5] = new bool[] { true, true, true, false, false, false };
             DisplacementVector = new double[15];
-            PenaltyFactor = properties.YoungMod * 2.0 / 100;
+
+            PenaltyFactor = properties.YoungMod * 5.0;
             lastKsiVector = new double[2];
-            PenaltyFactor = properties.YoungMod * 2.0 / 100;
+        }
+        public void CalculateElementEASMatrices()
+        {
+            throw new Exception("This method is to be used only for EAS method elements");
+        }
+        public void InitializeElementEASParameters()
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void UpdateElementEASParameters(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
+        }
+        public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
+        {
+            throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
         }
 
         public Dictionary<int, INode> NodesAtFinalState()
@@ -41,6 +112,37 @@ namespace GFEC
             finalNodes[4] = new Node(Nodes[4].XCoordinate + DisplacementVector[9], Nodes[4].YCoordinate + DisplacementVector[10], Nodes[4].ZCoordinate + DisplacementVector[11]);
             finalNodes[5] = new Node(Nodes[5].XCoordinate + DisplacementVector[12], Nodes[5].YCoordinate + DisplacementVector[13], Nodes[5].ZCoordinate + DisplacementVector[14]);
             return finalNodes;
+        }
+
+        public List<double[]> GetStressVector()
+        {
+            List<double[]> l = new List<double[]>();
+            l.Add(new double[] { 0.0, 0.0, 0.0 });
+            return l;
+        }
+        public List<double[]> GetStrainVector()
+        {
+            List<double[]> l = new List<double[]>();
+            l.Add(new double[] { 0.0, 0.0, 0.0 });
+            return l;
+        }
+        public List<double[]> GetGaussPointsInPhysicalSpace()
+        {
+            List<double[]> l = new List<double[]>();
+            l.Add(new double[] { 0.0, 0.0, 0.0 });
+            return l;
+        }
+        public List<double[]> GetStressFromElementsNodes()
+        {
+            List<double[]> l = new List<double[]>();
+            l.Add(new double[] { 0.0, 0.0, 0.0 });
+            return l;
+        }
+        public List<double[]> GetStrainFromElementsNodes()
+        {
+            List<double[]> l = new List<double[]>();
+            l.Add(new double[] { 0.0, 0.0, 0.0 });
+            return l;
         }
 
         private double[] xUpdatedVector()
@@ -62,12 +164,12 @@ namespace GFEC
             double N2 = 1.0 / 4.0 * (1.0 + ksi1) * (1.0 - ksi2);
             double N3 = 1.0 / 4.0 * (1.0 + ksi1) * (1.0 + ksi2);
             double N4 = 1.0 / 4.0 * (1.0 - ksi1) * (1.0 + ksi2);
-            
+
             double dN11 = -1.0 / 4.0 * (1.0 - ksi2);
             double dN21 = 1.0 / 4.0 * (1.0 - ksi2);
             double dN31 = 1.0 / 4.0 * (1.0 + ksi2);
             double dN41 = -1.0 / 4.0 * (1.0 + ksi2);
-            
+
             double dN12 = -1.0 / 4.0 * (1.0 - ksi1);
             double dN22 = -1.0 / 4.0 * (1.0 + ksi1);
             double dN32 = 1.0 / 4.0 * (1.0 + ksi1);
@@ -204,19 +306,43 @@ namespace GFEC
 
             return deltaKsi;
         }
-        
-        private double[] Project(double[] ksiVector)
+
+
+        private double[] Project(double[] ksiVectorInitial)
         {
+            int maxIterations = 1000;
+            double tol = Math.Pow(10.0, -4.0);
+            double[] deltaKsi = new double[2];
+            double norm = new double();
+            double[] ksiVector = ksiVectorInitial;
             double[] xUpdated = xUpdatedVector();
-            Tuple<double[,], double[,], double[,]> aMatrices = CalculatePositionMatrix(ksiVector[0], ksiVector[1]);
-            List<double[]> dRho = SurfaceVectors(ksiVector[0], ksiVector[1]);
-            double[] f = Calculate_f(dRho, aMatrices.Item1, xUpdated);
-            double e = Calculate_e(aMatrices.Item2, xUpdated);
-            double[,] m = MetricTensor(dRho);
-            double detm = MetricTensorDet(m);
-            double[] deltaKsi = CalculateDeltaKsi(detm, m, f, e);
-            ksiVector = VectorOperations.VectorVectorAddition(ksiVector, deltaKsi);
-            return ksiVector;
+            for(int i = 1; i <= maxIterations; i++)
+            {
+                double[] oldksiVector = ksiVector;
+                Tuple<double[,], double[,], double[,]> aMatrices = CalculatePositionMatrix(ksiVector[0], ksiVector[1]);
+                List<double[]> dRho = SurfaceVectors(ksiVector[0], ksiVector[1]);
+                double[] f = Calculate_f(dRho, aMatrices.Item1, xUpdated);
+                double e = Calculate_e(aMatrices.Item1, xUpdated);//double e = Calculate_e(aMatrices.Item2, xUpdated);
+                double[,] m = MetricTensor(dRho);
+                double detm = MetricTensorDet(m);
+                deltaKsi = CalculateDeltaKsi(detm, m, f, e);
+                ksiVector = VectorOperations.VectorVectorAddition(ksiVector, deltaKsi);//Iterations for the CPP?
+                norm = VectorOperations.VectorNorm2(VectorOperations.VectorVectorSubtraction(ksiVector, oldksiVector));
+                if(norm <= tol)
+                {
+                    break;
+                }
+            }
+            if (norm > tol)
+            {
+                throw new Exception("CPP not found in current iterations");
+            }
+            else
+            {
+                return ksiVector;
+
+            }
+
         }
 
         private double CalculatePenetration(double[] normalVector, double[,] aMatrix, double[] xUpdated)
@@ -237,11 +363,42 @@ namespace GFEC
             return Kmain;
         }
 
+        private double[,] RotationalStiffnessPart(double penaltyFactor, double[] normalVector, double[,] aMatrix, double[,] a1Matrix, double[,] a2Matrix, List<double[]> dRho, double ksi3)
+        {
+            double[,] m = MetricTensor(dRho);
+            double[,] mInv = InverseMetricTensor(m);
+
+            double scalar1 = penaltyFactor * ksi3 * mInv[0, 0];
+            double scalar2 = penaltyFactor * ksi3 * mInv[1, 0];
+            double scalar3 = penaltyFactor * ksi3 * mInv[0, 1];
+            double scalar4 = penaltyFactor * ksi3 * mInv[1, 1];
+
+            double[,] mat11 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(a1Matrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(normalVector, dRho[0]), aMatrix));
+            double[,] mat12 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(aMatrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(dRho[0], normalVector), a1Matrix));
+            double[,] mat21 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(a1Matrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(normalVector, dRho[1]), aMatrix));
+            double[,] mat22 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(aMatrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(dRho[0], normalVector), a2Matrix));
+            double[,] mat31 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(a2Matrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(normalVector, dRho[0]), aMatrix));
+            double[,] mat32 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(aMatrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(dRho[1], normalVector), a1Matrix));
+            double[,] mat41 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(a2Matrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(normalVector, dRho[1]), aMatrix));
+            double[,] mat42 = MatrixOperations.MatrixProduct(MatrixOperations.Transpose(aMatrix), MatrixOperations.MatrixProduct(VectorOperations.VectorVectorTensorProduct(dRho[1], normalVector), a2Matrix));
+            
+            double[,] mat1 = MatrixOperations.MatrixAddition(mat11, mat12);
+            double[,] mat2 = MatrixOperations.MatrixAddition(mat21, mat22);
+            double[,] mat3= MatrixOperations.MatrixAddition(mat31, mat32);
+            double[,] mat4 = MatrixOperations.MatrixAddition(mat41, mat42);
+
+            double[,] Kr = MatrixOperations.MatrixAddition(MatrixOperations.MatrixAddition(MatrixOperations.MatrixAddition(MatrixOperations.ScalarMatrixProductNew(scalar1, mat1),
+                MatrixOperations.ScalarMatrixProductNew(scalar2, mat2)),
+                MatrixOperations.ScalarMatrixProductNew(scalar3, mat3)),
+                MatrixOperations.ScalarMatrixProductNew(scalar4, mat4));
+            return Kr;
+        }
         public double[,] CreateGlobalStiffnessMatrix()
         {
             double[] ksiVector = Project(new double[2]);
-            
-            
+
+
+
             if (Math.Abs(ksiVector[0]) <= 1.05 && ksiVector[1] <= 1.05)
             {
                 Tuple<double[,], double[,], double[,]> aMatrices = CalculatePositionMatrix(ksiVector[0], ksiVector[1]);
@@ -253,12 +410,19 @@ namespace GFEC
 
                 if (ksi3 <= 0)
                 {
-                    double[,] K = MainStiffnessPart(PenaltyFactor, n, aMatrices.Item1);
+
+                    double[,] Km = MainStiffnessPart(PenaltyFactor, n, aMatrices.Item1);
+                    double[,] Kr = RotationalStiffnessPart(PenaltyFactor, n, aMatrices.Item1, aMatrices.Item2, aMatrices.Item3, dRho, ksi3);
+                    double[,] K = MatrixOperations.MatrixAddition(Km, Kr);
+
+
                     return K;
                 }
                 else
                 {
-                    return new double[15,15];
+
+                    return new double[15, 15];
+
                 }
             }
             else
@@ -312,4 +476,6 @@ namespace GFEC
             return new double[15, 15];
         }
     }
+
 }
+
