@@ -83,6 +83,15 @@ namespace GFEC
             Density = density;
             PenaltyFactorRatio = 10.0;
         }
+
+
+        public ElementProperties(double youngMod, string elementType)
+        {
+            YoungMod = youngMod;
+            ElementType = elementType;
+        }
+
+
         public ElementProperties(double youngMod, double sectionArea, double momentOfInertia, string elementType)
         {
             YoungMod = youngMod;

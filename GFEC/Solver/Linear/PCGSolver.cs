@@ -10,6 +10,7 @@ namespace GFEC
         int maxIterations = 2000;
         double tolerance = 1e-18;
 
+
         private double[] PCG(double[,] stiffnessMatrix, double[] forceVector)
         {
             double[] solutionVector = new double[forceVector.Length];

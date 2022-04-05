@@ -42,6 +42,7 @@ namespace GFEC
             ElementFreedomSignature[2] = new bool[] { true, true, false, false, false, false };
             ElementFreedomSignature[3] = new bool[] { true, true, false, false, false, false };
             DisplacementVector = new double[6];
+
             //PenaltyFactor = properties.YoungMod * 1000.0 * properties.SectionArea;
             //PenaltyFactor = properties.YoungMod * 3000.0 * properties.SectionArea;
             PenaltyFactor = properties.YoungMod * 100.0;// εN / Ε is to be added to element properties
@@ -95,6 +96,7 @@ namespace GFEC
             //    PositionVectorsList.Add(positionVector);
             //}
             return PositionVectorsList;
+
         }
 
         //private double[] CalculateNormalUnitVector(double detm)

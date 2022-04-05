@@ -164,6 +164,7 @@ namespace GFEC
                     case "Hex8":
                         ElementsAssembly[elem] = new Hex8(ElementsProperties[elem], elementNodes);
                         break;
+
                     case "Hex27":
                         ElementsAssembly[elem] = new Hex27(ElementsProperties[elem], elementNodes);
                         break;
@@ -193,6 +194,10 @@ namespace GFEC
                         break;
                     case "ANSSolidShell8EAS":
                         ElementsAssembly[elem] = new ANSSolidShell8EAS(ElementsProperties[elem], elementNodes);
+
+                    case "ContactNtS3Df":
+                        ElementsAssembly[elem] = new ContactNtS3Df(ElementsProperties[elem], elementNodes);
+
                         break;
                 }
                 Dictionary<int, bool[]> efs = ElementsAssembly[elem].ElementFreedomSignature;

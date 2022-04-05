@@ -27,6 +27,10 @@ namespace GFEC
     {
         public Viewport3D MainViewport = new Viewport3D();
         public ModelVisual3D finalModel = new ModelVisual3D();
+
+        public Dictionary<int, INode> nodes = new Dictionary<int, INode>();
+        public Dictionary<int, Dictionary<int, int>> elementsConnectivity = new Dictionary<int, Dictionary<int, int>>();
+
         // The main object model group.
         private Model3DGroup MainModel3Dgroup = new Model3DGroup();
 
@@ -34,12 +38,15 @@ namespace GFEC
         private PerspectiveCamera TheCamera;
 
         // The camera's current location.
-        private double CameraPhi = Math.PI / 6.0;       // 30 degrees
-        private double CameraTheta = Math.PI / 6.0;     // 30 degrees
+
+
+        private double CameraPhi = 0; //Math.PI / 6.0;       // 30 degrees
+        private double CameraTheta = 0;// Math.PI / 6.0;     // 30 degrees
 #if SURFACE2
         private double CameraR = 3.0;
 #else
-        private double CameraR = 13.0;
+        private double CameraR = 300.0;
+
 #endif
 
         // The change in CameraPhi when you press the up and down arrows.
@@ -49,7 +56,9 @@ namespace GFEC
         private const double CameraDTheta = 0.1;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1;
+
+        private const double CameraDR = 0.1*100;
+
 
         // Create the scene.
         // MainViewport is the Viewport3D defined
@@ -76,6 +85,28 @@ namespace GFEC
             MainViewport.Children.Add(model_visual);
         }
 
+
+        public ModelVisual3D GetModel()
+        {
+            // Give the camera its initial position.
+            TheCamera = new PerspectiveCamera();
+            TheCamera.FieldOfView = 60;
+            MainViewport.Camera = TheCamera;
+            PositionCamera();
+
+            // Define lights.
+            DefineLights();
+
+            // Create the model.
+            DefineModel(MainModel3Dgroup);
+
+            // Add the group of models to a ModelVisual3D.
+            ModelVisual3D model_visual = new ModelVisual3D();
+            model_visual.Content = MainModel3Dgroup;
+            return model_visual;
+        }
+
+
         //Define the lights.
         private void DefineLights()
         {
@@ -92,38 +123,93 @@ namespace GFEC
             // Make a mesh to hold the surface.
             MeshGeometry3D mesh = new MeshGeometry3D();
 
-            // Make the surface's points and triangles.
-#if SURFACE2
-            const double xmin = -1.5;
-            const double xmax = 1.5;
-            const double dx = 0.05;
-            const double zmin = -1.5;
-            const double zmax = 1.5;
-            const double dz = 0.05;
-#else
-            const double xmin = -5;
-            const double xmax = 5;
-            const double dx = 0.5;
-            const double zmin = -5;
-            const double zmax = 5;
-            const double dz = 0.5;
-#endif
-            for (double x = xmin; x <= xmax - dx; x += dx)
-            {
-                for (double z = zmin; z <= zmax - dz; z += dx)
-                {
-                    // Make points at the corners of the surface
-                    // over (x, z) - (x + dx, z + dz).
-                    Point3D p00 = new Point3D(x, F(x, z), z);
-                    Point3D p10 = new Point3D(x + dx, F(x + dx, z), z);
-                    Point3D p01 = new Point3D(x, F(x, z + dz), z + dz);
-                    Point3D p11 = new Point3D(x + dx, F(x + dx, z + dz), z + dz);
 
-                    // Add the triangles.
-                    AddTriangle(mesh, p00, p01, p11);
-                    AddTriangle(mesh, p00, p11, p10);
-                }
+            List<double> nodesX = new List<double>();
+            List<double> nodesY = new List<double>();
+            List<double> nodesZ = new List<double>();
+            foreach (var node in nodes)
+            {
+                nodesX.Add(node.Value.XCoordinate);
+                nodesY.Add(node.Value.YCoordinate);
+                nodesZ.Add(node.Value.ZCoordinate);
             }
+            double minX = nodesX.Min();
+            double maxX = nodesX.Max();
+            double centerX = (maxX + minX) / 2.0;
+            double minY = nodesY.Min();
+            double maxY = nodesY.Max();
+            double centerY = (maxY + minY) / 2.0;
+            double minZ = nodesZ.Min();
+            double maxZ = nodesZ.Max();
+            double centerZ = (maxZ + minZ) / 2.0;
+
+            foreach (var element in elementsConnectivity)
+            {
+                int globalPointIndex1 = element.Value[1];
+                int globalPointIndex2 = element.Value[2];
+                int globalPointIndex3 = element.Value[3];
+                int globalPointIndex4 = element.Value[4];
+
+                double localPoint1X = nodes[globalPointIndex1].XCoordinate;
+                double localPoint1Y = nodes[globalPointIndex1].YCoordinate;
+                double localPoint1Z = nodes[globalPointIndex1].ZCoordinate;
+
+                double localPoint2X = nodes[globalPointIndex2].XCoordinate;
+                double localPoint2Y = nodes[globalPointIndex2].YCoordinate;
+                double localPoint2Z = nodes[globalPointIndex2].ZCoordinate;
+
+                double localPoint3X = nodes[globalPointIndex3].XCoordinate;
+                double localPoint3Y = nodes[globalPointIndex3].YCoordinate;
+                double localPoint3Z = nodes[globalPointIndex3].ZCoordinate;
+
+                double localPoint4X = nodes[globalPointIndex4].XCoordinate;
+                double localPoint4Y = nodes[globalPointIndex4].YCoordinate;
+                double localPoint4Z = nodes[globalPointIndex4].ZCoordinate;
+
+                Point3D point1 = new Point3D(localPoint1X - centerX, localPoint1Y -centerY, localPoint1Z -centerZ);
+                Point3D point2 = new Point3D(localPoint2X - centerX, localPoint2Y -centerY, localPoint2Z -centerZ);
+                Point3D point3 = new Point3D(localPoint3X - centerX, localPoint3Y -centerY, localPoint3Z -centerZ);
+                Point3D point4 = new Point3D(localPoint4X - centerX, localPoint4Y -centerY, localPoint4Z -centerZ);
+                AddTriangle(mesh, point1, point2, point3);
+                AddTriangle(mesh, point1, point3, point4);
+            }
+            //Point3D point1 = new Point3D(89-70, -215+200, 34);
+            //Point3D point2 = new Point3D(99-70, -200+200, 25);
+            //Point3D point3 = new Point3D(79-70, -180+200, 15);
+            //AddTriangle(mesh, point1, point2, point3);
+            //            // Make the surface's points and triangles.
+            //#if SURFACE2
+            //            const double xmin = -1.5;
+            //            const double xmax = 1.5;
+            //            const double dx = 0.05;
+            //            const double zmin = -1.5;
+            //            const double zmax = 1.5;
+            //            const double dz = 0.05;
+            //#else
+            //            const double xmin = -5;
+            //            const double xmax = 5;
+            //            const double dx = 0.5;
+            //            const double zmin = -5;
+            //            const double zmax = 5;
+            //            const double dz = 0.5;
+            //#endif
+            //            for (double x = xmin; x <= xmax - dx; x += dx)
+            //            {
+            //                for (double z = zmin; z <= zmax - dz; z += dx)
+            //                {
+            //                    // Make points at the corners of the surface
+            //                    // over (x, z) - (x + dx, z + dz).
+            //                    Point3D p00 = new Point3D(x, F(x, z), z);
+            //                    Point3D p10 = new Point3D(x + dx, F(x + dx, z), z);
+            //                    Point3D p01 = new Point3D(x, F(x, z + dz), z + dz);
+            //                    Point3D p11 = new Point3D(x + dx, F(x + dx, z + dz), z + dz);
+
+            //                    // Add the triangles.
+            //                    AddTriangle(mesh, p00, p01, p11);
+            //                    AddTriangle(mesh, p00, p11, p10);
+            //                }
+            //            }
+
             Console.WriteLine(mesh.Positions.Count + " points");
             Console.WriteLine(mesh.TriangleIndices.Count / 3 + " triangles");
 
@@ -233,4 +319,6 @@ namespace GFEC
 
 
     }
+
 }
+
