@@ -754,6 +754,76 @@ namespace GFEC
             }
         }
 
+        public void InitializeTangentialProperties()
+        {
+            throw new Exception("Not implemented");
+        }
+        public void UpdateTangentialProperties()
+        {
+
+            throw new Exception("Not implemented");
+        }
+        public void InitializeContactSurfaceGeometry()
+        {
+
+            throw new Exception("Not implemented");
+        }
+        public void UpdateContactSurfaceGeometry()
+        {
+
+            throw new Exception("Not implemented");
+        }
+        public void UpdateIncrementalDisplacements(double[] deltaU)
+        {
+
+            throw new Exception("Not implemented");
+        }
+
+        public List<double[]> GetStressVector()
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetStrainVector()
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetGaussPointsInPhysicalSpace()
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetStressFromElementsNodes()
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetStrainFromElementsNodes()
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetStressFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            throw new Exception("Not implemented");
+        }
+        public List<double[]> GetphysicalCoordinatesFromElements(List<double[]> parametricCoordinatesVector)
+        {
+            throw new Exception("Not implemented");
+        }
+        public void CalculateElementEASMatrices()
+        {
+            throw new Exception("Not implemented");
+        }
+        public void InitializeElementEASParameters()
+        {
+            throw new Exception("Not implemented");
+        }
+        public void UpdateElementEASParameters(double[] solutionVector)
+        {
+            throw new Exception("Not implemented");
+        }
+        public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
+        {
+            throw new Exception("Not implemented");
+        }
+
         public double ClosestPointProjection()
         {
             throw new Exception("Alternative method <Project> has been used for 3D contact");

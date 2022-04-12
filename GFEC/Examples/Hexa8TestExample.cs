@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GFEC
 {
-    public static class Hxa8TestExample
+    public static class Hexa8TestExample
     {
         private const double BlockLength = 1.0;
         private static Dictionary<int, INode> nodes;

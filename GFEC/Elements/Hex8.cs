@@ -528,12 +528,6 @@ namespace GFEC
             return stressVector;
         }
 
-        private double[] CalculateStressVector(double[,] E, double[] strain)
-        {
-            double[] stressVector = VectorOperations.MatrixVectorProduct(E, strain);
-            return stressVector;
-        }
-
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] fInt = new double[24];
