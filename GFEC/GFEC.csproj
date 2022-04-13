@@ -88,7 +88,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
-
+    <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />
     <Compile Include="PlotOBJMesh.cs" />
@@ -206,6 +206,7 @@
     <Compile Include="Solver\Linear\LinearSolution.cs" />
     <Compile Include="Solver\Linear\LUFactorization.cs" />
     <Compile Include="Solver\Linear\PCGSolver.cs" />
+    <Compile Include="Solver\NonLinear\LoadControlledNewtonRaphson2.cs" />
     <Compile Include="Solver\NonLinear\MMCPCGLoadControlledNewtonRaphson.cs" />
     <Compile Include="Solver\NonLinear\ModifiedNewtonRaphson.cs" />
     <Compile Include="Solver\NonLinear\ConvergenceValues.cs" />
