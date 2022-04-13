@@ -117,11 +117,11 @@ namespace GFEC
                     residualNorm = VectorOperations.VectorNorm2(residual);
                     if (residualNorm <= Tolerance)
                     {
-                        OnConvergenceResult("Newton-Raphson: Load Step " + i + " - Solution converged at iteration " + iteration + " - Residual Norm = " + residualNorm);
+                        OnConvergenceResult(new ConvergenceValues() { ResidualNorm = residualNorm, LoadStep = i, Iteration = iteration, Tolerance = Tolerance, ConvergenceResult = true });
                     }
                     else
                     {
-                        OnConvergenceResult("Newton-Raphson: Load Step " + i + " - Solution not converged at iteration " + iteration + " - Residual Norm = " + residualNorm);
+                        OnConvergenceResult(new ConvergenceValues() { ResidualNorm = residualNorm, LoadStep = i, Iteration = iteration, Tolerance = Tolerance, ConvergenceResult = false });
                     }
                     iteration = iteration + 1;
                     //(Application.Current.Windows[0] as MainWindow).LogTool.Text = "ok"; 
@@ -134,7 +134,7 @@ namespace GFEC
                 //discretization.NextStepFrictionUpdate();
                 if (iteration >= MaxIterations)
                 {
-                    OnConvergenceResult("Newton-Raphson did not converge at Load Step " + i + ". Exiting solution.");
+                    OnConvergenceResult(new ConvergenceValues() { ResidualNorm = residualNorm, LoadStep = i, Iteration = iteration, Tolerance = Tolerance, ConvergenceResult = false });
                     LoadStepConvergence.Add("Solution not converged.");
                     break;
                 }

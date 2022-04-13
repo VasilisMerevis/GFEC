@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GFEC
 {
-    public static class TwoBlocksInContact3D
+    public static class TwoBlocksInContact3D2
     {
         private const double BlockLength = 1.0;
         private const double ElementSize  = 1.0;
