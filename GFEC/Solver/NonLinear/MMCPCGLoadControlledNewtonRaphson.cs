@@ -228,6 +228,11 @@ namespace GFEC
                 }
                 LoadStepConvergence.Add("Solution converged.");
 
+                string exportPath = @"C:\Users\Public\Documents\";
+                MatrixOperations.PrintMatrixToFile(stiffnessMatrices.Item1, exportPath + "Ktotal" + i+".dat");
+                MatrixOperations.PrintMatrixToFile(stiffnessMatrices.Item2, exportPath + "K" + i + ".dat");
+                MatrixOperations.PrintMatrixToFile(stiffnessMatrices.Item3, exportPath + "B" + i + ".dat");
+                MatrixOperations.PrintMatrixToFile(stiffnessMatrices.Item4, exportPath + "C" + i + ".dat");
                 discretization.MMCPCGUpdateDisplacements(solutionVector);
                 stiffnessMatrices = discretization.MMCPCGCreateTotalStiffnessMatrix();
                 K = stiffnessMatrices.Item2;
