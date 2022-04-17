@@ -14,6 +14,9 @@ namespace GFEC
         public double[] DisplacementVector { get; set; }
         public double[] AccelerationVector { get; set; }
         public double poisson { get; set; }
+
+        private bool RecalculateMatrices { get; set; }
+        private double[] DisplacementVectorCurrent { get; set; }
         //private double thickness = 1.0; //To be included in Element Properties
         //private double density = 1.0; //To be included in Element Properties
         public void InitializeTangentialProperties()
@@ -45,6 +48,7 @@ namespace GFEC
             ElementFreedomSignature[3] = new bool[] { true, true, false, false, false, false };
             ElementFreedomSignature[4] = new bool[] { true, true, false, false, false, false };
             DisplacementVector = new double[8];
+            RecalculateMatrices = true;
         }
         public void CalculateElementEASMatrices()
         {
@@ -366,7 +370,7 @@ namespace GFEC
             return new Tuple<double[], double[]>(vectorWithPoints, vectorWithWeights);
         }
 
-        public double[,] CreateGlobalStiffnessMatrix()
+        public double[,] CreateGlobalStiffnessMatrixNew()
         {
             double[,] K = new double[8, 8];
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); 
@@ -388,6 +392,24 @@ namespace GFEC
                 }
             }
             return K;
+        }
+
+        public double[,] CreateGlobalStiffnessMatrix()
+        {
+            double[,] kMatrix;
+            if (RecalculateMatrices)
+            {
+                kMatrix = CreateGlobalStiffnessMatrixNew();
+                RecalculateMatrices = false;
+            }
+            else
+            {
+                DisplacementVectorCurrent = DisplacementVector;
+                DisplacementVector = new double[8];
+                kMatrix = CreateGlobalStiffnessMatrixNew();
+                DisplacementVector = DisplacementVectorCurrent;
+            }
+            return kMatrix;
         }
 
         public double[,] CreateMassMatrix()
