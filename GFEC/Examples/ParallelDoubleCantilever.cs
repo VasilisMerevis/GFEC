@@ -31,7 +31,7 @@ namespace GFEC
 
 
         //External loads
-        const double externalStructuralLoad = -2.6 / 100;
+        const double externalStructuralLoad = -2.6 / 100*0.4;
         const double externalHeatLoad = 2500.0 * 1e-9;
         //-----------------------------------------------------------------------------------
         //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
@@ -239,7 +239,7 @@ namespace GFEC
             IAssembly elementsAssembly = CreateAssembly();
             elementsAssembly.CreateElementsAssembly();
             elementsAssembly.ActivateBoundaryConditions = true;
-            double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
+            //double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
             int countContactElements = elementsAssembly.CountElementsOfSameType(typeof(ContactNtN2D));
             elementsAssembly.SeperateContactDoF();
             //Gnuplot graphs
@@ -274,7 +274,7 @@ namespace GFEC
             //structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
             structuralSolution.NonLinearScheme.Tolerance = 1e-4;
             structuralSolution.ActivateNonLinearSolver = true;
-            structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;
+            structuralSolution.NonLinearScheme.numberOfLoadSteps = 10;
 
             double[] externalForces3 = externalForcesStructuralVector;
             foreach (var dof in loadedStructuralDOFs)

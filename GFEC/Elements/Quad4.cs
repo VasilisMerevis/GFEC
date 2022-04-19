@@ -16,6 +16,7 @@ namespace GFEC
         public double poisson { get; set; }
 
         private bool RecalculateMatrices { get; set; }
+        private double[,] tempK;
         private double[] DisplacementVectorCurrent { get; set; }
         //private double thickness = 1.0; //To be included in Element Properties
         //private double density = 1.0; //To be included in Element Properties
@@ -401,13 +402,15 @@ namespace GFEC
             {
                 kMatrix = CreateGlobalStiffnessMatrixNew();
                 RecalculateMatrices = false;
+                tempK = kMatrix;
             }
             else
             {
-                DisplacementVectorCurrent = DisplacementVector;
-                DisplacementVector = new double[8];
-                kMatrix = CreateGlobalStiffnessMatrixNew();
-                DisplacementVector = DisplacementVectorCurrent;
+                //DisplacementVectorCurrent = DisplacementVector;
+                //DisplacementVector = new double[8];
+                //kMatrix = CreateGlobalStiffnessMatrixNew();
+                //DisplacementVector = DisplacementVectorCurrent;
+                kMatrix = tempK;
             }
             return kMatrix;
         }
@@ -504,26 +507,27 @@ namespace GFEC
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] F = new double[8];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); //needs fixing in poisson v
+            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); //needs fixing in poisson v
 
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < 2; j++)
-                {
-                    double[] gP = GaussPoints(i, j).Item1;
-                    double[] gW = GaussPoints(i, j).Item2;
-                    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-                    double[,] J = CalculateJacobian(localdN);
-                    double[,] invJ = CalculateInverseJacobian(J).Item1;
-                    double detJ = CalculateInverseJacobian(J).Item2;
-                    Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
-                    double[,] B = CalculateBMatrix(globaldN);
-                    double[] strainVector = CalculateStrainsVector(B);
-                    double[] stressVector = CalculateStressVector(E, strainVector);
-                    F = VectorOperations.VectorVectorAddition(F, VectorOperations.VectorScalarProductNew(
-                        VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * Properties.Thickness));
-                }
-            }
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    for (int j = 0; j < 2; j++)
+            //    {
+            //        double[] gP = GaussPoints(i, j).Item1;
+            //        double[] gW = GaussPoints(i, j).Item2;
+            //        Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
+            //        double[,] J = CalculateJacobian(localdN);
+            //        double[,] invJ = CalculateInverseJacobian(J).Item1;
+            //        double detJ = CalculateInverseJacobian(J).Item2;
+            //        Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
+            //        double[,] B = CalculateBMatrix(globaldN);
+            //        double[] strainVector = CalculateStrainsVector(B);
+            //        double[] stressVector = CalculateStressVector(E, strainVector);
+            //        F = VectorOperations.VectorVectorAddition(F, VectorOperations.VectorScalarProductNew(
+            //            VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * Properties.Thickness));
+            //    }
+            //}
+            F = VectorOperations.MatrixVectorProduct(tempK, DisplacementVector);
             return F;
         }
     }
