@@ -30,7 +30,7 @@ namespace GFEC
         private static double offset = (nodesInXCoor - 1) * xIntervals * Math.Sin(angle) - totalContactElements * xIntervals + 0.1; //6.95;//8.1;//9.3// tested: 7.0 - 0.05, 7.0 -0.45, 7.0 -0.25, 7.0 -0.0
         private static double offsetInY = (nodesInXCoor - 1) * xIntervals * Math.Cos(angle);
         private static double gap = offsetInY + 0.05; //tested: 1.14, 2.75, 2.10, 0.75
-        private static int loadStepsNumber = 40;
+        private static int loadStepsNumber = 10;
 
        
        
