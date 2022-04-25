@@ -88,6 +88,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
+    <Compile Include="Examples\CantileverAngleTest.cs" />
     <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />

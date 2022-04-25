@@ -439,6 +439,7 @@ namespace GFEC
             exampleList.Add("TwoBlocksInContact3D");
             exampleList.Add("Hxa8TestExample");
             exampleList.Add("ParallelDoubleCantilever");
+            exampleList.Add("CantileverAngleTest");
 
 
             ComboBox1.ItemsSource = exampleList;
@@ -566,6 +567,12 @@ namespace GFEC
                     ParallelDoubleCantilever.structuralSolution.NonLinearScheme = new MMCPCGLoadControlledNewtonRaphson();
                     ParallelDoubleCantilever.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = ParallelDoubleCantilever.RunStaticExample();
+                    break;
+                case "CantileverAngleTest":
+                    CantileverAngleTest.structuralSolution = new StaticSolver();
+                    CantileverAngleTest.structuralSolution.NonLinearScheme = new MMCPCGLoadControlledNewtonRaphson();
+                    CantileverAngleTest.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
+                    finalResults = CantileverAngleTest.RunStaticExample();
                     break;
                 case "CNTsInAngleFinalExample":
                     CNTsInAngleFinalExample.structuralSolution = new StaticSolver();
