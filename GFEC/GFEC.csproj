@@ -195,6 +195,7 @@
     <Compile Include="IO Routines\ShowToGUI.cs" />
     <Compile Include="PlotOBJMesh.cs" />
     <Compile Include="Solver\Dynamic.cs" />
+    <Compile Include="Solver\Dynamic\BatheExplicit.cs" />
     <Compile Include="Solver\Dynamic\CentralDifferences.cs" />
     <Compile Include="Solver\Dynamic\InitialConditions.cs" />
     <Compile Include="Solver\ISolver.cs" />
