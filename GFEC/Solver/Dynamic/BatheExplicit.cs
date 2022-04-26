@@ -10,7 +10,10 @@ namespace GFEC
     {
         private double totalTime, timeStep;
         private int timeStepsNumber;
-        private Dictionary<int, double[]> explicitSolution = new Dictionary<int, double[]>();
+        private Dictionary<int, double[]> displacement = new Dictionary<int, double[]>();
+        private Dictionary<int, double[]> velocity = new Dictionary<int, double[]>();
+        private Dictionary<int, double[]> acceleration = new Dictionary<int, double[]>();
+        private Dictionary<int, double[]> exForces = new Dictionary<int, double[]>();
         int totalDOFs;
         double[,] massMatrix, dampingMatrix;
         double[,] stiffnessMatrix;
@@ -36,10 +39,7 @@ namespace GFEC
             initialAccelerationVector = initialValues.InitialAccelerationVector;
             initialTime = initialValues.InitialTime;
             this.linearSolver = linearSolver;
-            a0 = 1.0 / (timeStep * timeStep);
-            a1 = 1.0 / (2.0 * timeStep);
-            a2 = 2.0 * a0;
-            a3 = 1.0 / a2;
+            p = 0.54;
         }
 
         private void Calculate_qValues()
@@ -146,5 +146,40 @@ namespace GFEC
             return du_current;
         }
 
+        private void CreateRForAllSteps()
+        {
+            exForces.Add(0, new double[externalForcesVector.Length]);
+            for (int i = 1; i < timeStepsNumber; i++)
+            {
+                double[] forceStep = VectorOperations.VectorScalarProductNew(externalForcesVector, 1.0 / timeStepsNumber);
+                exForces.Add(i, VectorOperations.VectorScalarProductNew(forceStep, i));
+            }
+        }
+        public void SolveBatheExplicit()
+        {
+
+            displacement.Add(0, initialDisplacementVector);
+            velocity.Add(0, initialVelocityVector);
+            acceleration.Add(0, initialAccelerationVector);
+            Calculate_qValues();
+            Calculate_aValues();
+            for (int i = 1; i < timeStepsNumber; i++)
+            {
+                double[] u_middle = U_middle(displacement[i - 1], velocity[i - 1], acceleration[i - 1], a0, a1);
+                double[] r_hat_middle = R_hat_middle(exForces[i - 1], exForces[i], p);
+                double[] r_roundhat_middle = R_roundhat_middle(r_hat_middle, u_middle, velocity[i - 1], acceleration[i - 1], stiffnessMatrix, dampingMatrix, a0);
+                double[] ddu_middle = DDU_middle(massMatrix, r_roundhat_middle);
+                double[] du_middle = DU_middle(velocity[i - 1], acceleration[i - 1], ddu_middle, a2);
+
+                double[] u_current = U_current(u_middle, du_middle, ddu_middle, a3, a4);
+                double[] r_roundhat_current = R_roundhat_current(exForces[i], stiffnessMatrix, u_current, dampingMatrix, du_middle, ddu_middle, a3);
+                double[] ddu_current = DDU_current(massMatrix, r_roundhat_current);
+                double[] du_current = DU_current(du_middle, acceleration[i - 1], ddu_middle, ddu_current, a5, a6, a7);
+
+                displacement.Add(i, u_current);
+                velocity.Add(i, du_current);
+                acceleration.Add(i, ddu_current);
+            }
+        }
     }
 }
