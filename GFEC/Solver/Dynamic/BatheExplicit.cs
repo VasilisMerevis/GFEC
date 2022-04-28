@@ -93,8 +93,7 @@ namespace GFEC
 
         private double[] DDU_middle(double[,] mMatrix, double[] r_roundhatmiddle)
         {
-            ILinearSolution solver = new CholeskyFactorization();
-            double[] ddu_middle = solver.Solve(mMatrix, r_roundhatmiddle);
+            double[] ddu_middle = linearSolver.Solve(mMatrix, r_roundhatmiddle);
             return ddu_middle;
         }
 
@@ -129,8 +128,7 @@ namespace GFEC
 
         private double[] DDU_current(double[,] mMatrix, double[] r_roundhat_current)
         {
-            ILinearSolution solver = new CholeskyFactorization();
-            double[] ddu_current = solver.Solve(mMatrix, r_roundhat_current);
+            double[] ddu_current = linearSolver.Solve(mMatrix, r_roundhat_current);
             return ddu_current;
         }
 
@@ -146,12 +144,12 @@ namespace GFEC
             return du_current;
         }
 
-        private void CreateRForAllSteps()
+        private void CreateRForAllSteps(double[] externalForces)
         {
-            exForces.Add(0, new double[externalForcesVector.Length]);
+            exForces.Add(0, new double[externalForces.Length]);
             for (int i = 1; i < timeStepsNumber; i++)
             {
-                double[] forceStep = VectorOperations.VectorScalarProductNew(externalForcesVector, 1.0 / timeStepsNumber);
+                double[] forceStep = VectorOperations.VectorScalarProductNew(externalForces, 1.0 / timeStepsNumber);
                 exForces.Add(i, VectorOperations.VectorScalarProductNew(forceStep, i));
             }
         }
@@ -161,6 +159,7 @@ namespace GFEC
             displacement.Add(0, initialDisplacementVector);
             velocity.Add(0, initialVelocityVector);
             acceleration.Add(0, initialAccelerationVector);
+            CreateRForAllSteps(externalForcesVector);
             Calculate_qValues();
             Calculate_aValues();
             for (int i = 1; i < timeStepsNumber; i++)

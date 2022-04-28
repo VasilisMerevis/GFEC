@@ -441,6 +441,7 @@ namespace GFEC
             exampleList.Add("ParallelDoubleCantilever");
             exampleList.Add("CantileverAngleTest");
             exampleList.Add("ExplicitLinearExample");
+            exampleList.Add("BatheExplicitLinearExample");
 
 
             ComboBox1.ItemsSource = exampleList;
@@ -786,6 +787,10 @@ namespace GFEC
                 case "ExplicitLinearExample":
                     ExplicitLinearExample.SolveExample();
                     finalResults = ExplicitLinearExample.RunStaticExample();
+                    break;
+                case "BatheExplicitLinearExample":
+                    BatheExplicitLinearExample.SolveExample();
+                    finalResults = BatheExplicitLinearExample.RunStaticExample();
                     break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();

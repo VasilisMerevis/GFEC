@@ -30,7 +30,7 @@ namespace GFEC
             initialValues.InitialVelocityVector = new double[] { 0.0, 0.0 };
             initialValues.InitialTime = 0.0;
 
-            BatheExplicit solver = new BatheExplicit(new LUFactorization(), initialValues, 10.0, 10, K, M, F);
+            BatheExplicit solver = new BatheExplicit(new LUFactorization(), initialValues, 2.8, 10, K, M, F);
             //solver.InitialValues = initialValues;
             //solver.CustomMassMatrix = M;
             //solver.CustomStiffnessMatrix = K;
