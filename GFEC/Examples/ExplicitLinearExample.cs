@@ -75,5 +75,10 @@ namespace GFEC
             solver.SolveNewmark();
             solver.PrintExplicitSolution();
         }
+
+        public static Results RunStaticExample()
+        {
+            return new Results();
+        }
     }
 }

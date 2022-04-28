@@ -440,6 +440,7 @@ namespace GFEC
             exampleList.Add("Hxa8TestExample");
             exampleList.Add("ParallelDoubleCantilever");
             exampleList.Add("CantileverAngleTest");
+            exampleList.Add("ExplicitLinearExample");
 
 
             ComboBox1.ItemsSource = exampleList;
@@ -781,6 +782,10 @@ namespace GFEC
                     SolidShellElementsContactExample.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     SolidShellElementsContactExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = SolidShellElementsContactExample.RunStaticExample();
+                    break;
+                case "ExplicitLinearExample":
+                    ExplicitLinearExample.SolveExample();
+                    finalResults = ExplicitLinearExample.RunStaticExample();
                     break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();
