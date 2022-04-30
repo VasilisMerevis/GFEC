@@ -18,8 +18,9 @@ namespace GFEC
         double[,] massMatrix, dampingMatrix;
         double[,] stiffnessMatrix;
         double[] externalForcesVector;
-        double a0, a1, a2, a3, a4, a5, a6, a7;
-        double q0, q1, q2, p;
+        //double a0, a1, a2, a3, a4, a5, a6, a7;
+        //double q0, q1, q2, p;
+        double p;
         double[] initialDisplacementVector, initialVelocityVector, initialAccelerationVector;
         double initialTime;
         private ILinearSolution linearSolver;
@@ -42,24 +43,42 @@ namespace GFEC
             p = 0.54;
         }
 
-        private void Calculate_qValues()
+        private List<double> Calculate_qValues(double p)
         {
-            q1 = (1.0 - 2.0 * p) / (2.0 * p * (1.0 - p));
-            q2 = 0.5 - p * q1;
-            q0 = -q1 - q2 + 0.5;
+            double q1 = (1.0 - 2.0 * p) / (2.0 * p * (1.0 - p));
+            double q2 = 0.5 - p * q1;
+            double q0 = -q1 - q2 + 0.5;
+            List<double> q = new List<double>();
+            q.Add(q0);
+            q.Add(q1);
+            q.Add(q2);
+            return q;
         }
 
-        private void Calculate_aValues()
+        private List<double> Calculate_aValues(double p, List<double> q, double tStep)
         {
-            double deltat = timeStep;
-            a0 = p * deltat;
-            a1 = 0.5 * Math.Pow(p * deltat, 2);
-            a2 = a0 / 2.0;
-            a3 = (1.0 - p) * deltat;
-            a4 = 0.5 * Math.Pow((1.0 - p) * deltat, 2);
-            a5 = q0 * a3;
-            a6 = (0.5 + q1) * a3;
-            a7 = q2 * a3;
+            double q0 = q[0];
+            double q1 = q[1];
+            double q2 = q[2];
+            double deltat = tStep;
+            double a0 = p * deltat;
+            double a1 = 0.5 * Math.Pow(p * deltat, 2);
+            double a2 = a0 / 2.0;
+            double a3 = (1.0 - p) * deltat;
+            double a4 = 0.5 * Math.Pow((1.0 - p) * deltat, 2);
+            double a5 = q0 * a3;
+            double a6 = (0.5 + q1) * a3;
+            double a7 = q2 * a3;
+            List<double> a = new List<double>();
+            a.Add(a0);
+            a.Add(a1);
+            a.Add(a2);
+            a.Add(a3);
+            a.Add(a4);
+            a.Add(a5);
+            a.Add(a6);
+            a.Add(a7);
+            return a;
         }
 
         private double[] U_middle(double[] u_previous, double[] du_previous, double[] ddu_previous, double a0, double a1)
@@ -160,20 +179,20 @@ namespace GFEC
             velocity.Add(0, initialVelocityVector);
             acceleration.Add(0, initialAccelerationVector);
             CreateRForAllSteps(externalForcesVector);
-            Calculate_qValues();
-            Calculate_aValues();
+            List<double> q = Calculate_qValues(p);
+            List<double> a = Calculate_aValues(p, q, timeStep);
             for (int i = 1; i < timeStepsNumber; i++)
             {
-                double[] u_middle = U_middle(displacement[i - 1], velocity[i - 1], acceleration[i - 1], a0, a1);
+                double[] u_middle = U_middle(displacement[i - 1], velocity[i - 1], acceleration[i - 1], a[0], a[1]);
                 double[] r_hat_middle = R_hat_middle(exForces[i - 1], exForces[i], p);
-                double[] r_roundhat_middle = R_roundhat_middle(r_hat_middle, u_middle, velocity[i - 1], acceleration[i - 1], stiffnessMatrix, dampingMatrix, a0);
+                double[] r_roundhat_middle = R_roundhat_middle(r_hat_middle, u_middle, velocity[i - 1], acceleration[i - 1], stiffnessMatrix, dampingMatrix, a[0]);
                 double[] ddu_middle = DDU_middle(massMatrix, r_roundhat_middle);
-                double[] du_middle = DU_middle(velocity[i - 1], acceleration[i - 1], ddu_middle, a2);
+                double[] du_middle = DU_middle(velocity[i - 1], acceleration[i - 1], ddu_middle, a[2]);
 
-                double[] u_current = U_current(u_middle, du_middle, ddu_middle, a3, a4);
-                double[] r_roundhat_current = R_roundhat_current(exForces[i], stiffnessMatrix, u_current, dampingMatrix, du_middle, ddu_middle, a3);
+                double[] u_current = U_current(u_middle, du_middle, ddu_middle, a[3], a[4]);
+                double[] r_roundhat_current = R_roundhat_current(exForces[i], stiffnessMatrix, u_current, dampingMatrix, du_middle, ddu_middle, a[3]);
                 double[] ddu_current = DDU_current(massMatrix, r_roundhat_current);
-                double[] du_current = DU_current(du_middle, acceleration[i - 1], ddu_middle, ddu_current, a5, a6, a7);
+                double[] du_current = DU_current(du_middle, acceleration[i - 1], ddu_middle, ddu_current, a[5], a[6], a[7]);
 
                 displacement.Add(i, u_current);
                 velocity.Add(i, du_current);
