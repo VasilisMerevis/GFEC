@@ -172,13 +172,22 @@ namespace GFEC
                 exForces.Add(i, VectorOperations.VectorScalarProductNew(forceStep, i));
             }
         }
+
+        private void CreateRForAllStepsNoChange(double[] externalForces)
+        {
+            exForces.Add(0, externalForces);
+            for (int i = 1; i < timeStepsNumber; i++)
+            {
+                exForces.Add(i, externalForces);
+            }
+        }
         public void SolveBatheExplicit()
         {
 
             displacement.Add(0, initialDisplacementVector);
             velocity.Add(0, initialVelocityVector);
             acceleration.Add(0, initialAccelerationVector);
-            CreateRForAllSteps(externalForcesVector);
+            CreateRForAllStepsNoChange(externalForcesVector);
             List<double> q = Calculate_qValues(p);
             List<double> a = Calculate_aValues(p, q, timeStep);
             for (int i = 1; i < timeStepsNumber; i++)
