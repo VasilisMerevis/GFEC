@@ -90,6 +90,7 @@
     </ApplicationDefinition>
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
     <Compile Include="Examples\BatheExplicitLinearExample.cs" />
+    <Compile Include="Examples\BumperExample.cs" />
     <Compile Include="Examples\CantileverAngleTest.cs" />
     <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
