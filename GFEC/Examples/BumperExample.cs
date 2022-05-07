@@ -65,7 +65,7 @@ namespace GFEC
             assembly.NodeFreedomAllocationList = CreateNodeFAT();
             CreateStructuralBoundaryConditions();
             CreateStructuralLoadVector();
-            assembly.BoundedDOFsVector = structuralBoundaryConditions;
+            //assembly.BoundedDOFsVector = structuralBoundaryConditions;
             return assembly;
         }
 
@@ -82,7 +82,7 @@ namespace GFEC
             structuralSolution.ActivateNonLinearSolver = true;
             structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;
 
-            double[] reducedExternalForces3 = BoundaryConditionsImposition.ReducedVector(externalForces3, elementsAssembly.BoundedDOFsVector);
+            double[] reducedExternalForces3 = BoundaryConditionsImposition.ReducedVector(new double[3], elementsAssembly.BoundedDOFsVector);
             structuralSolution.AssemblyData = elementsAssembly;
             structuralSolution.Solve(reducedExternalForces3);
             double[] solvector3 = structuralSolution.GetSolution();

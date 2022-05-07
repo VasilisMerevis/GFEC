@@ -868,7 +868,7 @@ namespace GFEC
                         // in case of first line ...
                         string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
                         int nodeIndex = int.Parse(fields[0]);
-                        var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]));
+                        var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
                         nodes[nodeIndex] = node;
                     }
                 }
@@ -903,7 +903,11 @@ namespace GFEC
                             { 1, int.Parse(fields[2]) },
                             { 2, int.Parse(fields[3]) },
                             { 3, int.Parse(fields[4]) },
-                            { 4, int.Parse(fields[5]) }
+                            { 4, int.Parse(fields[5]) },
+                            { 5, int.Parse(fields[6]) },
+                            { 6, int.Parse(fields[7]) },
+                            { 7, int.Parse(fields[8]) },
+                            { 8, int.Parse(fields[9]) }
                         };
                         elementsConnectivity[elementIndex] = element;
                     }
