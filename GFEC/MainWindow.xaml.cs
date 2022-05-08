@@ -59,7 +59,7 @@ namespace GFEC
 #if SURFACE2
         private double CameraR = 3.0;
 #else
-        private double CameraR = 300.0;
+        private double CameraR = 300.0/100;
 #endif
 
         // The change in CameraPhi when you press the up and down arrows.
@@ -69,7 +69,7 @@ namespace GFEC
         private const double CameraDTheta = 0.1;
 
         // The change in CameraR when you press + or -.
-        private const double CameraDR = 0.1 * 100;
+        private const double CameraDR = 0.1 * 100*10;
 
 
         public MainWindow()
@@ -1222,216 +1222,30 @@ namespace GFEC
             }
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void Button_Plot_OBJ(object sender, RoutedEventArgs e)
         {
             PlotOBJMesh plotMesh = new PlotOBJMesh();
-            Dictionary<int, INode> nodesSmallerList = new Dictionary<int, INode>();
-            Dictionary<int, Dictionary<int, int>> elementsConnectivitySmallerList = new Dictionary<int, Dictionary<int, int>>();
-            for (int i = 1; i <= 10; i++)
-            {
-                nodesSmallerList[i] = nodes[i];
-            }
-            for (int i = 1; i <= 4; i++)
-            {
-                elementsConnectivitySmallerList[i] = elementsConnectivity[i];
-            }
             plotMesh.elementsConnectivity = elementsConnectivity;
             plotMesh.nodes = nodes;
-            //plotMesh.Window_Loaded();
-
-
-            //ViewportGraphics = plotMesh.MainViewport;
-            //neo = plotMesh.MainViewport;
-            //Window secondWindow = new Window();
-            //secondWindow.Show();
-            //secondWindow.KeyDown += plotMesh.Window_KeyDown;
-            //secondWindow.Content = plotMesh.MainViewport;
-            //ViewportGraphics.InvalidateVisual();
-
             ViewportGraphics.Children.Clear();
             ViewportGraphics.InvalidateVisual();
-           
             ViewportGraphics.Children.Add(plotMesh.GetModel());
-            //ViewportGraphics.InvalidateVisual();
-            //ViewportGraphics = plotMesh.MainViewport;
-            //viewport3DGrid.Children.Add(ViewportGraphics);
-
-
-            //CompositionTarget.Rendering += TestMethod;
         }
 
         private void Button_Plot_Geometry(object sender, RoutedEventArgs e)
         {
-            PlotOBJMesh plotMesh = new PlotOBJMesh();
-            Dictionary<int, INode> nodesSmallerList = new Dictionary<int, INode>();
-            Dictionary<int, Dictionary<int, int>> elementsConnectivitySmallerList = new Dictionary<int, Dictionary<int, int>>();
-            //for (int i = 1; i <= 10; i++)
-            //{
-            //    nodesSmallerList[i] = nodes[i];
-            //}
-            //for (int i = 1; i <= 4; i++)
-            //{
-            //    elementsConnectivitySmallerList[i] = elementsConnectivity[i];
-            //}
-            plotMesh.elementsConnectivity = elementsConnectivity;
-            plotMesh.nodes = nodes;
-            //plotMesh.Window_Loaded();
-
-
-            //ViewportGraphics = plotMesh.MainViewport;
-            //neo = plotMesh.MainViewport;
-            //Window secondWindow = new Window();
-            //secondWindow.Show();
-            //secondWindow.KeyDown += plotMesh.Window_KeyDown;
-            //secondWindow.Content = plotMesh.MainViewport;
-            //ViewportGraphics.InvalidateVisual();
-
+            Object3D mesh = new Object3D(nodes, elementsConnectivity);
+            mesh.FaceTransform();
+            mesh.Create3DMesh();
             ViewportGraphics.Children.Clear();
             ViewportGraphics.InvalidateVisual();
-
-            ViewportGraphics.Children.Add(plotMesh.GetModel());
-            //ViewportGraphics.InvalidateVisual();
-            //ViewportGraphics = plotMesh.MainViewport;
-            //viewport3DGrid.Children.Add(ViewportGraphics);
-
-
-            //CompositionTarget.Rendering += TestMethod;
+            ViewportGraphics.Children.Add(mesh.GetModel());
         }
         public object Clone()
         {
             return this.MemberwiseClone();
         }
 
-        private void TestMethod(object sender, EventArgs e)
-        {
-            //ViewportGraphics = neo;
-            ViewportGraphics.UpdateLayout();
-        }
-        //--------------------------------------------------------------------------
-        //private double _axisMax;
-        //private double _axisMin;
-
-
-        //public Func<double, string> DateTimeFormatter { get; set; }
-        //public double AxisStep { get; set; }
-        //public double AxisUnit { get; set; }
-        //public bool IsReading { get; set; }
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //public void ConvergenceResults()
-        //{
-        //    var mapper = Mappers.Xy<ConvergenceValues>()
-        //        .X(model => model.Iteration)   //use DateTime.Ticks as X
-        //        .Y(model => model.ResidualNorm);           //use the value property as Y
-
-        //    //lets save the mapper globally.
-        //    Charting.For<ConvergenceValues>(mapper);
-
-        //    //the values property will store our values array
-        //    ChartValues = new ChartValues<ConvergenceValues>();
-
-        //    //lets set how to display the X Labels
-        //    //DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
-
-        //    //AxisStep forces the distance between each separator in the X axis
-        //    AxisStep = 1;// TimeSpan.FromSeconds(1).Ticks;
-        //    //AxisUnit forces lets the axis know that we are plotting seconds
-        //    //this is not always necessary, but it can prevent wrong labeling
-        //    AxisUnit = 100;// TimeSpan.TicksPerSecond;
-        //}
-
-        //public double AxisMax
-        //{
-        //    get { return _axisMax; }
-        //    set
-        //    {
-        //        _axisMax = value;
-        //        OnPropertyChanged("AxisMax");
-        //    }
-        //}
-        //public double AxisMin
-        //{
-        //    get { return _axisMin; }
-        //    set
-        //    {
-        //        _axisMin = value;
-        //        OnPropertyChanged("AxisMin");
-        //    }
-        //}
-
-        //private void SetAxisLimits(int now)
-        //{
-        //    AxisMax = now + 1;
-        //    AxisMin = now - 8;
-        //}
-
-        //protected virtual void OnPropertyChanged(string propertyName = null)
-        //{
-        //    if (PropertyChanged != null)
-        //        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        //}
-
-        //private void ImportOBJFile(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        OpenFileDialog dialog1 = new OpenFileDialog();
-        //        if (dialog1.ShowDialog() == true)
-        //        {
-        //            string selectedFilePath = dialog1.FileName;
-        //            List<string> allLines = new List<string>(File.ReadAllLines(selectedFilePath));
-
-        //            //List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-        //            allLines.RemoveRange(0, 4);
-        //            int nodeIndex = 0;
-        //            int connectivityIndex = 0;
-        //            foreach (var line in allLines)
-        //            {
-        //                // in case of first line ...
-        //                string separator = " ";
-        //                string[] fields = line.Split(separator.ToCharArray()); //(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
-        //                if (fields[0] == "v")
-        //                {
-        //                    nodeIndex = nodeIndex + 1;
-        //                    var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
-        //                    nodes[nodeIndex] = node;
-        //                }
-        //                else if (fields[0] == "f")
-        //                {
-        //                    connectivityIndex = connectivityIndex + 1;
-        //                    string separatorForNode = "/";
-        //                    int[] elementNodes = new int[4];
-        //                    for (int i = 0; i < 4; i++)
-        //                    {
-        //                        string[] fieldsForNode = fields[i + 1].Split(separatorForNode.ToCharArray());
-        //                        elementNodes[i] = Int16.Parse(fieldsForNode[0]);
-        //                    }
-        //                    elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
-        //                }
-
-        //            }
-        //        }
-
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
-
-        //private void Button_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //    PlotOBJMesh plotMesh = new PlotOBJMesh();
-        //    plotMesh.Window_Loaded();
-        //    //ViewportGraphics = plotMesh.MainViewport;
-        //    //ViewportGraphics.UpdateLayout();
-        //    Window secondWindow = new Window();
-        //    secondWindow.Show();
-        //    secondWindow.KeyDown += plotMesh.Window_KeyDown;
-        //    secondWindow.Content = plotMesh.MainViewport;
-        //    //ViewportGraphics.InvalidateVisual();
-        //    //ViewportGraphics.Children.Add(plotMesh.finalModel);
-        //}
     }
 
 

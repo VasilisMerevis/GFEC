@@ -96,7 +96,6 @@
     <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />
-    <Compile Include="PlotOBJMesh.cs" />
     <Compile Include="Elements\ANSSolidShell8EAS.cs" />
     <Compile Include="Elements\IsoparamShell18.cs" />
     <Compile Include="Elements\Shell2DQuadratic4.cs" />

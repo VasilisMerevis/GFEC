@@ -1,8 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using LiveCharts;
+using LiveCharts.Configurations;
+using LiveCharts.Wpf;
+using Microsoft.Win32;
 
 namespace GFEC
 {
@@ -10,8 +27,8 @@ namespace GFEC
     {
         PlotOBJMesh Mesh3D { get; set; }
         Dictionary<int, INode> Nodes { get; set; }
-        Dictionary<int, Dictionary<int, int>> ElementsList { get; set; }
-
+        private Dictionary<int, Dictionary<int, int>> ElementsList { get; set; }
+        public Dictionary<int, Dictionary<int, int>> QuadFacesList { get; set; }
         public Object3D(Dictionary<int, INode> nodes, Dictionary<int, Dictionary<int, int>> elementsList)
         {
             Mesh3D = new PlotOBJMesh();
@@ -19,7 +36,7 @@ namespace GFEC
             ElementsList = elementsList;
         }
 
-        public void Transfrom()
+        public void FaceTransform()
         {
             Dictionary<int, Dictionary<int, int>> transformedList = new Dictionary<int, Dictionary<int, int>>();
             int k = 0;
@@ -74,7 +91,19 @@ namespace GFEC
                 transformedList.Add(k, face5NodesList);
                 k = k + 1;
                 transformedList.Add(k, face6NodesList);
+
+                QuadFacesList = transformedList;
             }
+        }
+        public void Create3DMesh()
+        {
+            Mesh3D.nodes = Nodes;
+            Mesh3D.elementsConnectivity = QuadFacesList;
+        }
+
+        public ModelVisual3D GetModel()
+        {
+            return Mesh3D.GetModel();
         }
     }
 }
