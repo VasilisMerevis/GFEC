@@ -1259,6 +1259,44 @@ namespace GFEC
 
             //CompositionTarget.Rendering += TestMethod;
         }
+
+        private void Button_Plot_Geometry(object sender, RoutedEventArgs e)
+        {
+            PlotOBJMesh plotMesh = new PlotOBJMesh();
+            Dictionary<int, INode> nodesSmallerList = new Dictionary<int, INode>();
+            Dictionary<int, Dictionary<int, int>> elementsConnectivitySmallerList = new Dictionary<int, Dictionary<int, int>>();
+            //for (int i = 1; i <= 10; i++)
+            //{
+            //    nodesSmallerList[i] = nodes[i];
+            //}
+            //for (int i = 1; i <= 4; i++)
+            //{
+            //    elementsConnectivitySmallerList[i] = elementsConnectivity[i];
+            //}
+            plotMesh.elementsConnectivity = elementsConnectivity;
+            plotMesh.nodes = nodes;
+            //plotMesh.Window_Loaded();
+
+
+            //ViewportGraphics = plotMesh.MainViewport;
+            //neo = plotMesh.MainViewport;
+            //Window secondWindow = new Window();
+            //secondWindow.Show();
+            //secondWindow.KeyDown += plotMesh.Window_KeyDown;
+            //secondWindow.Content = plotMesh.MainViewport;
+            //ViewportGraphics.InvalidateVisual();
+
+            ViewportGraphics.Children.Clear();
+            ViewportGraphics.InvalidateVisual();
+
+            ViewportGraphics.Children.Add(plotMesh.GetModel());
+            //ViewportGraphics.InvalidateVisual();
+            //ViewportGraphics = plotMesh.MainViewport;
+            //viewport3DGrid.Children.Add(ViewportGraphics);
+
+
+            //CompositionTarget.Rendering += TestMethod;
+        }
         public object Clone()
         {
             return this.MemberwiseClone();
