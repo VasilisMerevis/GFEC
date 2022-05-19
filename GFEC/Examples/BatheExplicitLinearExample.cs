@@ -8,6 +8,7 @@ namespace GFEC
     
     public static class BatheExplicitLinearExample
     {
+        private static Results finalresutls;
         public static void SolveExample()
         {
             double[,] M = new double[,]
@@ -40,6 +41,7 @@ namespace GFEC
             //solver.LinearSolver = new LUFactorization();
             solver.SolveBatheExplicit();
             //solver.PrintExplicitSolution();
+            
         }
 
         

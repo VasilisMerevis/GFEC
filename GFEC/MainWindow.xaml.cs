@@ -1246,6 +1246,16 @@ namespace GFEC
             return this.MemberwiseClone();
         }
 
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Window result = new Window();
+            CartesianChart resultChart = new CartesianChart();
+            ShowToGUI guiOutput = new ShowToGUI();
+
+            resultChart.Series = guiOutput.ShowResults(solverResults);
+            result.Content = resultChart;
+            result.Show();
+        }
     }
 
 

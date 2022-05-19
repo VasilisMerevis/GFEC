@@ -62,6 +62,7 @@
         <Button Content="Zoom +" HorizontalAlignment="Left" Margin="295,0,0,285" Width="50" Click="ZoomInCamera" Height="20" VerticalAlignment="Bottom"/>
         <Button Content="Zoom -" HorizontalAlignment="Left" Margin="350,0,0,285" VerticalAlignment="Bottom" Width="50" Click="ZoomOutCamera"/>
         <Button Content="Display FE mesh object" Margin="0,104,275,0" VerticalAlignment="Top" Click="Button_Plot_Geometry" Height="32" HorizontalAlignment="Right" Width="133"/>
+        <Button Content="Plot results" HorizontalAlignment="Left" Margin="444,0,0,285" Click="Button_Click_1" Width="100" Height="20" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>
