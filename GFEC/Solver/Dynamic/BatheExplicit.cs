@@ -10,7 +10,7 @@ namespace GFEC
     {
         private double totalTime, timeStep;
         private int timeStepsNumber;
-        private Dictionary<int, double[]> displacement = new Dictionary<int, double[]>();
+        public Dictionary<int, double[]> displacement = new Dictionary<int, double[]>();
         private Dictionary<int, double[]> velocity = new Dictionary<int, double[]>();
         private Dictionary<int, double[]> acceleration = new Dictionary<int, double[]>();
         private Dictionary<int, double[]> exForces = new Dictionary<int, double[]>();
@@ -24,7 +24,7 @@ namespace GFEC
         double[] initialDisplacementVector, initialVelocityVector, initialAccelerationVector;
         double initialTime;
         private ILinearSolution linearSolver;
-
+        public Dictionary<int, double> TimeAtEachStep { get; set; }
         public BatheExplicit(ILinearSolution linearSolver, InitialConditions initialValues, double totalTime, int timeStepsNumber, double[,] stiffnessMatrix, double[,] massMatrix, double[] externalForcesVector)
         {
             totalDOFs = stiffnessMatrix.GetLength(0);
@@ -41,6 +41,7 @@ namespace GFEC
             initialTime = initialValues.InitialTime;
             this.linearSolver = linearSolver;
             p = 0.54;
+            TimeAtEachStep = new Dictionary<int, double>();
         }
 
         private List<double> Calculate_qValues(double p)
@@ -190,8 +191,10 @@ namespace GFEC
             CreateRForAllStepsNoChange(externalForcesVector);
             List<double> q = Calculate_qValues(p);
             List<double> a = Calculate_aValues(p, q, timeStep);
+            TimeAtEachStep.Add(0, 0.0);
             for (int i = 1; i < timeStepsNumber; i++)
             {
+                double time = i * timeStep + initialTime;
                 double[] u_middle = U_middle(displacement[i - 1], velocity[i - 1], acceleration[i - 1], a[0], a[1]);
                 double[] r_hat_middle = R_hat_middle(exForces[i - 1], exForces[i], p);
                 double[] r_roundhat_middle = R_roundhat_middle(r_hat_middle, u_middle, velocity[i - 1], acceleration[i - 1], stiffnessMatrix, dampingMatrix, a[0]);
@@ -206,6 +209,7 @@ namespace GFEC
                 displacement.Add(i, u_current);
                 velocity.Add(i, du_current);
                 acceleration.Add(i, ddu_current);
+                TimeAtEachStep.Add(i, time);
             }
         }
     }
