@@ -442,6 +442,7 @@ namespace GFEC
             exampleList.Add("CantileverAngleTest");
             exampleList.Add("ExplicitLinearExample");
             exampleList.Add("BatheExplicitLinearExample");
+            exampleList.Add("LinearAlgebraTests");
 
 
             ComboBox1.ItemsSource = exampleList;
@@ -791,6 +792,10 @@ namespace GFEC
                 case "BatheExplicitLinearExample":
                     BatheExplicitLinearExample.SolveExample();
                     finalResults = BatheExplicitLinearExample.RunStaticExample();
+                    break;
+                case "LinearAlgebraTests":
+                    LinearAlgebraTests.SolveExample();
+                    finalResults = new Results();
                     break;
                 default:
                     finalResults = TwoQuadsExample.RunStaticExample();

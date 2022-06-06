@@ -217,12 +217,12 @@ namespace GFEC
 
         public static double[,] MatrixAdditionParallel2(double[,] matrix1, double[,] matrix2)
         {
-            int totalRows = 2000;
+            int totalRows = matrix1.GetLength(0);
             TempVariable = matrix1;
-            Task first = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 0, 500));
-            Task second = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 500, 1000));
-            Task third= Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 1000, 1500));
-            Task fourth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 1500, 2000));
+            Task first = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 0, totalRows/4));
+            Task second = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, totalRows / 4, totalRows / 2));
+            Task third= Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, totalRows / 2, 3* totalRows / 4));
+            Task fourth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 3* totalRows / 4, totalRows));
             Task.WaitAll(first, second, third, fourth);
             return TempVariable;
         }
