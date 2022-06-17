@@ -194,6 +194,10 @@ namespace GFEC
                         break;
                     case "ANSSolidShell8EAS":
                         ElementsAssembly[elem] = new ANSSolidShell8EAS(ElementsProperties[elem], elementNodes);
+
+                    case "ContactNtS3Df":
+                        ElementsAssembly[elem] = new ContactNtS3Df(ElementsProperties[elem], elementNodes);
+
                         break;
                     case "ANSSolidShell8LEAS1FI":
                         ElementsAssembly[elem] = new ANSSolidShell8LEAS1FI(ElementsProperties[elem], elementNodes);
