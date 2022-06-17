@@ -47,7 +47,6 @@ namespace GFEC
             ElementFreedomSignature[7] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[8] = new bool[] { true, true, true, false, false, false };
             DisplacementVector = new double[24];
-
         }
         public void CalculateElementEASMatrices()
         {
@@ -64,7 +63,6 @@ namespace GFEC
         public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
         {
             throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
-
         }
         public double ClosestPointProjection()
         {
@@ -539,17 +537,10 @@ namespace GFEC
             return stressVector;
         }
 
-        private double[] CalculateStressVector(double[,] E, double[] strain)
-        {
-            double[] stressVector = VectorOperations.MatrixVectorProduct(E, strain);
-            return stressVector;
-        }
-
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] fInt = new double[24];
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-
 
             for (int i = 0; i < 2; i++)
             {
