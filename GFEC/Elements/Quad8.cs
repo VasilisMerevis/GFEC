@@ -133,9 +133,9 @@ namespace GFEC
         public List<double[]> GetStrainFromElementsNodes()
         {
             List<double[]> strainVectors = new List<double[]>();
-            double[] ksi = new double[] { -1.0, 0.0, 1.0, 1.0, 1.0, 0.0, -1.0, - 1.0 };
+            double[] ksi = new double[] { -1.0, 0.0, 1.0, 1.0, 1.0, 0.0, -1.0, -1.0 };
             double[] ihta = new double[] { -1.0, -1.0, -1.0, 0.0, 1.0, 1.0, 1.0, 0.0 };
-            for (int i = 0; i < 8; i ++)
+            for (int i = 0; i < 8; i++)
             {
                 double[] node = new double[] { ksi[i], ihta[i] };
                 Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(node);
@@ -192,7 +192,16 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] initialCoor = new double[16];
+            for (int i = 1; i <= 8; i++)
+            {
+                initialCoor[2 * i - 2] = Nodes[i].XCoordinate;
+                initialCoor[2 * i - 1] = Nodes[i].YCoordinate;
+            }
+            return initialCoor;
+        }
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -211,7 +220,7 @@ namespace GFEC
         {
             Dictionary<int, double> shapeFunctions = new Dictionary<int, double>();
             double N1 = -1.0 / 4.0 * (1 - ksi) * (1 - ihta) * (1 + ksi + ihta); shapeFunctions.Add(1, N1);
-            double N2 = 1.0 / 2.0 * (1 + ksi) * (1 - ksi) * (1 - ihta); shapeFunctions.Add(2,N2);
+            double N2 = 1.0 / 2.0 * (1 + ksi) * (1 - ksi) * (1 - ihta); shapeFunctions.Add(2, N2);
             double N3 = -1.0 / 4.0 * (1 + ksi) * (1 - ihta) * (1 - ksi + ihta); shapeFunctions.Add(3, N3);
             double N4 = 1.0 / 2.0 * (1 + ksi) * (1 + ihta) * (1 - ihta); shapeFunctions.Add(4, N4);
             double N5 = -1.0 / 4.0 * (1 + ksi) * (1 + ihta) * (1 - ksi - ihta); shapeFunctions.Add(5, N5);
@@ -269,31 +278,31 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[2, 2];
 
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
 
             k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
 
@@ -506,7 +515,7 @@ namespace GFEC
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] F = new double[16];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); //needs fixing in poisson v
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
 
             for (int i = 0; i < 3; i++)
             {

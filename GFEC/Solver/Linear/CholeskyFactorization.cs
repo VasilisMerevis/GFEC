@@ -44,9 +44,9 @@ namespace GFEC
         public override double[] Solve(double[,] stiffnessMatrix, double[] forceVector)
         {
             double[,] lowerMatrix = Cholesky(stiffnessMatrix);
-            double[,] upperMatrix = MatrixOperations.Transpose(lowerMatrix);
+            //double[,] upperMatrix = MatrixOperations.Transpose(lowerMatrix);
             double[] intermediateVector = ForwardSubstitution(lowerMatrix, forceVector);
-            double[] solutionuberVector = BackSubstitution(upperMatrix, intermediateVector);
+            double[] solutionuberVector = BackSubstitution(MatrixOperations.TransposeSquareMatrix(lowerMatrix), intermediateVector);
             return solutionuberVector;
         }
     }

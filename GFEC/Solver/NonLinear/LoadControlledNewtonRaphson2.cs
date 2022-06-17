@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace GFEC
 {
-    public class LoadControlledNewtonRaphson : NonLinearSolution
+    public class LoadControlledNewtonRaphson2 : NonLinearSolution
     {
         private double[] localSolutionVector;
 
-        public LoadControlledNewtonRaphson()
+        public LoadControlledNewtonRaphson2()
         {
 
         }
-        public LoadControlledNewtonRaphson(double[] exSolution)
+        public LoadControlledNewtonRaphson2(double[] exSolution)
         {
             localSolutionVector = exSolution;
         }
@@ -28,33 +27,25 @@ namespace GFEC
             double[] dU;
             double[] residual;
             double residualNorm;
-            discretization.InitializeContactTangentialProperties();
-            discretization.InitializeContactSurfaceVectors();
-            double[,] stiffnessMatrixLinearPart = discretization.CreateStiffnessMatrixLinearPart();
             for (int i = 0; i < numberOfLoadSteps; i++)
             {
                 incrementalExternalForcesVector = VectorOperations.VectorVectorAddition(incrementalExternalForcesVector, incrementDf);
                 discretization.UpdateDisplacements(solutionVector);
-                discretization.UpdateEASParameters(solutionVector);//added EAS
-                discretization.UpdateContactSurfaceVectors();
                 internalForcesTotalVector = discretization.CreateTotalInternalForcesVector();
-                double[,] UpdatedStiffnessMatrix = discretization.UpdateStifnessMatrix(stiffnessMatrixLinearPart);
-                dU = linearSolver.Solve(UpdatedStiffnessMatrix, incrementDf);
-                discretization.UpdateElementsIncrementalDisplacements(dU);
+                double[,] stiffnessMatrix = discretization.CreateTotalStiffnessMatrix();
+                //OnConvergenceResult("Newton-Raphson: Solution not converged at load step" + i); 
+                dU = linearSolver.Solve(stiffnessMatrix, incrementDf);
                 solutionVector = VectorOperations.VectorVectorAddition(solutionVector, dU);
                 residual = VectorOperations.VectorVectorSubtraction(internalForcesTotalVector, incrementalExternalForcesVector);
                 residualNorm = VectorOperations.VectorNorm2(residual);
                 int iteration = 0;
                 Array.Clear(deltaU, 0, deltaU.Length);
-                //Array.Clear(deltaU, 0, deltaU.Length);
                 while (residualNorm > Tolerance && iteration < MaxIterations)
                 {
-                    UpdatedStiffnessMatrix = discretization.UpdateStifnessMatrix(stiffnessMatrixLinearPart);
-                    deltaU = VectorOperations.VectorVectorSubtraction(deltaU, linearSolver.Solve(UpdatedStiffnessMatrix, residual));
+                    stiffnessMatrix = discretization.CreateTotalStiffnessMatrix();
+                    deltaU = VectorOperations.VectorVectorSubtraction(deltaU, linearSolver.Solve(stiffnessMatrix, residual));
                     tempSolutionVector = VectorOperations.VectorVectorAddition(solutionVector, deltaU);
-                    discretization.UpdateElementsIncrementalDisplacements(VectorOperations.VectorVectorAddition(dU, deltaU));
                     discretization.UpdateDisplacements(tempSolutionVector);
-                    discretization.UpdateEASParameters(tempSolutionVector);//added EAS
                     internalForcesTotalVector = discretization.CreateTotalInternalForcesVector();
                     residual = VectorOperations.VectorVectorSubtraction(internalForcesTotalVector, incrementalExternalForcesVector);
                     residualNorm = VectorOperations.VectorNorm2(residual);
@@ -66,15 +57,13 @@ namespace GFEC
                     {
                         OnConvergenceResult(new ConvergenceValues() { ResidualNorm = residualNorm, LoadStep = i, Iteration = iteration, Tolerance = Tolerance, ConvergenceResult = false });
                     }
-                    iteration += 1;
+                    iteration = iteration + 1;
+                    //(Application.Current.Windows[0] as MainWindow).LogTool.Text = "ok"; 
+                    //OnConvergenceResult("Newton-Raphson: Solution not converged at load step" + iteration);
                 }
                 InternalForces.Add(i + 1, internalForcesTotalVector);
                 solutionVector = VectorOperations.VectorVectorAddition(solutionVector, deltaU);
                 Solutions.Add(i + 1, solutionVector);
-                discretization.UpdateContactTangentialProperties();
-                //VectorOperations.PrintVectorToFile(solutionVector, @"C:\Users\Public\Documents\" + "Solution37.dat");
-
-                //discretization.NextStepFrictionUpdate();
                 if (iteration >= MaxIterations)
                 {
                     OnConvergenceResult(new ConvergenceValues() { ResidualNorm = residualNorm, LoadStep = i, Iteration = iteration, Tolerance = Tolerance, ConvergenceResult = true });
@@ -82,6 +71,7 @@ namespace GFEC
                     break;
                 }
                 LoadStepConvergence.Add("Solution converged.");
+
             }
             return solutionVector;
         }
@@ -109,4 +99,3 @@ namespace GFEC
 
     }
 }
-

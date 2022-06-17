@@ -56,6 +56,9 @@ namespace GFEC
         public double[] EASFEnhancedVector { get; set; }
         public double[,] EASLMatrix { get; set; }
         public double[,] EASDMatrix { get; set; }
+        public double[] DisplacementVectorPreviousIncrement { get; set; }
+        public double[] HourglassInternalForceVector { get; set; }
+        public double[] HourglassInternalForceVectorPreviousConvergedSolution { get; set; }
         public ElementProperties(double youngMod, double sectionArea, string elementType)
         {
             YoungMod = youngMod;
@@ -83,6 +86,15 @@ namespace GFEC
             Density = density;
             PenaltyFactorRatio = 10.0;
         }
+
+
+        public ElementProperties(double youngMod, string elementType)
+        {
+            YoungMod = youngMod;
+            ElementType = elementType;
+        }
+
+
         public ElementProperties(double youngMod, double sectionArea, double momentOfInertia, string elementType)
         {
             YoungMod = youngMod;

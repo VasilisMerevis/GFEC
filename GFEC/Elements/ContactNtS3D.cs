@@ -16,6 +16,7 @@ namespace GFEC
         public double[] AccelerationVector { get; set; }
         private double PenaltyFactor { get; set; }
         double[] lastKsiVector;
+
         public void InitializeTangentialProperties()
         {
             throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
@@ -70,6 +71,7 @@ namespace GFEC
             //}
             return PositionVectorsList;
         }
+
         public ContactNtS3D(IElementProperties properties, Dictionary<int, INode> nodes)
         {
             Properties = properties;
@@ -80,6 +82,7 @@ namespace GFEC
             ElementFreedomSignature[4] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[5] = new bool[] { true, true, true, false, false, false };
             DisplacementVector = new double[15];
+
             PenaltyFactor = properties.YoungMod * 5.0;
             lastKsiVector = new double[2];
         }
@@ -99,6 +102,7 @@ namespace GFEC
         {
             throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
         }
+
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -109,6 +113,7 @@ namespace GFEC
             finalNodes[5] = new Node(Nodes[5].XCoordinate + DisplacementVector[12], Nodes[5].YCoordinate + DisplacementVector[13], Nodes[5].ZCoordinate + DisplacementVector[14]);
             return finalNodes;
         }
+
         public List<double[]> GetStressVector()
         {
             List<double[]> l = new List<double[]>();
@@ -139,6 +144,7 @@ namespace GFEC
             l.Add(new double[] { 0.0, 0.0, 0.0 });
             return l;
         }
+
         private double[] xUpdatedVector()
         {
             Dictionary<int, INode> finalNodes = NodesAtFinalState();
@@ -301,6 +307,7 @@ namespace GFEC
             return deltaKsi;
         }
 
+
         private double[] Project(double[] ksiVectorInitial)
         {
             int maxIterations = 1000;
@@ -335,6 +342,7 @@ namespace GFEC
                 return ksiVector;
 
             }
+
         }
 
         private double CalculatePenetration(double[] normalVector, double[,] aMatrix, double[] xUpdated)
@@ -354,6 +362,7 @@ namespace GFEC
             double[,] Kmain = MatrixOperations.ScalarMatrixProductNew(penaltyFactor, aTnxna);
             return Kmain;
         }
+
         private double[,] RotationalStiffnessPart(double penaltyFactor, double[] normalVector, double[,] aMatrix, double[,] a1Matrix, double[,] a2Matrix, List<double[]> dRho, double ksi3)
         {
             double[,] m = MetricTensor(dRho);
@@ -389,6 +398,7 @@ namespace GFEC
             double[] ksiVector = Project(new double[2]);
 
 
+
             if (Math.Abs(ksiVector[0]) <= 1.05 && ksiVector[1] <= 1.05)
             {
                 Tuple<double[,], double[,], double[,]> aMatrices = CalculatePositionMatrix(ksiVector[0], ksiVector[1]);
@@ -400,15 +410,19 @@ namespace GFEC
 
                 if (ksi3 <= 0)
                 {
+
                     double[,] Km = MainStiffnessPart(PenaltyFactor, n, aMatrices.Item1);
                     double[,] Kr = RotationalStiffnessPart(PenaltyFactor, n, aMatrices.Item1, aMatrices.Item2, aMatrices.Item3, dRho, ksi3);
                     double[,] K = MatrixOperations.MatrixAddition(Km, Kr);
+
 
                     return K;
                 }
                 else
                 {
+
                     return new double[15, 15];
+
                 }
             }
             else
@@ -462,4 +476,6 @@ namespace GFEC
             return new double[15, 15];
         }
     }
+
 }
+

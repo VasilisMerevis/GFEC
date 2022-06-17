@@ -14,6 +14,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -24,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -58,13 +60,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
+      <HintPath>packages\LiveCharts.0.9.7\lib\net40\LiveCharts.dll</HintPath>
     </Reference>
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
+      <HintPath>packages\LiveCharts.Wpf.0.9.7\lib\net40\LiveCharts.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
+      <HintPath>packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -88,6 +90,20 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS7.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS1FI.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS1RI.cs" />
+    <Compile Include="Examples\BatheExplicitLinearExample.cs" />
+    <Compile Include="Examples\BumperExample.cs" />
+    <Compile Include="Examples\CantileverAngleTest.cs" />
+    <Compile Include="Examples\BumperExampleRefinedMesh.cs" />
+    <Compile Include="Examples\CylinderCheck.cs" />
+    <Compile Include="Examples\TruckBumperImpact.cs" />
+    <Compile Include="Examples\SolidShellThinCylinderConnectivity2.cs" />
+    <Compile Include="Examples\SolidShellElementsThinCylinder.cs" />
+    <Compile Include="Examples\RefinedMeshBumperExample.cs" />
+    <Compile Include="Examples\SolidShellElementsImpact.cs" />
+    <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />
     <Compile Include="PlotOBJMesh.cs" />
@@ -105,6 +121,7 @@
     <Compile Include="Elements\ContactNtS3D.cs" />
     <Compile Include="Elements\Quad8.cs" />
     <Compile Include="Elements\Triangle3.cs" />
+    <Compile Include="ContactNtS3Df.cs" />
     <Compile Include="Elements\Quad4Th2.cs" />
     <Compile Include="Elements\ContactNtS2DTh.cs" />
     <Compile Include="Elements\ContactNtN2DTh.cs" />
@@ -165,6 +182,7 @@
     <Compile Include="Examples\CoupledThermalStructuralCNTsInAngle5.cs" />
     <Compile Include="Examples\DynamicExample.cs" />
     <Compile Include="Examples\ExplicitLinearExample.cs" />
+    <Compile Include="Examples\Hexa8TestExample.cs" />
     <Compile Include="Examples\LinearFrameExample.cs" />
     <Compile Include="Examples\LinearFrameTrussHybridExample.cs" />
     <Compile Include="Examples\LinearTrussExample.cs" />
@@ -177,6 +195,7 @@
     <Compile Include="Examples\TwoBeamsInContactQuadsExample.cs" />
     <Compile Include="Examples\TwoBeamsInFrContactQuadsExample.cs" />
     <Compile Include="Examples\TwoBlocksInContact.cs" />
+    <Compile Include="Examples\TwoBocksInContact3D.cs" />
     <Compile Include="Examples\TwoQuadsDynamicExample.cs" />
     <Compile Include="Examples\TwoQuadsExample.cs" />
     <Compile Include="Examples\TwoQuadsInContactNewExample.cs" />
@@ -189,7 +208,9 @@
     <Compile Include="IO Routines\Results.cs" />
     <Compile Include="IO Routines\ShowDiagramInGUIArgs.cs" />
     <Compile Include="IO Routines\ShowToGUI.cs" />
+    <Compile Include="PlotOBJMesh.cs" />
     <Compile Include="Solver\Dynamic.cs" />
+    <Compile Include="Solver\Dynamic\BatheExplicit.cs" />
     <Compile Include="Solver\Dynamic\CentralDifferences.cs" />
     <Compile Include="Solver\Dynamic\InitialConditions.cs" />
     <Compile Include="Solver\ISolver.cs" />
@@ -201,8 +222,10 @@
     <Compile Include="Solver\Linear\LinearSolution.cs" />
     <Compile Include="Solver\Linear\LUFactorization.cs" />
     <Compile Include="Solver\Linear\PCGSolver.cs" />
+    <Compile Include="Solver\NonLinear\LoadControlledNewtonRaphson2.cs" />
     <Compile Include="Solver\NonLinear\MMCPCGLoadControlledNewtonRaphson.cs" />
     <Compile Include="Solver\NonLinear\ModifiedNewtonRaphson.cs" />
+    <Compile Include="Solver\NonLinear\ConvergenceValues.cs" />
     <Compile Include="Solver\NonLinear\INonLinearSolution.cs" />
     <Compile Include="Solver\NonLinear\LoadControlledNewtonRaphson.cs" />
     <Compile Include="Solver\NonLinear\NewtonIterations.cs" />

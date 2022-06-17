@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace GFEC
 {
-    class SolidShellElementsContactExample
+    class SolidShellElementsImpact
     {
         public static ISolver structuralSolution;
         static int[] structuralBoundaryConditions;
         const double thickness = 0.006;
-        const double uniformGap = 0.001;
+        const double uniformGap = 0.0001;
         const double offsetX = 0.45;
         const double offsetY = -0.50;
         const int nodesInX = 21;
@@ -31,7 +31,7 @@ namespace GFEC
         const double zInterv = 0.05;
 
         //External loads
-        const double externalStructuralLoad = -8000.0;
+        const double externalStructuralLoad = -80000.0;
 
         static List<int> loadedStructuralDOFs;
         static double[] externalForcesStructuralVector;
@@ -80,38 +80,38 @@ namespace GFEC
             boundedDofs.Add(add + 1321);
             boundedDofs.Add(add + 1322);
             boundedDofs.Add(add + 1323);
-            for (int i = 1; i <= 9; i++)
-            {
-                boundedDofs.Add(nodesNumberShellEmements * 3 + i);
+            //for (int i = 1; i <= 9; i++)
+            //{
+            //    boundedDofs.Add(nodesNumberShellEmements * 3 + i);
 
-            }
-            for (int i = 1; i <= 9; i++)
-            {
-                boundedDofs.Add(nodesNumberShellEmements * 3 + 63 * 3 + i);
+            //}
+            //for (int i = 1; i <= 9; i++)
+            //{
+            //    boundedDofs.Add(nodesNumberShellEmements * 3 + 63 * 3 + i);
 
-            }
-            for (int i = 1; i <= 9; i++)
-            {
-                boundedDofs.Add(nodesNumberShellEmements * 3 + 126 * 3 + i);
+            //}
+            //for (int i = 1; i <= 9; i++)
+            //{
+            //    boundedDofs.Add(nodesNumberShellEmements * 3 + 126 * 3 + i);
 
-            }
+            //}
             structuralBoundaryConditions = boundedDofs.ToArray<int>();
         }
         private static void CreateStructuralLoadVector()
         {
             loadedStructuralDOFs = new List<int>();
-            for (int i = 2; i <= 21; i++)
-            {
-                loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + i * 9);
-            }
-            for (int i = 2; i <= 21; i++)
-            {
-                loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + 189 + i * 9);
-            }
-            for (int i = 2; i <= 21; i++)
-            {
-                loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + 2 * 189 + i * 9);
-            }
+            //for (int i = 2; i <= 21; i++)
+            //{
+            //    loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + i * 9);
+            //}
+            //for (int i = 2; i <= 21; i++)
+            //{
+            //    loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + 189 + i * 9);
+            //}
+            //for (int i = 2; i <= 21; i++)
+            //{
+            //    loadedStructuralDOFs.Add(nodesNumberShellEmements * 3 + 2 * 189 + i * 9);
+            //}
             externalForcesStructuralVector = new double[nodesNumberShellEmements * 3 +
                 3 * nodesNumberSolidEmements];
         }
@@ -602,7 +602,7 @@ namespace GFEC
             structuralSolution.ActivateNonLinearSolver = true;
             structuralSolution.NonLinearScheme.Tolerance = 1e-5;//
             structuralSolution.NonLinearScheme.MaxIterations = 100;//
-            structuralSolution.NonLinearScheme.numberOfLoadSteps = 5;//
+            structuralSolution.NonLinearScheme.numberOfLoadSteps = 50;//
 
             double[] externalForces3 = externalForcesStructuralVector;
             int count = 1;
@@ -664,27 +664,58 @@ namespace GFEC
             return new Results() { NonlinearSolution = structuralSolutions, SelectedDOF = 2, SolutionType = "Nonlinear" };
         }
 
-        public static void RunDynamicExample()
+        public static Results RunDynamicExample()
         {
             IAssembly elementsAssembly = CreateAssembly();
             elementsAssembly.CreateElementsAssembly();
+            ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             elementsAssembly.ActivateBoundaryConditions = true;
-
+            var AccelerationVector = new double[nodesNumberSolidEmements * 3 +
+                nodesNumberShellEmements * 3];
+            var DisplacementVector = new double[nodesNumberShellEmements * 3 +
+                nodesNumberSolidEmements * 3];
+            var VelocityVector = new double[nodesNumberShellEmements * 3 +
+                nodesNumberSolidEmements * 3];
+            for (int i = nodesNumberShellEmements * 3 + 2; i <= nodesNumberShellEmements * 3 +
+                nodesNumberSolidEmements * 3 - 1; i += 3)
+            {
+                VelocityVector[i] = -20.0;
+            }
             InitialConditions initialValues = new InitialConditions();
-            initialValues.InitialAccelerationVector = new double[6];
-            initialValues.InitialDisplacementVector = new double[6];
-            initialValues.InitialVelocityVector = new double[6];
+            initialValues.InitialAccelerationVector = BoundaryConditionsImposition.ReducedVector(AccelerationVector, elementsAssembly.BoundedDOFsVector);
+            initialValues.InitialDisplacementVector = BoundaryConditionsImposition.ReducedVector(DisplacementVector, elementsAssembly.BoundedDOFsVector);
+            initialValues.InitialVelocityVector = BoundaryConditionsImposition.ReducedVector(VelocityVector, elementsAssembly.BoundedDOFsVector);
             initialValues.InitialTime = 0.0;
-
-            ExplicitSolver newSolver = new ExplicitSolver(1.0, 10000);
+            ExplicitSolver newSolver = new ExplicitSolver(0.0005, 20);
             newSolver.Assembler = elementsAssembly;
-
+            double[] externalForces = externalForcesStructuralVector;
             newSolver.InitialValues = initialValues;
-            newSolver.ExternalForcesVector = new double[] { 0, 0, 0, 0, -50000, -50000 };
-            newSolver.LinearSolver = new CholeskyFactorization();
+            newSolver.ExternalForcesVector = BoundaryConditionsImposition.ReducedVector(externalForces, elementsAssembly.BoundedDOFsVector);
+            newSolver.LinearSolver = new LUFactorization();
             newSolver.ActivateNonLinearSolution = true;
             newSolver.SolveNewmark();
-            newSolver.PrintExplicitSolution();//
+            //newSolver.SolveExplicit();
+            Tuple<Dictionary<int, double[]>, Dictionary<int, double>> solvectors = newSolver.GetResults();
+            Dictionary<int, double[]> allStepsSolutions = solvectors.Item1;
+
+            //for (int i = 0; i< solutionsIndices.Count; i++)
+            //{
+            //    int index = solutionsIndices[i];
+            //    double[] fullDynamicSol = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(allStepsSolutions[index], elementsAssembly.BoundedDOFsVector);
+            //    var k = index + 1;
+            //    VectorOperations.PrintVectorToFile(fullDynamicSol, @"C:\Users\Public\Documents\Results" + k.ToString() + ".dat");
+
+            //}
+
+            for (int i = 0; i <= allStepsSolutions.Keys.Max(); i++)
+            {
+                double[] fullDynamicSol = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(allStepsSolutions[i], elementsAssembly.BoundedDOFsVector);
+                var k = i + 1;
+                VectorOperations.PrintVectorToFile(fullDynamicSol, @"C:\Users\Public\Documents\Results" + k.ToString() + ".dat");
+
+            }
+            Results finalResults = new Results() { DynamicSolution = newSolver.explicitSolution, TimeSteps = newSolver.TimeAtEachStep, SelectedDOF = 1, SelectedInterval = 1, SolutionType = "Dynamic" };
+            return finalResults;
         }
 
     }

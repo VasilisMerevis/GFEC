@@ -185,7 +185,8 @@ namespace GFEC
             {
                 k = k + 1;
                 Dictionary<int, double[]> contactForcesForElements = loadStep.Value;
-                int componentsOfVector = contactForcesForElements[321].Length;
+                int index = contactForcesForElements.Keys.Max();
+                int componentsOfVector = contactForcesForElements[index].Length;
                 string row;
                 List<string> totalData = new List<string>();
                 for (int i = 0; i < componentsOfVector; i++)
@@ -208,7 +209,8 @@ namespace GFEC
             {
                 k = k + 1;
                 Dictionary<int, double[]> contactForcesForElements = loadStep.Value;
-                int componentsOfVector = contactForcesForElements[321].Length;
+                int index = contactForcesForElements.Keys.Max();
+                int componentsOfVector = contactForcesForElements[index].Length;
                 string row;
                 List<string> totalData = new List<string>();
                 for (int i = 0; i < componentsOfVector; i++)

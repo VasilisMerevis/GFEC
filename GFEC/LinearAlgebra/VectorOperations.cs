@@ -28,6 +28,16 @@ namespace GFEC
             }
             File.WriteAllLines(path, dataToPrint);
         }
+        public static void PrintIntVectorToFile(int[] vector, string path)
+        {
+            int rows = vector.Length;
+            string[] dataToPrint = new string[rows];
+            for (int i = 0; i < rows; i++)
+            {
+                dataToPrint[i] = vector[i].ToString();
+            }
+            File.WriteAllLines(path, dataToPrint);
+        }
         public static void PrintListofVectorsToFile(List<double[]> vectors, string path)
         {
             int size = new int();
@@ -232,6 +242,22 @@ namespace GFEC
             }
         }
 
+        public static double[] VectorCrossProduct(double[] vector1, double[] vector2)
+        {
+            if (vector1.Length == vector2.Length && vector1.Length==3)
+            {
+                double[] result = new double[3];
+                result[0] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
+                result[1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
+                result[2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+                return result;
+            }
+            else
+            {
+                throw new Exception("Vectors Dot Product: Not equally sized vectors or wrong size vector");
+            }
+        }
+
         public static double[] VectorScalarProduct(double[] vector, double scalar)
         {
             for (int row = 0; row < vector.Length; row++)
@@ -276,21 +302,7 @@ namespace GFEC
             }
             return matrix;
         }
-        public static double[] VectorCrossProduct(double[] vector1, double[] vector2)
-        {
-            if (vector1.Length == vector2.Length && vector1.Length == 3)
-            {
-                double[] result = new double[3];
-                result[0] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
-                result[1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
-                result[2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
-                return result;
-            }
-            else
-            {
-                throw new Exception("Vectors Dot Product: Not equally sized vectors or wrong size vector");
-            }
-        }
+        
         public static double[] CreateFullVectorFromTwoVectors(double[] vector1, double[] vector2)
         {
             double[] result = new double[vector1.Length + vector2.Length];
@@ -325,6 +337,19 @@ namespace GFEC
                 }
             }
             return new Tuple<double[], double[]>(result1, result2);
+        }
+        public static bool CheckForNonZeroElements(double[] vector)
+        {
+            bool result = true;
+            for(int i =0; i< vector.GetLength(0); i++)
+            {
+                if (vector[i] != 0)
+                {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
         }
 
     }

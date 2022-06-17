@@ -168,7 +168,16 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] updatedCoor = new double[12];
+            for (int i = 1; i <= 6; i++)
+            {
+                updatedCoor[2 * i - 2] = Nodes[i].XCoordinate;
+                updatedCoor[2 * i - 1] = Nodes[i].YCoordinate;
+            }
+            return updatedCoor;
+        }
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -187,8 +196,8 @@ namespace GFEC
             double N1 = ksi - 2 * ksi * ihta - 2 * ksi * (1.0 - ksi - ihta); shapeFunctions.Add(1, N1);
             double N2 = ihta - 2 * ksi * ihta - 2 * ihta * (1.0 - ksi - ihta); shapeFunctions.Add(2, N2);
             double N3 = 1.0 - ksi - ihta - 2 * ihta * (1.0 - ksi - ihta) - 2 * ksi * (1.0 - ksi - ihta); shapeFunctions.Add(3, N3);
-            double N4 = 4*ksi*ihta; shapeFunctions.Add(4, N4);
-            double N5 = 4*ihta*(1.0 - ksi - ihta); shapeFunctions.Add(5, N5);
+            double N4 = 4 * ksi * ihta; shapeFunctions.Add(4, N4);
+            double N5 = 4 * ihta * (1.0 - ksi - ihta); shapeFunctions.Add(5, N5);
             double N6 = 4 * ksi * (1.0 - ksi - ihta); shapeFunctions.Add(6, N6);
             return shapeFunctions;
         }
@@ -239,31 +248,31 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[2, 2];
 
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 6; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 6; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
 
             k = 0;
             for (int i = 0; i < 6; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 6; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
 

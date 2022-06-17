@@ -15,7 +15,7 @@ namespace GFEC
         Dictionary<int, double[]> Solutions { get; set; }
         double Tolerance { get; set; }
         int MaxIterations { get; set; }
-        event EventHandler<string> convergenceResult;
+        event EventHandler<ConvergenceValues> convergenceResult;
         List<string> LoadStepConvergence { get; set; }
     }
 }

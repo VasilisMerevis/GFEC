@@ -72,7 +72,7 @@ namespace GFEC
         {
             Properties = properties;
             this.Nodes = nodes;
-            int amountOfNodes =(Properties.SlaveSegmentPolynomialDegree + 1) * (Properties.SlaveSegmentPolynomialDegree + 1) + 
+            int amountOfNodes = (Properties.SlaveSegmentPolynomialDegree + 1) * (Properties.SlaveSegmentPolynomialDegree + 1) +
                 (Properties.MasterSegmentPolynomialDegree + 1) * (Properties.MasterSegmentPolynomialDegree + 1);
             for (int i = 1; i <= amountOfNodes; i++)
             {
@@ -101,7 +101,7 @@ namespace GFEC
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
-            int amountOfNodes = (Properties.SlaveSegmentPolynomialDegree + 1) * (Properties.SlaveSegmentPolynomialDegree + 1) + 
+            int amountOfNodes = (Properties.SlaveSegmentPolynomialDegree + 1) * (Properties.SlaveSegmentPolynomialDegree + 1) +
                 (Properties.MasterSegmentPolynomialDegree + 1) * (Properties.MasterSegmentPolynomialDegree + 1);
             int dofCount = new int();
             for (int i = 1; i <= amountOfNodes; i++)
@@ -318,7 +318,7 @@ namespace GFEC
                 double dN533 = -1.0 / 2.0 * ksi4 * (1 - ksi4);
                 double dN633 = (1 - ksi4) * ksi4;
                 double dN733 = -1.0 / 2.0 * ksi4 * (1 - ksi4);
-                double dN833 =  1 - Math.Pow(ksi4, 2);
+                double dN833 = 1 - Math.Pow(ksi4, 2);
                 double dN933 = 1.0 / 2.0 * ksi4 * (1 + ksi4);
                 double dN1033 = -(ksi4 + 1) * ksi4;
                 double dN1133 = 1.0 / 2.0 * ksi4 * (1 + ksi4);
@@ -770,13 +770,13 @@ namespace GFEC
                     { VectorOperations.VectorDotProduct(surfaceVector1, surfaceVector1), VectorOperations.VectorDotProduct(surfaceVector1, surfaceVector2) },
                     { VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector1), VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector2) }
                     };
-            double detm = m[0,0] * m[1,1] - m[0,1] * m[1,0];
+            double detm = m[0, 0] * m[1, 1] - m[0, 1] * m[1, 0];
             double[,] mInv = new double[,]
                     {
                     { m[1,1]/detm, - m[0,1]/detm },
                     { -m[1,0]/detm, m[0,0]/detm }
                     };
-            double[] normalUnitVec = VectorOperations.VectorScalarProductNew(VectorOperations.VectorCrossProduct(surfaceVector1, surfaceVector2), 1.0 / Math.Pow(detm,0.5));
+            double[] normalUnitVec = VectorOperations.VectorScalarProductNew(VectorOperations.VectorCrossProduct(surfaceVector1, surfaceVector2), 1.0 / Math.Pow(detm, 0.5));
             double[,] curvatureTensor = new double[,]
                     {
                     { 0.0, 0.0 },
@@ -794,7 +794,7 @@ namespace GFEC
                 curvatureTensor[1, 0] = VectorOperations.VectorDotProduct(surfaceVectorDerivative12, normalUnitVec);
                 curvatureTensor[1, 1] = VectorOperations.VectorDotProduct(surfaceVectorDerivative22, normalUnitVec);
 
-                curvatureContravariantTensor[0, 0] = curvatureTensor[0, 0]* mInv[0, 0] * mInv[0, 0] +
+                curvatureContravariantTensor[0, 0] = curvatureTensor[0, 0] * mInv[0, 0] * mInv[0, 0] +
                     curvatureTensor[0, 1] * mInv[0, 0] * mInv[1, 0] +
                     curvatureTensor[1, 0] * mInv[0, 1] * mInv[0, 0] +
                     curvatureTensor[1, 1] * mInv[0, 1] * mInv[1, 0];
@@ -855,7 +855,7 @@ namespace GFEC
             else
             {
                 double detDDF = (VectorOperations.VectorDotProduct(surfaceVector1, surfaceVector1) - VectorOperations.VectorDotProduct(surfaceVectorDerivative11, masterSlaveRelativeVector)) *
-                    (VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector2) - VectorOperations.VectorDotProduct(surfaceVectorDerivative22, masterSlaveRelativeVector))-
+                    (VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector2) - VectorOperations.VectorDotProduct(surfaceVectorDerivative22, masterSlaveRelativeVector)) -
                     (VectorOperations.VectorDotProduct(surfaceVector1, surfaceVector2) - VectorOperations.VectorDotProduct(surfaceVectorDerivative12, masterSlaveRelativeVector)) *
                     (VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector1) - VectorOperations.VectorDotProduct(surfaceVectorDerivative12, masterSlaveRelativeVector));
                 double scalar = -1.0 / detDDF;
@@ -866,13 +866,13 @@ namespace GFEC
                     { VectorOperations.VectorDotProduct(surfaceVectorDerivative12, masterSlaveRelativeVector) - VectorOperations.VectorDotProduct(surfaceVector2, surfaceVector1),
                      VectorOperations.VectorDotProduct(surfaceVector1, surfaceVector1) - VectorOperations.VectorDotProduct(surfaceVectorDerivative11, masterSlaveRelativeVector)}
                 };
-                double[] vector = new double[]{ VectorOperations.VectorDotProduct(surfaceVector1, masterSlaveRelativeVector), VectorOperations.VectorDotProduct(surfaceVector2, masterSlaveRelativeVector) };
+                double[] vector = new double[] { VectorOperations.VectorDotProduct(surfaceVector1, masterSlaveRelativeVector), VectorOperations.VectorDotProduct(surfaceVector2, masterSlaveRelativeVector) };
                 vector = VectorOperations.VectorScalarProductNew(vector, -1.0);
                 deltaKsi = VectorOperations.VectorScalarProductNew(VectorOperations.MatrixVectorProduct(matrix, vector), scalar);
             }
             return deltaKsi;
         }
-        private double[] Project(double ksi1Initial, double ksi2Initial,double ksi3, double ksi4)
+        private double[] Project(double ksi1Initial, double ksi2Initial, double ksi3, double ksi4)
         {
             int maxIterations = 1000;
             double tol = Math.Pow(10.0, -6.0);
@@ -1211,7 +1211,7 @@ namespace GFEC
         private double[,] CalculateRotationalStiffnessPart(double[,] A, double[,] dA1, double[,] dA2, double[] n, double ksi3, double[,] mInv, double[] surfaceVector1, double[] surfaceVector2)
         {
             double[,] rotationalPart;
-            double coef1 = PenaltyFactor * ksi3 * mInv[0,0];
+            double coef1 = PenaltyFactor * ksi3 * mInv[0, 0];
             double[,] rotationalPart1;
             double[,] n_x_surfaceVector1 = VectorOperations.VectorVectorTensorProduct(n, surfaceVector1);
             double[,] surfaceVector1_x_n = VectorOperations.VectorVectorTensorProduct(surfaceVector1, n);

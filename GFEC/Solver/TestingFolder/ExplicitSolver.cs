@@ -12,7 +12,7 @@ namespace GFEC
         public double[] ExternalForcesVector { get; set; }
         public InitialConditions InitialValues { get; set; }
         private int numberOfLoadSteps = 20;
-        private double tolerance = 1.0e-6;
+        private double tolerance = 1.0e-4;
         private int maxIterations = 1000;
         private double lambda;
         private double totalTime;
@@ -566,9 +566,9 @@ namespace GFEC
             explicitAcceleration.Add(0, CalculateInitialAccelerationsNewmark());
             TimeAtEachStep.Add(0, 0.0);
             double[] nextSolution;
-            Assembler.InitializeEASParameters();//Added EAS
-            Assembler.CalculateEASMatrices();//added EAS
-            for (int i = 1; i < timeStepsNumber; i++)
+            //Assembler.InitializeEASParameters();//Added EAS
+            //Assembler.CalculateEASMatrices();//added EAS
+            for (int i = 1; i <= timeStepsNumber; i++)
             {
                 double time = i * timeStep + InitialValues.InitialTime;
 
@@ -581,14 +581,21 @@ namespace GFEC
                 }
                 else
                 {
-                    Assembler.StoreFinalStepDisplacementVector(explicitSolution.Values.Last());//Added EAS
+                    //Assembler.StoreFinalStepDisplacementVector(explicitSolution.Values.Last());//Added EAS
                     nextSolution = NewtonIterationsNewmark(ExternalForcesVector, i, aConstants);
                     Console.WriteLine("Solution for Load Step {0} is:", i);
                     VectorOperations.PrintVector(nextSolution);
                 }
                 explicitSolution.Add(i, nextSolution);
+                double[] fullDynamicSol = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(nextSolution, Assembler.BoundedDOFsVector);
+                VectorOperations.PrintVectorToFile(fullDynamicSol, @"C:\Users\Public\Documents\DynamicSol" + i.ToString() + ".dat");                
                 explicitAcceleration.Add(i, CalculateAccelerationNewmark(i, aConstants));
                 explicitVelocity.Add(i, CalculateVelocityNewmark(i, aConstants));
+
+                double[] fullVelocitySol = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(explicitVelocity[i], Assembler.BoundedDOFsVector);
+                double[] fullAccelerationSol = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(explicitAcceleration[i], Assembler.BoundedDOFsVector);
+                VectorOperations.PrintVectorToFile(fullVelocitySol, @"C:\Users\Public\Documents\Velocity" + i.ToString() + ".dat");
+                VectorOperations.PrintVectorToFile(fullAccelerationSol, @"C:\Users\Public\Documents\Acceleration" + i.ToString() + ".dat");
                 TimeAtEachStep.Add(i, time);
             }
             ExportToFile.ExportExplicitResults(explicitSolution, TimeAtEachStep, 1, 1);
@@ -669,12 +676,13 @@ namespace GFEC
             solutionVector = explicitSolution.Values.Last();
 
             Assembler.UpdateDisplacements(solutionVector);
+            Assembler.UpdateEASParameters(solutionVector);//added EAS
 
             //Assembler.UpdateAccelerations(explicitAcceleration.Values.Last());
             hatR = CalculateHatRVectorNewmarkNL(stepNumber, aConstants, solutionVector);
             internalForcesTotalVector = Assembler.CreateTotalInternalForcesVector();
             residual = VectorOperations.VectorVectorSubtraction(hatR, internalForcesTotalVector);
-            residual = VectorOperations.VectorVectorSubtraction(forceVector, Assembler.CreateTotalInternalForcesVector());
+            //residual = VectorOperations.VectorVectorSubtraction(forceVector, Assembler.CreateTotalInternalForcesVector());
             residualNorm = VectorOperations.VectorNorm2(residual);
             int iteration = 0;
             Array.Clear(deltaU, 0, deltaU.Length);
@@ -691,12 +699,12 @@ namespace GFEC
                 internalForcesTotalVector = Assembler.CreateTotalInternalForcesVector();
                 residual = VectorOperations.VectorVectorSubtraction(hatR, internalForcesTotalVector);
                 residualNorm = VectorOperations.VectorNorm2(residual);
-                if (residualNorm < tolerance)
+                if (residualNorm < 1.0e-4)
                 {
                     break;
                 }
                 iteration = iteration + 1;
-                Assembler.CalculateEASMatrices();//added EAS
+                //Assembler.CalculateEASMatrices();//added EAS
             }
             //Console.WriteLine(iteration);
             if (iteration >= maxIterations && residualNorm > tolerance) throw new Exception("Newton-Raphson: Solution not converged at current iterations");

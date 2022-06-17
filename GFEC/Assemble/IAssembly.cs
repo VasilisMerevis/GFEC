@@ -13,6 +13,8 @@ namespace GFEC
         Dictionary<int, bool[]> NodeFreedomAllocationList { get; set; }
         void CreateElementsAssembly();
         double[,] CreateTotalStiffnessMatrix();
+        double[,] CreateStiffnessMatrixLinearPart();
+        double[,] UpdateStifnessMatrix(double[,] stiffnessMatrixLinearPart);
         bool ActivateBoundaryConditions { get; set; }
         int[] BoundedDOFsVector { get; set; }
         int[] ContactDOFsVector { get; set; }

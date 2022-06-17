@@ -70,7 +70,19 @@ namespace GFEC
             }
             return m;
         }
-
+        public static double[,] TransposeSquareMatrix(double[,] matrix)
+        {
+            for (int row = 0; row <= matrix.GetLength(0) - 2; row++)
+            {
+                for (int col = row + 1; col <= matrix.GetLength(0) - 1; col++)
+                {
+                    double local = matrix[row, col];
+                    matrix[row, col] = matrix[col, row];
+                    matrix[col, row] = local;
+                }
+            }
+            return matrix;
+        }
         public static double[,] MatrixProduct(double[,] matrix1, double[,] matrix2)
         {
             
@@ -559,7 +571,7 @@ namespace GFEC
         {
             int n = matrix.GetLength(0);
             int m = matrix.GetLength(1);
-            double tol = 0.000001;
+            double tol = 0.001;
             bool value = true;
             if (!(n == m))
             {
@@ -792,6 +804,86 @@ namespace GFEC
                 }
             }
             return inverseMatrix;
+        }
+        public static double[,] ΕliminateMatrixLine(double[,] matrix, int line)
+        {
+            double[,] resultMatrix = matrix;
+            for (int i = 0; i < matrix.GetLength(1); i++)
+            {
+                resultMatrix[line, i] = 0.0;
+            }
+            return resultMatrix;
+        }
+        public static double[,] CalculateInverseMatrixGaussJordanMethod(double[,] matrix)
+        {
+            if (!(matrix.GetLength(0) == matrix.GetLength(1)))
+            {
+                throw new Exception("The matrix must be square");
+            }
+            double[,] augmentedMatrix = new double[matrix.GetLength(0), 2 * matrix.GetLength(0)];
+            double[,] inverseMatrix = new double[matrix.GetLength(0), matrix.GetLength(0)];
+
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(0); j++)
+                {
+                    augmentedMatrix[i, j] = matrix[i, j];
+                    if (i == j)
+                    {
+                        augmentedMatrix[i, j + matrix.GetLength(0)] = 1.0;
+                    }
+                    else
+                    {
+                        augmentedMatrix[i, j + matrix.GetLength(0)] = 0.0;
+                    }
+                }
+            }
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                if (augmentedMatrix[i, i] == 0.0)
+                {
+                    throw new Exception("Zero diagonal element!");
+                }
+                for (int j = 0; j < matrix.GetLength(0); j++)
+                {
+                    if (i != j)
+                    {
+                        double ratio = augmentedMatrix[j, i] / augmentedMatrix[i, i];
+                        for (int k = 0; k < 2 * matrix.GetLength(0); k++)
+                        {
+                            augmentedMatrix[j, k] = augmentedMatrix[j, k] - ratio * augmentedMatrix[i, k];
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = matrix.GetLength(0); j < 2 * matrix.GetLength(0); j++)
+                {
+                    augmentedMatrix[i, j] = augmentedMatrix[i, j] / augmentedMatrix[i, i];
+                }
+            }
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(0); j++)
+                {
+                    inverseMatrix[i, j] = augmentedMatrix[i, j + matrix.GetLength(0)];
+                }
+            }
+            return inverseMatrix;
+        }
+        public static bool CheckDiagonalElements(double[,] matrix)
+        {
+            bool allPositive = true;
+            for (int i = 0; i< matrix.GetLength(0); i++)
+            {
+                if (matrix[i, i] <= 0)
+                {
+                    allPositive = false;
+                    break;
+                }
+            }
+            return allPositive;
         }
     }
 }

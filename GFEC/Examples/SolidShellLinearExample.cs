@@ -22,7 +22,7 @@ namespace GFEC
         const double yInterv = 0.05;
 
         //External loads
-        const double externalStructuralLoad = -5000.0;
+        const double externalStructuralLoad = -30000.0;
 
         static List<int> loadedStructuralDOFs;
         static double[] externalForcesStructuralVector;
@@ -134,14 +134,14 @@ namespace GFEC
                     int first2 = first + nodesNumber / 2;
                     connectivity[l] = new Dictionary<int, int>()
                     {
-                            { 1, first },
-                            { 2, first + nodesInY },
-                            { 3,  first + nodesInY + 1},
-                            { 4,  first + 1},
-                            { 5, first2 }, 
-                            { 6,  first2 + nodesInY},
-                            { 7,  first2 + nodesInY + 1},
-                            { 8,  first2 + 1}
+                            { 1,  first2 },
+                            { 2,  first2 + nodesInY },
+                            { 3,  first2 + nodesInY + 1},
+                            { 4,  first2 + 1},
+                            { 5,  first },
+                            { 6,  first + nodesInY},
+                            { 7,  first + nodesInY + 1},
+                            { 8,  first + 1}
                     };
                     l += 1;
                 }
@@ -162,7 +162,7 @@ namespace GFEC
         {
             double E = YoungMod;
             double A = area;
-            string type = "ANSSolidShell8EAS";
+            string type = "ANSSolidShell8LEAS7";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             for (int i = 1; i <= elementsNumber; i++)
@@ -191,10 +191,11 @@ namespace GFEC
             elementsAssembly.ActivateBoundaryConditions = true;
             ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
-            structuralSolution.LinearScheme = new LUFactorization();
-            structuralSolution.ActivateNonLinearSolver = true;
-            structuralSolution.NonLinearScheme.Tolerance = 1e-5;//
-            structuralSolution.NonLinearScheme.numberOfLoadSteps = 1;//
+            structuralSolution.LinearScheme = new CholeskyFactorization();
+            structuralSolution.ActivateNonLinearSolver = false;
+            //structuralSolution.NonLinearScheme.Tolerance = 1e-5;//
+            //structuralSolution.NonLinearScheme.MaxIterations = 100;//
+            //structuralSolution.NonLinearScheme.numberOfLoadSteps = 6;//
 
             double[] externalForces3 = externalForcesStructuralVector;
             foreach (var dof in loadedStructuralDOFs)
@@ -205,23 +206,23 @@ namespace GFEC
             double[] reducedExternalForces3 = BoundaryConditionsImposition.ReducedVector(externalForces3, elementsAssembly.BoundedDOFsVector);
             structuralSolution.AssemblyData = elementsAssembly;
             structuralSolution.Solve(reducedExternalForces3);
-            Dictionary<int, double[]> solvectors = structuralSolution.GetAllStepsSolutions();
-
-            //double[]  = structuralSolution.GetSolution();
-            for (int i = solvectors.Keys.Min(); i <= solvectors.Keys.Max(); i++)
-            {
-                double[] fullSolVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solvectors.Single(s => s.Key == i).Value,
+            //---------------------------------------------------
+            //Case Linear Solver
+            double[] fullSolVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(structuralSolution.GetSolution(),
                 elementsAssembly.BoundedDOFsVector);
-                string name = "SolidShellNLsolution" + i.ToString() + ".dat";
-                VectorOperations.PrintVectorToFile(fullSolVector, @"C:\Users\Public\Documents\" + name);
-            }
-            //double[] fullSolVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solvector,
+            string name = "SolidShellLsolution" + ".dat";
+            VectorOperations.PrintVectorToFile(fullSolVector, @"C:\Users\Public\Documents\" + name);
+            //---------------------------------------------------
+            ////Case NonLinear Solver
+            //Dictionary<int, double[]> solvectors = structuralSolution.GetAllStepsSolutions();
+            //for (int i = solvectors.Keys.Min(); i <= solvectors.Keys.Max(); i++)
+            //{
+            //    double[] fullSolVector = BoundaryConditionsImposition.CreateFullVectorFromReducedVector(solvectors.Single(s => s.Key == i).Value,
             //    elementsAssembly.BoundedDOFsVector);
-
-            //string name = "DegenElementssolution" + ".dat";
-            //VectorOperations.PrintVectorToFile(fullSolVector, @"C:\Users\Public\Documents\" + name);
+            //    string name = "SolidShellLsolution" + i.ToString() + ".dat";
+            //    VectorOperations.PrintVectorToFile(fullSolVector, @"C:\Users\Public\Documents\" + name);
+            //}
             List<double[]> structuralSolutions = new List<double[]>();
-
             #endregion
             return new Results() { NonlinearSolution = structuralSolutions, SelectedDOF = 2, SolutionType = "Nonlinear" };
         }
