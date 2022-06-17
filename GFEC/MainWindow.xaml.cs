@@ -86,7 +86,7 @@ namespace GFEC
             Window_Loaded();
             this.KeyDown += Window_KeyDown;
 
-            
+
         }
 
 
@@ -336,7 +336,7 @@ namespace GFEC
         private void RunButton(object sender, RoutedEventArgs args)
         {
             //SolveSelectedExample();
-           
+
             CoupledThermalStructural.diagramData = new ShowToGUI();
             CoupledThermalStructural.diagramData.TestEvent += TestEventMethod;
             CoupledThermalStructural.diagramData.TestEventMethod();
@@ -345,7 +345,7 @@ namespace GFEC
             thread1.SetApartmentState(ApartmentState.STA);
             thread1.Start();
 
-            
+
             //thread1.Join();
             //Graph = ShowToGUI.ShowResults(solverResults);
 
@@ -372,7 +372,7 @@ namespace GFEC
             //Mesh = ShowToGUI.DrawMesh(nodes, connectivity);
 
             DataContext = this;
-            
+
             return;
 
 
@@ -505,7 +505,7 @@ namespace GFEC
                     finalResults = CoupledThermalStructural2.RunStaticExample();
                     break;
                 case "CoupledThermalStructuralCNTs":
-                    CoupledThermalStructuralCNTs.structuralSolution = new StaticSolver(); 
+                    CoupledThermalStructuralCNTs.structuralSolution = new StaticSolver();
                     CoupledThermalStructuralCNTs.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     CoupledThermalStructuralCNTs.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = CoupledThermalStructuralCNTs.RunStaticExample();
@@ -845,7 +845,7 @@ namespace GFEC
         public void NonLinearScheme_convergenceResult(object sender, ConvergenceValues e)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
-            { 
+            {
                 LogTool.Text = "Load Step " + e.LoadStep + "-Iteration " + e.Iteration + " : Convergence State: " + e.ConvergenceResult + " with residual " + e.ResidualNorm;
                 if (e.LoadStep > LoadStepNumber)
                 {
@@ -860,7 +860,7 @@ namespace GFEC
                 LoadStepNumber = e.LoadStep;
             }));
             SetAxisLimits(e.Iteration);
-            
+
             if (ChartValues.Count > 50) ChartValues.RemoveAt(0);
         }
 
@@ -1276,7 +1276,7 @@ namespace GFEC
             gnuplotImage.Source = new BitmapImage(new Uri("file://" + AppContext.BaseDirectory + "gnuplot.png"));
         }
 
-        
+
         private void Button_ParallelTest(object sender, RoutedEventArgs e)
         {
             MultiThreadingExample test1 = new MultiThreadingExample();
@@ -1287,7 +1287,7 @@ namespace GFEC
         private double _axisMax;
         private double _axisMin;
 
-        
+
         public Func<double, string> DateTimeFormatter { get; set; }
         public double AxisStep { get; set; }
         public double AxisUnit { get; set; }
@@ -1371,138 +1371,19 @@ namespace GFEC
                             var node = new Node(double.Parse(fields[1], CultureInfo.InvariantCulture), double.Parse(fields[2], CultureInfo.InvariantCulture), double.Parse(fields[3], CultureInfo.InvariantCulture));
                             nodes[nodeIndex] = node;
                         }
-                        else if(fields[0] == "f")
+                        else if (fields[0] == "f")
                         {
                             connectivityIndex = connectivityIndex + 1;
                             string separatorForNode = "/";
                             int[] elementNodes = new int[4];
                             for (int i = 0; i < 4; i++)
                             {
-                                string[] fieldsForNode = fields[i+1].Split(separatorForNode.ToCharArray());
+                                string[] fieldsForNode = fields[i + 1].Split(separatorForNode.ToCharArray());
                                 elementNodes[i] = Int16.Parse(fieldsForNode[0]);
                             }
                             elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
                         }
-                        
-                    }
-                }
 
-
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        
-        private void Button_ParallelTest(object sender, RoutedEventArgs e)
-        {
-            MultiThreadingExample test1 = new MultiThreadingExample();
-            test1.timeElapsed += PrintResultOnUI;
-            test1.RunExample();
-        }
-
-        private double _axisMax;
-        private double _axisMin;
-
-        
-        public Func<double, string> DateTimeFormatter { get; set; }
-        public double AxisStep { get; set; }
-        public double AxisUnit { get; set; }
-        public bool IsReading { get; set; }
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void ConvergenceResults()
-        {
-            var mapper = Mappers.Xy<ConvergenceValues>()
-                .X(model => model.Iteration)   //use DateTime.Ticks as X
-                .Y(model => model.ResidualNorm);           //use the value property as Y
-
-            //lets save the mapper globally.
-            Charting.For<ConvergenceValues>(mapper);
-
-            //the values property will store our values array
-            ChartValues = new ChartValues<ConvergenceValues>();
-
-            //lets set how to display the X Labels
-            //DateTimeFormatter = value => new DateTime((long)value).ToString("mm:ss");
-
-            //AxisStep forces the distance between each separator in the X axis
-            AxisStep = 1;// TimeSpan.FromSeconds(1).Ticks;
-            //AxisUnit forces lets the axis know that we are plotting seconds
-            //this is not always necessary, but it can prevent wrong labeling
-            AxisUnit = 100;// TimeSpan.TicksPerSecond;
-        }
-
-        public double AxisMax
-        {
-            get { return _axisMax; }
-            set
-            {
-                _axisMax = value;
-                OnPropertyChanged("AxisMax");
-            }
-        }
-        public double AxisMin
-        {
-            get { return _axisMin; }
-            set
-            {
-                _axisMin = value;
-                OnPropertyChanged("AxisMin");
-            }
-        }
-
-        private void SetAxisLimits(int now)
-        {
-            AxisMax = now + 1;
-            AxisMin = now - 8;
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName = null)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void ImportOBJFile(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                OpenFileDialog dialog1 = new OpenFileDialog();
-                if (dialog1.ShowDialog() == true)
-                {
-                    string selectedFilePath = dialog1.FileName;
-                    List<string> allLines = new List<string>(File.ReadAllLines(selectedFilePath));
-
-                    //List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-                    allLines.RemoveRange(0, 4);
-                    int nodeIndex = 0;
-                    int connectivityIndex = 0;
-                    foreach (var line in allLines)
-                    {
-                        // in case of first line ...
-                        string separator = " ";
-                        string[] fields = line.Split(separator.ToCharArray()); //(new string[] { "\t" }, StringSplitOptions.RemoveEmptyEntries);
-                        if (fields[0] == "v")
-                        {
-                            nodeIndex = nodeIndex + 1;
-                            var node = new Node(double.Parse(fields[1], CultureInfo.InvariantCulture), double.Parse(fields[2], CultureInfo.InvariantCulture), double.Parse(fields[3], CultureInfo.InvariantCulture));
-                            nodes[nodeIndex] = node;
-                        }
-                        else if(fields[0] == "f")
-                        {
-                            connectivityIndex = connectivityIndex + 1;
-                            string separatorForNode = "/";
-                            int[] elementNodes = new int[4];
-                            for (int i = 0; i < 4; i++)
-                            {
-                                string[] fieldsForNode = fields[i+1].Split(separatorForNode.ToCharArray());
-                                elementNodes[i] = Int16.Parse(fieldsForNode[0]);
-                            }
-                            elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
-                        }
-                        
                     }
                 }
 
@@ -1542,7 +1423,7 @@ namespace GFEC
 
             ViewportGraphics.Children.Clear();
             ViewportGraphics.InvalidateVisual();
-           
+
             ViewportGraphics.Children.Add(plotMesh.GetModel());
             //ViewportGraphics.InvalidateVisual();
             //ViewportGraphics = plotMesh.MainViewport;
