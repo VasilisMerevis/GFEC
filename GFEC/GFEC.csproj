@@ -71,6 +71,9 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -106,6 +109,7 @@
     <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />
+    <Compile Include="LinearAlgebra\CheckEquality.cs" />
     <Compile Include="PlotOBJMesh.cs" />
     <Compile Include="Elements\ANSSolidShell8EAS.cs" />
     <Compile Include="Elements\IsoparamShell18.cs" />
@@ -216,6 +220,7 @@
     <Compile Include="Solver\ISolver.cs" />
     <Compile Include="Solver\Linear\BiCGSTABSolver.cs" />
     <Compile Include="Solver\Linear\CholeskyFactorization.cs" />
+    <Compile Include="Solver\Linear\Skyline.cs" />
     <Compile Include="Solver\Linear\MMCPCGSolver.cs" />
     <Compile Include="Solver\Linear\GaussSolver.cs" />
     <Compile Include="Solver\Linear\ILinearSolution.cs" />

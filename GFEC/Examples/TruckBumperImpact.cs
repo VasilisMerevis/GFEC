@@ -62,7 +62,7 @@ namespace GFEC
 
         private static Dictionary<int, IElementProperties> CreateElementProperties(Dictionary<int, Dictionary<int, int>> elementsConnectivity)
         {
-            double E1 = 72.4 * 1e9;
+            double E1 = 200.0 * 1e9;
             double E2 = 1.0 * 1e12;
             double density1 = 2780.0;
             double density2 = 7850.0;
@@ -84,7 +84,7 @@ namespace GFEC
             }
             for (int i = elmntsNumberSolidShell + elmntsNumberSolid + 1; i <= totalElements; i++)
             {
-                elementProperties[i] = new ElementProperties(E1, 1.0, type3, 5, 3, 1, 1);
+                elementProperties[i] = new ElementProperties(E1, 1.0, type3, 2d, 3, 1, 1);
             }
             return elementProperties;
         }
@@ -367,12 +367,13 @@ namespace GFEC
             initialValues.InitialDisplacementVector = BoundaryConditionsImposition.ReducedVector(DisplacementVector, elementsAssembly.BoundedDOFsVector);
             initialValues.InitialVelocityVector = BoundaryConditionsImposition.ReducedVector(VelocityVector, elementsAssembly.BoundedDOFsVector);
             initialValues.InitialTime = 0.0;
-            ExplicitSolver newSolver = new ExplicitSolver(0.001, 5);
+            ExplicitSolver newSolver = new ExplicitSolver(0.00415, 10);
             newSolver.Assembler = elementsAssembly;
             double[] externalForces = externalForcesStructuralVector;
             newSolver.InitialValues = initialValues;
             newSolver.ExternalForcesVector = BoundaryConditionsImposition.ReducedVector(externalForces, elementsAssembly.BoundedDOFsVector);
-            newSolver.LinearSolver = new LUFactorization();
+            //newSolver.LinearSolver = new LUFactorization();
+            newSolver.LinearSolver = new Skyline();
             newSolver.ActivateNonLinearSolution = true;
             newSolver.SolveNewmark();
             //newSolver.SolveExplicit();
