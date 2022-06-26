@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GFEC
 {
@@ -12,11 +10,6 @@ namespace GFEC
         public Dictionary<int, bool[]> ElementFreedomSignature { get; } = new Dictionary<int, bool[]>();
         public List<int> ElementFreedomList { get; set; }
         public double[] DisplacementVector { get; set; }
-        public double[] DisplacementVectorPreviousStep { get; set; }
-        public double[] EASVector { get; set; }
-        public double[] EASFEnhancedVector { get; set; }
-        public double[,] EASLMatrix { get; set; }
-        public double[,] EASDMatrix { get; set; }
         public double[] AccelerationVector { get; set; }
         public double poisson { get; set; }
         public void InitializeTangentialProperties()
@@ -52,69 +45,15 @@ namespace GFEC
             ElementFreedomSignature[7] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[8] = new bool[] { true, true, true, false, false, false };
             DisplacementVector = new double[24];
-            Properties.DisplacementVectorPreviousStep = new double[24];
-            Properties.EASVector = new double[4];
-            Properties.EASFEnhancedVector = new double[4];
-            Properties.EASLMatrix = new double[4, 24];
-            Properties.EASDMatrix = new double[4, 4];
+            Properties.EASVector = new double[7];
+            Properties.EASFEnhancedVector = new double[7];
+            Properties.EASLMatrix = new double[7, 24];
+            Properties.EASDMatrix = new double[7, 7];
+            Properties.DisplacementVectorPreviousIncrement = new double[24];
         }
         public void CalculateElementEASMatrices()
         {
-            double[,] LeMatrix = new double[4, 24];
-            double[,] DeMatrix = new double[4, 4];
-            double[] PeVector = new double[4];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-            //double[] nodalX = UpdateNodalCoordinates(DisplacementVector);
-            double[] nodalXInitial = InitialNodalCoordinates();
-            double[] center = new double[3];
-            double[,] J0 = CalculateJacobian(nodalXInitial, CalculateShapeFunctionsLocalDerivatives(center));
-            double detJ0 = CalculateJacobianDet(J0);
-            double[,] transformationMat0 = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J0));
-            Dictionary<int, Dictionary<string, double[]>> aStrainPoints = AssumedStrainSamplingPoints(nodalXInitial);
-            Dictionary<int, Dictionary<string, double[]>> aStrainPointsDU = AssumedStrainSamplingPointsDU();
-
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < 2; j++)
-                {
-                    for (int k = 0; k < 2; k++)
-                    {
-                        double[] gP = GaussPoints(i, j, k).Item1;
-                        double[] gW = GaussPoints(i, j, k).Item2;
-                        Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-                        double[,] J = CalculateJacobian(nodalXInitial, localdN);
-                        double[,] transformationMat = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J));
-                        double detJ = CalculateInverseJacobian(J).Item2;
-                        Dictionary<int, double[]> gVectors = CalculategVectors(nodalXInitial, localdN);
-                        Dictionary<int, double[]> gVectorsdU = CalculatedgdUVectors(localdN);
-
-                        var BMatrices = CalculateBANSMatrix(gP, localdN, transformationMat, gVectors, gVectorsdU,
-                            aStrainPoints, aStrainPointsDU);
-                        double[,] B = BMatrices.Item1;
-                        double[,] Gamma = CalculateEnhancedStrainMatrixGamma(transformationMat0, CreateEnhancedStrainsInterpolationMatrix(gP),
-                            detJ0, detJ);
-                        LeMatrix = MatrixOperations.MatrixAddition(LeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
-                            MatrixOperations.MatrixProduct(
-                            MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, B))));
-                        DeMatrix = MatrixOperations.MatrixAddition(DeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
-                            MatrixOperations.MatrixProduct(
-                            MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, Gamma))));
-
-                        double[] alphaVector = Properties.EASVector;
-                        double[] EnhStrainVector = VectorOperations.MatrixVectorProduct(Gamma, alphaVector);
-                        double[] modifiedStrainVector = VectorOperations.VectorVectorAddition(CalculateStrainsVector(B), EnhStrainVector);
-                        double[] modifiedStressVector = CalculateStressVector(E, modifiedStrainVector);
-                        PeVector = VectorOperations.VectorVectorAddition(PeVector,
-                                   VectorOperations.VectorScalarProductNew(
-                                   VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(Gamma), modifiedStressVector),
-                                   detJ * gW[0] * gW[1] * gW[2]));
-                    }
-                }
-            }
-            double[,] DeMatrixInv = MatrixOperations.BlockMatrixInversion4X4(DeMatrix);
-            Properties.EASLMatrix = LeMatrix;
-            Properties.EASDMatrix = DeMatrixInv;
-            Properties.EASFEnhancedVector = PeVector;
+            throw new Exception("This method is to be used only for EAS method elements");
         }
         public void InitializeElementEASParameters()
         {
@@ -122,24 +61,26 @@ namespace GFEC
             Properties.EASVector[1] = 0.0;
             Properties.EASVector[2] = 0.0;
             Properties.EASVector[3] = 0.0;
+            Properties.EASVector[4] = 0.0;
+            Properties.EASVector[5] = 0.0;
+            Properties.EASVector[6] = 0.0;
         }
-        public void UpdateElementEASParameters(double[] solutionVector)
+        public void UpdateElementEASParameters(double[] totalU)
         {
+            double[] deltaU = VectorOperations.VectorVectorSubtraction(totalU, Properties.DisplacementVectorPreviousIncrement);
             double[] aPrevious = Properties.EASVector;
-            double[] vectorPe = Properties.EASFEnhancedVector;
-            double[] uPrevious = Properties.DisplacementVectorPreviousStep;
-            double[,] matrixLe = Properties.EASLMatrix;
-            double[,] matrixDeInv = Properties.EASDMatrix;
-            double[] dU = VectorOperations.VectorVectorSubtraction(solutionVector, uPrevious);
-            double[] aNext = VectorOperations.VectorVectorSubtraction(aPrevious,
-                            VectorOperations.MatrixVectorProduct(matrixDeInv,
-                            VectorOperations.VectorVectorAddition(
-                            VectorOperations.MatrixVectorProduct(matrixLe, dU), vectorPe)));
-            Properties.EASVector = aNext;
+            double[] Pe = Properties.EASFEnhancedVector;
+            double[,] Le = Properties.EASLMatrix;
+            double[,] DeInv = Properties.EASDMatrix;
+            Properties.EASVector = VectorOperations.VectorVectorAddition(aPrevious,
+                VectorOperations.VectorScalarProductNew(
+                VectorOperations.MatrixVectorProduct(DeInv, VectorOperations.VectorVectorAddition(
+                VectorOperations.MatrixVectorProduct(Le, deltaU), Pe)), -1.0));
+            Properties.DisplacementVectorPreviousIncrement = totalU;
         }
         public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
         {
-            Properties.DisplacementVectorPreviousStep = solutionVector;
+            Properties.DisplacementVectorPreviousIncrement = solutionVector;
         }
         public double ClosestPointProjection()
         {
@@ -152,55 +93,11 @@ namespace GFEC
         }
         public List<double[]> GetStressVector()
         {
-            //List<double[]> GpointsStress = new List<double[]>();
-            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    for (int j = 0; j < 2; j++)
-            //    {
-            //        for (int k = 0; k < 2; k++)
-            //        {
-            //            double[] gP = GaussPoints(i, j, k).Item1;
-            //            double[] gW = GaussPoints(i, j, k).Item2;
-            //            Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-            //            double[,] J = CalculateJacobian(localdN);
-            //            double[,] invJ = CalculateInverseJacobian(J).Item1;
-            //            double detJ = CalculateInverseJacobian(J).Item2;
-            //            Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
-            //            double[,] B = CalculateBANSMatrix(globaldN);
-            //            double[] strainVector = CalculateStrainsVector(B);
-            //            double[] stressVector = CalculateStressVector(E, strainVector);
-            //            GpointsStress.Add(stressVector);
-            //        }
-            //    }
-            //}
-            //return GpointsStress;
-            throw new Exception("Method not implemenented");
+            throw new Exception("Method to be added later in element ANSSolidShell8LEAS1RI");
         }
         public List<double[]> GetStrainVector()
         {
-            //List<double[]> GpointsDeformation = new List<double[]>();
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    for (int j = 0; j < 2; j++)
-            //    {
-            //        for (int k = 0; k < 2; k++)
-            //        {
-            //            double[] gP = GaussPoints(i, j, k).Item1;
-            //            double[] gW = GaussPoints(i, j, k).Item2;
-            //            Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-            //            double[,] J = CalculateJacobian(localdN);
-            //            double[,] invJ = CalculateInverseJacobian(J).Item1;
-            //            double detJ = CalculateInverseJacobian(J).Item2;
-            //            Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
-            //            double[,] B = CalculateBANSMatrix(globaldN);
-            //            double[] strainVector = CalculateStrainsVector(B);
-            //            GpointsDeformation.Add(strainVector);
-            //        }
-            //    }
-            //}
-            //return GpointsDeformation;
-            throw new Exception("Method not implemenented");
+            throw new Exception("Method to be added later in element ANSSolidShell8LEAS1RI");
         }
         public List<double[]> GetGaussPointsInPhysicalSpace()
         {
@@ -222,34 +119,17 @@ namespace GFEC
         }
         public List<double[]> GetStressFromElementsNodes()
         {
-            List<double[]> l = new List<double[]>();
-            l.Add(new double[] { 0.0, 0.0, 0.0 });
-            return l;
+            throw new Exception("Method to be added later in element ANSSolidShell8LEAS1RI");
+
         }
         public List<double[]> GetStrainFromElementsNodes()
         {
-            List<double[]> l = new List<double[]>();
-            l.Add(new double[] { 0.0, 0.0, 0.0 });
-            return l;
+            throw new Exception("Method to be added later in element ANSSolidShell8LEAS1RI");
+
         }
         public List<double[]> GetStressFromElements(List<double[]> parametricCoordinatesVector)
         {
-            //List<double[]> StessVectorsList = new List<double[]>();
-            //double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-            ////double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
-            //for (int i = 0; i < parametricCoordinatesVector.Count; i++)
-            //{
-            //    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(parametricCoordinatesVector[i]);
-            //    double[,] J = CalculateJacobian(localdN);
-            //    double[,] invJ = CalculateInverseJacobian(J).Item1;
-            //    Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
-            //    double[,] B = CalculateBANSMatrix(globaldN);
-            //    double[] strainVector = CalculateStrainsVector(B);
-            //    double[] stressVector = CalculateStressVector(E, strainVector);
-            //    StessVectorsList.Add(stressVector);
-            //}
-            //return StessVectorsList;
-            throw new Exception("Method not implemenented");
+            throw new Exception("Method to be added later in element ANSSolidShell8LEAS1RI");
         }
         public List<double[]> GetphysicalCoordinatesFromElements(List<double[]> parametricCoordinatesVector)
         {
@@ -278,39 +158,90 @@ namespace GFEC
         }
         private double[] InitialNodalCoordinates()
         {
-            double[] InitialCoor = new double[24];
+            double[] initialCoordinates = new double[24];
             for (int i = 1; i <= 8; i++)
             {
-                InitialCoor[3 * i - 3] = Nodes[i].XCoordinate;
-                InitialCoor[3 * i - 2] = Nodes[i].YCoordinate;
-                InitialCoor[3 * i - 1] = Nodes[i].ZCoordinate;
+                initialCoordinates[3 * i - 3] = Nodes[i].XCoordinate;
+                initialCoordinates[3 * i - 2] = Nodes[i].YCoordinate;
+                initialCoordinates[3 * i - 1] = Nodes[i].ZCoordinate;
             }
-            return InitialCoor;
+            return initialCoordinates;
+        }
+        Dictionary<int, double[]> NodalCartesianCoordinatesCurrent(double[] displacementVector)
+        {
+            Dictionary<int, double[]> updatedCoor = new Dictionary<int, double[]>();
+            for (int i = 0; i < 8; i++)
+            {
+                double[] nodalPositionVector = new double[]
+                {
+                    Nodes[i + 1].XCoordinate + displacementVector[3 * i],
+                    Nodes[i + 1].YCoordinate + displacementVector[3 * i + 1],
+                    Nodes[i + 1].ZCoordinate + displacementVector[3 * i + 2]
+                };
+                updatedCoor.Add(i, nodalPositionVector);
+            }
+            return updatedCoor;
+        }
+        Dictionary<int, double[]> NodalCartesianCoordinatesInitial()
+        {
+            Dictionary<int, double[]> updatedCoor = new Dictionary<int, double[]>();
+            for (int i = 0; i < 8; i++)
+            {
+                double[] nodalPositionVector = new double[]
+                {
+                    Nodes[i + 1].XCoordinate,
+                    Nodes[i + 1].YCoordinate,
+                    Nodes[i + 1].ZCoordinate
+                };
+                updatedCoor.Add(i, nodalPositionVector);
+            }
+            return updatedCoor;
+        }
+        Dictionary<int, double[]> NodalNaturalCoordinates()
+        {
+            Dictionary<int, double[]> naturalCoor = new Dictionary<int, double[]>();
+            naturalCoor.Add(0, new double[] { 1.0, 1.0, 1.0 });
+            naturalCoor.Add(1, new double[] { -1.0, 1.0, 1.0 });
+            naturalCoor.Add(2, new double[] { -1.0, -1.0, 1.0 });
+            naturalCoor.Add(3, new double[] { 1.0, -1.0, 1.0 });
+            naturalCoor.Add(4, new double[] { 1.0, 1.0, -1.0 });
+            naturalCoor.Add(5, new double[] { -1.0, 1.0, -1.0 });
+            naturalCoor.Add(6, new double[] { -1.0, -1.0, -1.0 });
+            naturalCoor.Add(7, new double[] { 1.0, -1.0, -1.0 });
+            return naturalCoor;
+        }
+        Dictionary<int, double[]> PositionVectors()
+        {
+            Dictionary<int, double[]> positionVectors = new Dictionary<int, double[]>();
+            positionVectors.Add(0, new double[] { 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0 });
+            positionVectors.Add(1, new double[] { 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0 });
+            positionVectors.Add(2, new double[] { 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0 });
+            positionVectors.Add(3, new double[] { 1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0 });
+            return positionVectors;
         }
         private Dictionary<int, double> CalculateShapeFunctions(double ksi, double ihta, double mhi)
         {
             Dictionary<int, double> shapeFunctions = new Dictionary<int, double>();
-            double N1 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - mhi); shapeFunctions.Add(1, N1);
-            double N2 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - mhi); shapeFunctions.Add(2, N2);
-            double N3 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - mhi); shapeFunctions.Add(3, N3);
-            double N4 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - mhi); shapeFunctions.Add(4, N4);
-            double N5 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + mhi); shapeFunctions.Add(5, N5);
-            double N6 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + mhi); shapeFunctions.Add(6, N6);
-            double N7 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + mhi); shapeFunctions.Add(7, N7);
-            double N8 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 + mhi); shapeFunctions.Add(8, N8);
-
+            double N1 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + mhi); shapeFunctions.Add(1, N1);
+            double N2 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 + mhi); shapeFunctions.Add(2, N2);
+            double N3 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + mhi); shapeFunctions.Add(3, N3);
+            double N4 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + mhi); shapeFunctions.Add(4, N4);
+            double N5 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - mhi); shapeFunctions.Add(5, N5);
+            double N6 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - mhi); shapeFunctions.Add(6, N6);
+            double N7 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - mhi); shapeFunctions.Add(7, N7);
+            double N8 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - mhi); shapeFunctions.Add(8, N8);
             return shapeFunctions;
         }
         private double[,] CalculateShapeFunctionMatrix(double ksi, double ihta, double zita)
         {
-            double N1 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - zita);
-            double N2 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - zita);
-            double N3 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - zita);
-            double N4 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - zita);
-            double N5 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + zita);
-            double N6 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + zita);
-            double N7 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + zita);
-            double N8 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 + zita);
+            double N1 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + zita);
+            double N2 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 + zita);
+            double N3 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + zita);
+            double N4 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + zita);
+            double N5 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - zita);
+            double N6 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - zita);
+            double N7 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - zita);
+            double N8 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - zita);
             double[,] shapeFunctionsMat = new double[,] {
                 {N1, 0.0, 0.0, N2, 0.0, 0.0, N3, 0.0, 0.0, N4, 0.0, 0.0, N5, 0.0, 0.0, N6, 0.0, 0.0, N7, 0.0, 0.0, N8, 0.0, 0.0 },
                 {0.0, N1, 0.0, 0.0, N2, 0.0, 0.0, N3, 0.0, 0.0, N4, 0.0, 0.0, N5, 0.0, 0.0, N6, 0.0, 0.0, N7, 0.0, 0.0, N8, 0.0 },
@@ -327,38 +258,38 @@ namespace GFEC
 
             double[] dN_ksi = new double[]
             {
-                (-1.0/8.0*(1-ihta)*(1-mhi)),
-                (1.0/8.0*(1-ihta)*(1-mhi)),
-                (1.0/8.0*(1+ihta)*(1-mhi)),
-                (-1.0/8.0*(1+ihta)*(1-mhi)),
+                (1.0/8.0*(1+ihta)*(1+mhi)),
+                (-1.0/8.0*(1+ihta)*(1+mhi)),
                 (-1.0/8.0*(1-ihta)*(1+mhi)),
                 (1.0/8.0*(1-ihta)*(1+mhi)),
-                (1.0/8.0*(1+ihta)*(1+mhi)),
-                (-1.0/8.0*(1+ihta)*(1+mhi))
+                (1.0/8.0*(1+ihta)*(1-mhi)),
+                (-1.0/8.0*(1+ihta)*(1-mhi)),
+                (-1.0/8.0*(1-ihta)*(1-mhi)),
+                (1.0/8.0*(1-ihta)*(1-mhi))
             };
 
             double[] dN_ihta = new double[]
             {
-                (-1.0/8.0*(1-ksi)*(1-mhi)),
-                (-1.0/8.0*(1+ksi)*(1-mhi)),
-                (1.0/8.0*(1+ksi)*(1-mhi)),
-                (1.0/8.0*(1-ksi)*(1-mhi)),
+                (1.0/8.0*(1+ksi)*(1+mhi)),
+                (1.0/8.0*(1-ksi)*(1+mhi)),
                 (-1.0/8.0*(1-ksi)*(1+mhi)),
                 (-1.0/8.0*(1+ksi)*(1+mhi)),
-                (1.0/8.0*(1+ksi)*(1+mhi)),
-                (1.0/8.0*(1-ksi)*(1+mhi))
+                (1.0/8.0*(1+ksi)*(1-mhi)),
+                (1.0/8.0*(1-ksi)*(1-mhi)),
+                (-1.0/8.0*(1-ksi)*(1-mhi)),
+                (-1.0/8.0*(1+ksi)*(1-mhi))
             };
 
             double[] dN_mhi = new double[]
             {
-                (-1.0/8.0*(1-ksi)*(1-ihta)),
-                (-1.0/8.0*(1+ksi)*(1-ihta)),
-                (-1.0/8.0*(1+ksi)*(1+ihta)),
-                (-1.0/8.0*(1-ksi)*(1+ihta)),
+                (1.0/8.0*(1+ksi)*(1+ihta)),
+                (1.0/8.0*(1-ksi)*(1+ihta)),
                 (1.0/8.0*(1-ksi)*(1-ihta)),
                 (1.0/8.0*(1+ksi)*(1-ihta)),
-                (1.0/8.0*(1+ksi)*(1+ihta)),
-                (1.0/8.0*(1-ksi)*(1+ihta))
+                (-1.0/8.0*(1+ksi)*(1+ihta)),
+                (-1.0/8.0*(1-ksi)*(1+ihta)),
+                (-1.0/8.0*(1-ksi)*(1-ihta)),
+                (-1.0/8.0*(1+ksi)*(1-ihta))
             };
 
             Dictionary<string, double[]> dN = new Dictionary<string, double[]>();
@@ -367,73 +298,320 @@ namespace GFEC
             dN.Add("mhi", dN_mhi);
             return dN;
         }
+        private double CalculateShapeFunctionsLocalDerivatives(double[] naturalCoordinates, int parametricAxis,
+            int node)
+        {
+            double ksi = naturalCoordinates[0];
+            double ihta = naturalCoordinates[1];
+            double mhi = naturalCoordinates[2];
+            if(parametricAxis == 0)
+            {
+                double dN_ksi = new double();
+                switch (node)
+                {
+                    case 0:
+                        dN_ksi = 1.0 / 8.0 * (1 + ihta) * (1 + mhi);
+                        break;
+                    case 1:
+                        dN_ksi = -1.0 / 8.0 * (1 + ihta) * (1 + mhi);
+                        break;
+                    case 2:
+                        dN_ksi = -1.0 / 8.0 * (1 - ihta) * (1 + mhi);
+                        break;
+                    case 3:
+                        dN_ksi = 1.0 / 8.0 * (1 - ihta) * (1 + mhi);
+                        break;
+                    case 4:
+                        dN_ksi = 1.0 / 8.0 * (1 + ihta) * (1 - mhi);
+                        break;
+                    case 5:
+                        dN_ksi = -1.0 / 8.0 * (1 + ihta) * (1 - mhi);
+                        break;
+                    case 6:
+                        dN_ksi = -1.0 / 8.0 * (1 - ihta) * (1 - mhi);
+                        break;
+                    case 7:
+                        dN_ksi = 1.0 / 8.0 * (1 - ihta) * (1 - mhi);
+                        break;
+                }
+                return dN_ksi;
+            }
+            else if (parametricAxis == 1)
+            {
+                double dN_ihta = new double();
+                switch (node)
+                {
+                    case 0:
+                        dN_ihta = 1.0 / 8.0 * (1 + ksi) * (1 + mhi);
+                        break;
+                    case 1:
+                        dN_ihta = 1.0 / 8.0 * (1 - ksi) * (1 + mhi);
+                        break;
+                    case 2:
+                        dN_ihta = -1.0 / 8.0 * (1 - ksi) * (1 + mhi);
+                        break;
+                    case 3:
+                        dN_ihta = -1.0 / 8.0 * (1 + ksi) * (1 + mhi);
+                        break;
+                    case 4:
+                        dN_ihta = 1.0 / 8.0 * (1 + ksi) * (1 - mhi);
+                        break;
+                    case 5:
+                        dN_ihta = 1.0 / 8.0 * (1 - ksi) * (1 - mhi);
+                        break;
+                    case 6:
+                        dN_ihta = -1.0 / 8.0 * (1 - ksi) * (1 - mhi);
+                        break;
+                    case 7:
+                        dN_ihta = -1.0 / 8.0 * (1 + ksi) * (1 - mhi);
+                        break;
+                }
+                return dN_ihta;
+            }
+            else
+            {
 
-        private double[,] CalculateJacobian(double[] xNodal, Dictionary<string, double[]> dN)
+                double dN_mhi = new double();
+                switch (node)
+                {
+                    case 0:
+                        dN_mhi = 1.0 / 8.0 * (1 + ksi) * (1 + ihta);
+                        break;
+                    case 1:
+                        dN_mhi = 1.0 / 8.0 * (1 - ksi) * (1 + ihta);
+                        break;
+                    case 2:
+                        dN_mhi = 1.0 / 8.0 * (1 - ksi) * (1 - ihta);
+                        break;
+                    case 3:
+                        dN_mhi = 1.0 / 8.0 * (1 + ksi) * (1 - ihta);
+                        break;
+                    case 4:
+                        dN_mhi = -1.0 / 8.0 * (1 + ksi) * (1 + ihta);
+                        break;
+                    case 5:
+                        dN_mhi = -1.0 / 8.0 * (1 - ksi) * (1 + ihta);
+                        break;
+                    case 6:
+                        dN_mhi = -1.0 / 8.0 * (1 - ksi) * (1 - ihta);
+                        break;
+                    case 7:
+                        dN_mhi = -1.0 / 8.0 * (1 + ksi) * (1 - ihta);
+                        break;
+                }
+                return dN_mhi;
+            }
+        }
+        private double[,] CalculateUpdatedJacobianMatrix(double[] xUpdated, Dictionary<string, double[]> dN)
         {
             double[,] jacobianMatrix = new double[3, 3];
-            //DisplacementVector = new double[24];
-            //double[] xInitial = UpdateNodalCoordinates(DisplacementVector);
 
             int k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xNodal[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xNodal[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xNodal[k] * dN["ksi"][i];
+                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xUpdated[k] * dN["ksi"][i];
                 k = k + 3;
             }
 
             k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xNodal[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xNodal[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xNodal[k] * dN["ihta"][i];
+                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xUpdated[k] * dN["ihta"][i];
                 k = k + 3;
             }
 
             k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xNodal[k] * dN["mhi"][i];
+                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xUpdated[k] * dN["mhi"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xNodal[k] * dN["mhi"][i];
+                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xUpdated[k] * dN["mhi"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xNodal[k] * dN["mhi"][i];
+                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xUpdated[k] * dN["mhi"][i];
                 k = k + 3;
             }
 
             return jacobianMatrix;
         }
+        private double[,] CalculateJacobian(Dictionary<string, double[]> dN)
+        {
+            double[,] jacobianMatrix = new double[3, 3];
+            double[] xNodalInitial = InitialNodalCoordinates();
 
+            int k = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xNodalInitial[k] * dN["ksi"][i];
+                k = k + 3;
+            }
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xNodalInitial[k] * dN["ksi"][i];
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xNodalInitial[k] * dN["ksi"][i];
+                k = k + 3;
+            }
+
+            k = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xNodalInitial[k] * dN["ihta"][i];
+                k = k + 3;
+            }
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xNodalInitial[k] * dN["ihta"][i];
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xNodalInitial[k] * dN["ihta"][i];
+                k = k + 3;
+            }
+
+            k = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xNodalInitial[k] * dN["mhi"][i];
+                k = k + 3;
+            }
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xNodalInitial[k] * dN["mhi"][i];
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xNodalInitial[k] * dN["mhi"][i];
+                k = k + 3;
+            }
+
+            return jacobianMatrix;
+        }
+        private double CalculateJacobianDet(double[,] jacobianMatrix)
+        {
+            double[,] jacobianInverseMatrix = new double[3, 3];
+
+            jacobianInverseMatrix[0, 0] = jacobianMatrix[1, 1] * jacobianMatrix[2, 2] - jacobianMatrix[1, 2] * jacobianMatrix[2, 1];
+            jacobianInverseMatrix[1, 1] = jacobianMatrix[2, 2] * jacobianMatrix[0, 0] - jacobianMatrix[2, 0] * jacobianMatrix[2, 2];
+            jacobianInverseMatrix[2, 2] = jacobianMatrix[0, 0] * jacobianMatrix[1, 1] - jacobianMatrix[0, 1] * jacobianMatrix[1, 0];
+
+            jacobianInverseMatrix[0, 1] = jacobianMatrix[1, 2] * jacobianMatrix[2, 0] - jacobianMatrix[1, 0] * jacobianMatrix[2, 2];
+            jacobianInverseMatrix[1, 2] = jacobianMatrix[2, 0] * jacobianMatrix[0, 1] - jacobianMatrix[2, 1] * jacobianMatrix[0, 0];
+            jacobianInverseMatrix[2, 0] = jacobianMatrix[0, 1] * jacobianMatrix[1, 2] - jacobianMatrix[0, 2] * jacobianMatrix[1, 1];
+
+            jacobianInverseMatrix[1, 0] = jacobianMatrix[2, 1] * jacobianMatrix[0, 2] - jacobianMatrix[0, 1] * jacobianMatrix[2, 2];
+            jacobianInverseMatrix[2, 1] = jacobianMatrix[0, 2] * jacobianMatrix[1, 0] - jacobianMatrix[1, 2] * jacobianMatrix[0, 0];
+            jacobianInverseMatrix[0, 2] = jacobianMatrix[1, 0] * jacobianMatrix[1, 1] - jacobianMatrix[2, 0] * jacobianMatrix[1, 1];
+
+            double detj = jacobianMatrix[0, 0] * jacobianInverseMatrix[0, 0] + jacobianMatrix[0, 1] * jacobianInverseMatrix[1, 0] + jacobianMatrix[0, 2] * jacobianInverseMatrix[2, 0];
+            return detj;
+        }
+        private double[,] CalculateTransformationMatrix(double[,] jacobianInverseMatrix)
+        {
+            double[,] T = new double[6, 6];
+            T[0, 0] = jacobianInverseMatrix[0, 0] * jacobianInverseMatrix[0, 0];
+            T[0, 1] = jacobianInverseMatrix[0, 1] * jacobianInverseMatrix[0, 1];
+            T[0, 2] = jacobianInverseMatrix[0, 2] * jacobianInverseMatrix[0, 2];
+            T[0, 3] = jacobianInverseMatrix[0, 0] * jacobianInverseMatrix[0, 1];
+            T[0, 4] = jacobianInverseMatrix[0, 1] * jacobianInverseMatrix[0, 2];
+            T[0, 5] = jacobianInverseMatrix[0, 2] * jacobianInverseMatrix[0, 0];
+
+            T[1, 0] = jacobianInverseMatrix[1, 0] * jacobianInverseMatrix[1, 0];
+            T[1, 1] = jacobianInverseMatrix[1, 1] * jacobianInverseMatrix[1, 1];
+            T[1, 2] = jacobianInverseMatrix[1, 2] * jacobianInverseMatrix[1, 2];
+            T[1, 3] = jacobianInverseMatrix[1, 0] * jacobianInverseMatrix[1, 1];
+            T[1, 4] = jacobianInverseMatrix[1, 1] * jacobianInverseMatrix[1, 2];
+            T[1, 5] = jacobianInverseMatrix[1, 2] * jacobianInverseMatrix[1, 0];
+
+            T[2, 0] = jacobianInverseMatrix[2, 0] * jacobianInverseMatrix[2, 0];
+            T[2, 1] = jacobianInverseMatrix[2, 1] * jacobianInverseMatrix[2, 1];
+            T[2, 2] = jacobianInverseMatrix[2, 2] * jacobianInverseMatrix[2, 2];
+            T[2, 3] = jacobianInverseMatrix[2, 0] * jacobianInverseMatrix[2, 1];
+            T[2, 4] = jacobianInverseMatrix[2, 1] * jacobianInverseMatrix[2, 2];
+            T[2, 5] = jacobianInverseMatrix[2, 2] * jacobianInverseMatrix[2, 0];
+
+            T[3, 0] = 2 * jacobianInverseMatrix[0, 0] * jacobianInverseMatrix[1, 0];
+            T[3, 1] = 2 * jacobianInverseMatrix[0, 1] * jacobianInverseMatrix[1, 1];
+            T[3, 2] = 2 * jacobianInverseMatrix[0, 2] * jacobianInverseMatrix[1, 2];
+
+            T[3, 3] = jacobianInverseMatrix[0, 0] * jacobianInverseMatrix[1, 1] +
+                                jacobianInverseMatrix[0, 1] * jacobianInverseMatrix[1, 0];
+
+            T[3, 4] = jacobianInverseMatrix[0, 1] * jacobianInverseMatrix[1, 2] +
+                                jacobianInverseMatrix[0, 2] * jacobianInverseMatrix[1, 1];
+
+            T[3, 5] = jacobianInverseMatrix[0, 2] * jacobianInverseMatrix[1, 0] +
+                                jacobianInverseMatrix[0, 0] * jacobianInverseMatrix[2, 1];
+
+            T[4, 0] = 2 * jacobianInverseMatrix[1, 0] * jacobianInverseMatrix[2, 0];
+            T[4, 1] = 2 * jacobianInverseMatrix[1, 1] * jacobianInverseMatrix[2, 1];
+            T[4, 2] = 2 * jacobianInverseMatrix[1, 2] * jacobianInverseMatrix[2, 2];
+
+            T[4, 3] = jacobianInverseMatrix[1, 0] * jacobianInverseMatrix[2, 1] +
+                                jacobianInverseMatrix[1, 1] * jacobianInverseMatrix[2, 0];
+
+            T[4, 4] = jacobianInverseMatrix[1, 1] * jacobianInverseMatrix[2, 2] +
+                                jacobianInverseMatrix[1, 2] * jacobianInverseMatrix[2, 1];
+
+            T[4, 5] = jacobianInverseMatrix[1, 2] * jacobianInverseMatrix[2, 0] +
+                                jacobianInverseMatrix[1, 0] * jacobianInverseMatrix[2, 2];
+
+            T[5, 0] = 2 * jacobianInverseMatrix[2, 0] * jacobianInverseMatrix[0, 0];
+            T[5, 1] = 2 * jacobianInverseMatrix[2, 1] * jacobianInverseMatrix[0, 1];
+            T[5, 2] = 2 * jacobianInverseMatrix[2, 2] * jacobianInverseMatrix[0, 2];
+
+            T[5, 3] = jacobianInverseMatrix[2, 0] * jacobianInverseMatrix[0, 1] +
+                                jacobianInverseMatrix[2, 1] * jacobianInverseMatrix[0, 0];
+
+            T[5, 4] = jacobianInverseMatrix[2, 1] * jacobianInverseMatrix[0, 2] +
+                                jacobianInverseMatrix[2, 2] * jacobianInverseMatrix[0, 1];
+
+            T[5, 5] = jacobianInverseMatrix[2, 2] * jacobianInverseMatrix[0, 0] +
+                                jacobianInverseMatrix[2, 0] * jacobianInverseMatrix[0, 2];
+            return T;
+        }
         private Tuple<double[,], double> CalculateInverseJacobian(double[,] jacobianMatrix)
         {
             double[,] jacobianInverseMatrix = new double[3, 3];
@@ -466,348 +644,238 @@ namespace GFEC
 
             return new Tuple<double[,], double>(jacobianInverseMatrix, detj);
         }
-        private double CalculateJacobianDet(double[,] jacobianMatrix)
+        private double[] CalculateJacobianPart1(double[] parametricCoordinates)
         {
-            double[,] jacobianInverseMatrix = new double[3, 3];
+            double[] jacobianPart1 = new double[3];
+            double[] xNodalInitial = InitialNodalCoordinates();
 
-            jacobianInverseMatrix[0, 0] = jacobianMatrix[1, 1] * jacobianMatrix[2, 2] - jacobianMatrix[1, 2] * jacobianMatrix[2, 1];
-            jacobianInverseMatrix[1, 1] = jacobianMatrix[2, 2] * jacobianMatrix[0, 0] - jacobianMatrix[2, 0] * jacobianMatrix[2, 2];
-            jacobianInverseMatrix[2, 2] = jacobianMatrix[0, 0] * jacobianMatrix[1, 1] - jacobianMatrix[0, 1] * jacobianMatrix[1, 0];
-
-            jacobianInverseMatrix[0, 1] = jacobianMatrix[1, 2] * jacobianMatrix[2, 0] - jacobianMatrix[1, 0] * jacobianMatrix[2, 2];
-            jacobianInverseMatrix[1, 2] = jacobianMatrix[2, 0] * jacobianMatrix[0, 1] - jacobianMatrix[2, 1] * jacobianMatrix[0, 0];
-            jacobianInverseMatrix[2, 0] = jacobianMatrix[0, 1] * jacobianMatrix[1, 2] - jacobianMatrix[0, 2] * jacobianMatrix[1, 1];
-
-            jacobianInverseMatrix[1, 0] = jacobianMatrix[2, 1] * jacobianMatrix[0, 2] - jacobianMatrix[0, 1] * jacobianMatrix[2, 2];
-            jacobianInverseMatrix[2, 1] = jacobianMatrix[0, 2] * jacobianMatrix[1, 0] - jacobianMatrix[1, 2] * jacobianMatrix[0, 0];
-            jacobianInverseMatrix[0, 2] = jacobianMatrix[1, 0] * jacobianMatrix[1, 1] - jacobianMatrix[2, 0] * jacobianMatrix[1, 1];
-
-            double detj = jacobianMatrix[0, 0] * jacobianInverseMatrix[0, 0] + jacobianMatrix[0, 1] * jacobianInverseMatrix[1, 0] + jacobianMatrix[0, 2] * jacobianInverseMatrix[2, 0];
-            return detj;
-        }
-        private Dictionary<int, double[]> CalculateShapeFunctionsGlobalDerivatives(Dictionary<string, double[]> dN, double[,] Jinv)
-        {
-            Dictionary<int, double[]> dNg = new Dictionary<int, double[]>();
-
+            int k = 0;
             for (int i = 0; i < 8; i++)
             {
-                double[] dNlocal = new double[] { dN["ksi"][i], dN["ihta"][i], dN["mhi"][i] };
-                double[] dNglobal = VectorOperations.MatrixVectorProduct(Jinv, dNlocal);
-                dNg.Add(i, dNglobal);
+                jacobianPart1[0] = jacobianPart1[0] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 0, i); 
+                k = k + 3;
             }
-            return dNg;
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart1[1] = jacobianPart1[1] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 0, i);
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart1[2] = jacobianPart1[2] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 0, i);
+                k = k + 3;
+            }
+            return jacobianPart1;
         }
+        private double[] CalculateJacobianPart2(double[] parametricCoordinates)
+        {
+            double[] jacobianPart2 = new double[3];
+            double[] xNodalInitial = InitialNodalCoordinates();
 
+            int k = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart2[0] = jacobianPart2[0] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 1, i);
+                k = k + 3;
+            }
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart2[1] = jacobianPart2[1] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 1, i);
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart2[2] = jacobianPart2[2] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 1, i);
+                k = k + 3;
+            }
+            return jacobianPart2;
+        }
+        private double[] CalculateJacobianPart3(double[] parametricCoordinates)
+        {
+            double[] jacobianPart3 = new double[3];
+            double[] xNodalInitial = InitialNodalCoordinates();
+
+            int k = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart3[0] = jacobianPart3[0] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 2, i);
+                k = k + 3;
+            }
+            k = 1;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart3[1] = jacobianPart3[1] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 2, i);
+                k = k + 3;
+            }
+            k = 2;
+            for (int i = 0; i < 8; i++)
+            {
+                jacobianPart3[2] = jacobianPart3[2] + xNodalInitial[k] * CalculateShapeFunctionsLocalDerivatives(parametricCoordinates, 2, i);
+                k = k + 3;
+            }
+            return jacobianPart3;
+        }
+        private double[,] CalculateBMatrix(Dictionary<string, double[]> dNlocal, double[,] jacobianMatrix,
+            double[] parametricCoordinates, double[,] transformationMatrix)
+        {
+            double[,] BmatrixLocal = new double[6, 24];
+            //-----------------------------------------------------------------
+            double[] a = new double[] { 1d, 1d, 0d };
+            double[] b = new double[] { -1d, 1d, 0d };
+            double[] c = new double[] { -1d, -1d, 0d };
+            double[] d = new double[] { 1d, -1d, 0d };
+            //-----------------------------------------------------------------
+            double[] e = new double[] { 1d, 0d, 1d };
+            double[] f = new double[] { -1d, 0d, 1d };
+            double[] g = new double[] { -1d, 0d, -1d };
+            double[] h = new double[] { 1d, 0d, -1d };
+            //-----------------------------------------------------------------
+            double[] j = new double[] { 0d, 1d, 1d };
+            double[] k = new double[] { 0d, -1d, 1d };
+            double[] l = new double[] { 0d, -1d, -1d };
+            double[] m = new double[] { 0d, 1d, -1d };
+            for (int i = 0; i < 8; i++)
+            {
+                BmatrixLocal[0, i * 3] = dNlocal["ksi"][i] * jacobianMatrix[0, 0];
+                BmatrixLocal[0, i * 3 + 1] = dNlocal["ksi"][i] * jacobianMatrix[0, 1];
+                BmatrixLocal[0, i * 3 + 2] = dNlocal["ksi"][i] * jacobianMatrix[0, 2];
+
+                BmatrixLocal[1, i * 3] = dNlocal["ihta"][i] * jacobianMatrix[1, 0];
+                BmatrixLocal[1, i * 3 + 1] = dNlocal["ihta"][i] * jacobianMatrix[1, 1];
+                BmatrixLocal[1, i * 3 + 2] = dNlocal["ihta"][i] * jacobianMatrix[1, 2];
+
+                //εζζ Assumed strain interpolation from points A, B, C, D
+                BmatrixLocal[2, i * 3] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(a, 2, i) * CalculateJacobianPart3(a)[0] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(b, 2, i) * CalculateJacobianPart3(b)[0] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(c, 2, i) * CalculateJacobianPart3(c)[0] +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(d, 2, i) * CalculateJacobianPart3(d)[0];
+                BmatrixLocal[2, i * 3 + 1] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(a, 2, i) * CalculateJacobianPart3(a)[1] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(b, 2, i) * CalculateJacobianPart3(b)[1] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(c, 2, i) * CalculateJacobianPart3(c)[1] +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(d, 2, i) * CalculateJacobianPart3(d)[1];
+                BmatrixLocal[2, i * 3 + 2] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(a, 2, i) * CalculateJacobianPart3(a)[2] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(b, 2, i) * CalculateJacobianPart3(b)[2] +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(c, 2, i) * CalculateJacobianPart3(c)[2] +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[1]) *
+                                CalculateShapeFunctionsLocalDerivatives(d, 2, i) * CalculateJacobianPart3(d)[2];
+                //-----------------------------------------------------------------
+                BmatrixLocal[3, i * 3] = dNlocal["ihta"][i] * jacobianMatrix[0, 0] +
+                    dNlocal["ksi"][i] * jacobianMatrix[1, 0];
+                BmatrixLocal[3, i * 3 + 1] = dNlocal["ihta"][i] * jacobianMatrix[0, 1] +
+                    dNlocal["ksi"][i] * jacobianMatrix[1, 1];
+                BmatrixLocal[3, i * 3 + 2] = dNlocal["ihta"][i] * jacobianMatrix[0, 2] +
+                    dNlocal["ksi"][i] * jacobianMatrix[1, 2];
+                //εηζ Assumed strain interpolation from points E,F,G,H
+                BmatrixLocal[4, i * 3] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(e, 2, i) * CalculateJacobianPart2(e)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(e, 1, i) * CalculateJacobianPart3(e)[0]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(f, 2, i) * CalculateJacobianPart2(f)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(f, 1, i) * CalculateJacobianPart3(f)[0]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(g, 2, i) * CalculateJacobianPart2(g)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(g, 1, i) * CalculateJacobianPart3(g)[0]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(h, 2, i) * CalculateJacobianPart2(h)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(h, 1, i) * CalculateJacobianPart3(h)[0]);
+
+                BmatrixLocal[4, i * 3 + 1] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(e, 2, i) * CalculateJacobianPart2(e)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(e, 1, i) * CalculateJacobianPart3(e)[1]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(f, 2, i) * CalculateJacobianPart2(f)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(f, 1, i) * CalculateJacobianPart3(f)[1]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(g, 2, i) * CalculateJacobianPart2(g)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(g, 1, i) * CalculateJacobianPart3(g)[1]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(h, 2, i) * CalculateJacobianPart2(h)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(h, 1, i) * CalculateJacobianPart3(h)[1]);
+
+                BmatrixLocal[4, i * 3 + 2] = (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(e, 2, i) * CalculateJacobianPart2(e)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(e, 1, i) * CalculateJacobianPart3(e)[2]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(f, 2, i) * CalculateJacobianPart2(f)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(f, 1, i) * CalculateJacobianPart3(f)[2]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(g, 2, i) * CalculateJacobianPart2(g)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(g, 1, i) * CalculateJacobianPart3(g)[2]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[0]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(h, 2, i) * CalculateJacobianPart2(h)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(h, 1, i) * CalculateJacobianPart3(h)[2]);
+                //-----------------------------------------------------------------
+                //εζξ Assumed strain interpolation from points J, K, L, M
+                BmatrixLocal[5, i * 3] = (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(j, 0, i) * CalculateJacobianPart3(j)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(j, 2, i) * CalculateJacobianPart1(j)[0]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(k, 0, i) * CalculateJacobianPart3(k)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(k, 2, i) * CalculateJacobianPart1(k)[0]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(l, 0, i) * CalculateJacobianPart3(l)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(l, 2, i) * CalculateJacobianPart1(l)[0]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(m, 0, i) * CalculateJacobianPart3(m)[0] +
+                                CalculateShapeFunctionsLocalDerivatives(m, 2, i) * CalculateJacobianPart1(m)[0]);
+
+                BmatrixLocal[5, i * 3 + 1] = (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(j, 0, i) * CalculateJacobianPart3(j)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(j, 2, i) * CalculateJacobianPart1(j)[1]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(k, 0, i) * CalculateJacobianPart3(k)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(k, 2, i) * CalculateJacobianPart1(k)[1]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(l, 0, i) * CalculateJacobianPart3(l)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(l, 2, i) * CalculateJacobianPart1(l)[1]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(m, 0, i) * CalculateJacobianPart3(m)[1] +
+                                CalculateShapeFunctionsLocalDerivatives(m, 2, i) * CalculateJacobianPart1(m)[1]);
+
+                BmatrixLocal[5, i * 3 + 2] = (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(j, 0, i) * CalculateJacobianPart3(j)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(j, 2, i) * CalculateJacobianPart1(j)[2]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 + parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(k, 0, i) * CalculateJacobianPart3(k)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(k, 2, i) * CalculateJacobianPart1(k)[2]) +
+                                (1.0 / 4.0) * (1.0 - parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(l, 0, i) * CalculateJacobianPart3(l)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(l, 2, i) * CalculateJacobianPart1(l)[2]) +
+                                (1.0 / 4.0) * (1.0 + parametricCoordinates[1]) * (1.0 - parametricCoordinates[2]) *
+                                (CalculateShapeFunctionsLocalDerivatives(m, 0, i) * CalculateJacobianPart3(m)[2] +
+                                CalculateShapeFunctionsLocalDerivatives(m, 2, i) * CalculateJacobianPart1(m)[2]);
+                //-----------------------------------------------------------------
+            }
+            var BmatrixGlobal = MatrixOperations.MatrixProduct(transformationMatrix, BmatrixLocal);
+            return BmatrixGlobal;
+        }
         private double[] CalculateStrainsVector(double[,] Bmatrix)
         {
             double[] strains = VectorOperations.MatrixVectorProduct(Bmatrix, DisplacementVector);
             return strains;
         }
-        private Dictionary<int, double[]> CalculategVectors(double[] nodalXInitial, Dictionary<string, double[]> localdN)
+        private double[] CalculateIncrementStrainsVector(double[,] Bmatrix)
         {
-            Dictionary<int, double[]> gVectors = new Dictionary<int, double[]>();
-            double g11 = new double();
-            double g12 = new double();
-            double g13 = new double();
-            double g21 = new double();
-            double g22 = new double();
-            double g23 = new double();
-            double g31 = new double();
-            double g32 = new double();
-            double g33 = new double();
-            for (int i = 0; i < 8; i++)
-            {
-                g11 += localdN["ksi"][i] * (nodalXInitial[3 * i] + DisplacementVector[3 * i]);
-                g21 += localdN["ihta"][i] * (nodalXInitial[3 * i] + DisplacementVector[3 * i]);
-                g31 += localdN["mhi"][i] * (nodalXInitial[3 * i] + DisplacementVector[3 * i]);
-                g12 += localdN["ksi"][i] * (nodalXInitial[3 * i + 1] + DisplacementVector[3 * i + 1]);
-                g22 += localdN["ihta"][i] * (nodalXInitial[3 * i + 1] + DisplacementVector[3 * i + 1]);
-                g32 += localdN["mhi"][i] * (nodalXInitial[3 * i + 1] + DisplacementVector[3 * i + 1]);
-                g13 += localdN["ksi"][i] * (nodalXInitial[3 * i + 2] + DisplacementVector[3 * i + 2]);
-                g23 += localdN["ihta"][i] * (nodalXInitial[3 * i + 2] + DisplacementVector[3 * i + 2]);
-                g33 += localdN["mhi"][i] * (nodalXInitial[3 * i + 2] + DisplacementVector[3 * i + 2]);
-            }
-            double[] g1 = new double[] { g11, g12, g13 };
-            double[] g2 = new double[] { g21, g22, g23 };
-            double[] g3 = new double[] { g31, g32, g33 };
-            gVectors.Add(1, g1);
-            gVectors.Add(2, g2);
-            gVectors.Add(3, g3);
-            return gVectors;
+            double[] deltaU = VectorOperations.VectorVectorSubtraction(DisplacementVector, Properties.DisplacementVectorPreviousStep);
+            double[] strainsIncrement = VectorOperations.MatrixVectorProduct(Bmatrix, deltaU);
+            return strainsIncrement;
         }
-        private Dictionary<int, double[]> CalculatedgdUVectors(Dictionary<string, double[]> localdN)
-        {
-            Dictionary<int, double[]> dgVectors = new Dictionary<int, double[]>();
-            double dg11 = new double();
-            double dg12 = new double();
-            double dg13 = new double();
-            double dg21 = new double();
-            double dg22 = new double();
-            double dg23 = new double();
-            double dg31 = new double();
-            double dg32 = new double();
-            double dg33 = new double();
-            for (int i = 0; i < 8; i++)
-            {
-                dg11 += localdN["ksi"][i];
-                dg21 += localdN["ihta"][i];
-                dg31 += localdN["mhi"][i];
-                dg12 += localdN["ksi"][i];
-                dg22 += localdN["ihta"][i];
-                dg32 += localdN["mhi"][i];
-                dg13 += localdN["ksi"][i];
-                dg23 += localdN["ihta"][i];
-                dg33 += localdN["mhi"][i];
-            }
-            double[] dg1 = new double[] { dg11, dg12, dg13 };
-            double[] dg2 = new double[] { dg21, dg22, dg23 };
-            double[] dg3 = new double[] { dg31, dg32, dg33 };
-            dgVectors.Add(1, dg1);
-            dgVectors.Add(2, dg2);
-            dgVectors.Add(3, dg3);
-            return dgVectors;
-        }
-        private Tuple<double[,], double[,]> CalculateBANSMatrix(double[] GaussPointNaturalCoordinates, Dictionary<string, double[]> localdNGaussPoint,
-                                              double[,] transformationMatrix,Dictionary<int, double[]> gVectors,
-                                              Dictionary<int, double[]> gVectorsDU,
-                                              Dictionary<int, Dictionary<string, double[]>> StrainSamplingPoints,
-                                              Dictionary<int, Dictionary<string, double[]>> StrainSamplingPointsDU)
-        {
-            double[,] BANSmatrix = new double[6, 24];
-            double[,] BANSmatrixDU = new double[6, 24];
-            for (int i = 0; i < 8; i++)
-            {
-                double[,] nodalB = new double[6, 3];
-                double[,] nodalBdU = new double[6, 3];
 
-                nodalB[0, 0] = localdNGaussPoint["ksi"][i] * gVectors[1][0];
-                nodalB[1, 0] = localdNGaussPoint["ihta"][i] * gVectors[2][0];
-                nodalB[2, 0] = localdNGaussPoint["mhi"][i] * gVectors[3][0];
-                nodalB[0, 1] = localdNGaussPoint["ksi"][i] * gVectors[1][1];
-                nodalB[1, 1] = localdNGaussPoint["ihta"][i] * gVectors[2][1];
-                nodalB[2, 1] = localdNGaussPoint["mhi"][i] * gVectors[3][1];
-                nodalB[0, 2] = localdNGaussPoint["ksi"][i] * gVectors[1][2];
-                nodalB[1, 2] = localdNGaussPoint["ihta"][i] * gVectors[2][2];
-                nodalB[2, 2] = localdNGaussPoint["mhi"][i] * gVectors[3][2];
-
-                nodalB[3, 0] = localdNGaussPoint["ksi"][i] * gVectors[2][0] +
-                               localdNGaussPoint["ihta"][i] * gVectors[1][0];
-                nodalB[3, 1] = localdNGaussPoint["ksi"][i] * gVectors[2][1] +
-                               localdNGaussPoint["ihta"][i] * gVectors[1][1];
-                nodalB[3, 2] = localdNGaussPoint["ksi"][i] * gVectors[2][2] +
-                               localdNGaussPoint["ihta"][i] * gVectors[1][2];
-
-                nodalB[4, 0] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["A"][0] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["C"][0];
-
-                nodalB[4, 1] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["A"][1] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["C"][1];
-
-                nodalB[4, 2] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["A"][2] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPoints[i]["C"][2];
-
-                nodalB[5, 0] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["D"][0] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["B"][0];
-
-                nodalB[5, 1] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["D"][1] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["B"][1];
-
-                nodalB[5, 2] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["D"][2] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPoints[i]["B"][2];
-
-                double[,] nodalBTransformed = MatrixOperations.MatrixProduct(transformationMatrix, nodalB);
-                BANSmatrix[0, i * 3] = nodalBTransformed[0, 0];
-                BANSmatrix[1, i * 3] = nodalBTransformed[1, 0];
-                BANSmatrix[2, i * 3] = nodalBTransformed[2, 0];
-                BANSmatrix[3, i * 3] = nodalBTransformed[3, 0];
-                BANSmatrix[4, i * 3] = nodalBTransformed[4, 0];
-                BANSmatrix[5, i * 3] = nodalBTransformed[5, 0];
-                BANSmatrix[0, i * 3 + 1] = nodalBTransformed[0, 1];
-                BANSmatrix[1, i * 3 + 1] = nodalBTransformed[1, 1];
-                BANSmatrix[2, i * 3 + 1] = nodalBTransformed[2, 1];
-                BANSmatrix[3, i * 3 + 1] = nodalBTransformed[3, 1];
-                BANSmatrix[4, i * 3 + 1] = nodalBTransformed[4, 1];
-                BANSmatrix[5, i * 3 + 1] = nodalBTransformed[5, 1];
-                BANSmatrix[0, i * 3 + 2] = nodalBTransformed[0, 2];
-                BANSmatrix[1, i * 3 + 2] = nodalBTransformed[1, 2];
-                BANSmatrix[2, i * 3 + 2] = nodalBTransformed[2, 2];
-                BANSmatrix[3, i * 3 + 2] = nodalBTransformed[3, 2];
-                BANSmatrix[4, i * 3 + 2] = nodalBTransformed[4, 2];
-                BANSmatrix[5, i * 3 + 2] = nodalBTransformed[5, 2];
-                //
-                //-------------------------------------------------------------------
-                //
-                nodalBdU[0, 0] = localdNGaussPoint["ksi"][i] * gVectorsDU[1][0];
-                nodalBdU[1, 0] = localdNGaussPoint["ihta"][i] * gVectorsDU[2][0];
-                nodalBdU[2, 0] = localdNGaussPoint["mhi"][i] * gVectorsDU[3][0];
-                nodalBdU[0, 1] = localdNGaussPoint["ksi"][i] * gVectorsDU[1][1];
-                nodalBdU[1, 1] = localdNGaussPoint["ihta"][i] * gVectorsDU[2][1];
-                nodalBdU[2, 1] = localdNGaussPoint["mhi"][i] * gVectorsDU[3][1];
-                nodalBdU[0, 2] = localdNGaussPoint["ksi"][i] * gVectorsDU[1][2];
-                nodalBdU[1, 2] = localdNGaussPoint["ihta"][i] * gVectorsDU[2][2];
-                nodalBdU[2, 2] = localdNGaussPoint["mhi"][i] * gVectorsDU[3][2];
-
-                nodalBdU[3, 0] = localdNGaussPoint["ksi"][i] * gVectorsDU[2][0] +
-                               localdNGaussPoint["ihta"][i] * gVectorsDU[1][0];
-                nodalBdU[3, 1] = localdNGaussPoint["ksi"][i] * gVectorsDU[2][1] +
-                               localdNGaussPoint["ihta"][i] * gVectorsDU[1][1];
-                nodalBdU[3, 2] = localdNGaussPoint["ksi"][i] * gVectorsDU[2][2] +
-                               localdNGaussPoint["ihta"][i] * gVectorsDU[1][2];
-
-                nodalBdU[4, 0] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["A"][0] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["C"][0];
-
-                nodalBdU[4, 1] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["A"][1] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["C"][1];
-
-                nodalBdU[4, 2] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["A"][2] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[1]) *
-                               StrainSamplingPointsDU[i]["C"][2];
-
-                nodalBdU[5, 0] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["D"][0] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["B"][0];
-
-                nodalBdU[5, 1] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["D"][1] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["B"][1];
-
-                nodalBdU[5, 2] = (1.0 / 2.0) * (1.0 - GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["D"][2] +
-                               (1.0 / 2.0) * (1.0 + GaussPointNaturalCoordinates[0]) *
-                               StrainSamplingPointsDU[i]["B"][2];
-
-                double[,] nodalBDUTransformed = MatrixOperations.MatrixProduct(transformationMatrix, nodalBdU);
-                BANSmatrixDU[0, i * 3] = nodalBDUTransformed[0, 0];
-                BANSmatrixDU[1, i * 3] = nodalBDUTransformed[1, 0];
-                BANSmatrixDU[2, i * 3] = nodalBDUTransformed[2, 0];
-                BANSmatrixDU[3, i * 3] = nodalBDUTransformed[3, 0];
-                BANSmatrixDU[4, i * 3] = nodalBDUTransformed[4, 0];
-                BANSmatrixDU[5, i * 3] = nodalBDUTransformed[5, 0];
-                BANSmatrixDU[0, i * 3 + 1] = nodalBDUTransformed[0, 1];
-                BANSmatrixDU[1, i * 3 + 1] = nodalBDUTransformed[1, 1];
-                BANSmatrixDU[2, i * 3 + 1] = nodalBDUTransformed[2, 1];
-                BANSmatrixDU[3, i * 3 + 1] = nodalBDUTransformed[3, 1];
-                BANSmatrixDU[4, i * 3 + 1] = nodalBDUTransformed[4, 1];
-                BANSmatrixDU[5, i * 3 + 1] = nodalBDUTransformed[5, 1];
-                BANSmatrixDU[0, i * 3 + 2] = nodalBDUTransformed[0, 2];
-                BANSmatrixDU[1, i * 3 + 2] = nodalBDUTransformed[1, 2];
-                BANSmatrixDU[2, i * 3 + 2] = nodalBDUTransformed[2, 2];
-                BANSmatrixDU[3, i * 3 + 2] = nodalBDUTransformed[3, 2];
-                BANSmatrixDU[4, i * 3 + 2] = nodalBDUTransformed[4, 2];
-                BANSmatrixDU[5, i * 3 + 2] = nodalBDUTransformed[5, 2];
-            }
-            return new Tuple<double[,], double[,]>(BANSmatrix, BANSmatrixDU);
-        }
-        private Dictionary<int, Dictionary<string, double[]>> AssumedStrainSamplingPoints(double[] nodalXInitial)
-        {
-            Dictionary<int, Dictionary<string, double[]>> assumedStrainPoints = new Dictionary<int, 
-                Dictionary<string, double[]>>();
-
-            double[] A = new double[] { 0.0, -1.0, 0.0 };
-            double[] B = new double[] { 1.0, 0.0, 0.0 };
-            double[] C = new double[] { 0.0, 1.0, 0.0 };
-            double[] D = new double[] { -1.0, 0.0, 0.0 };
-
-            Dictionary<string, double[]> localdNA = CalculateShapeFunctionsLocalDerivatives(A);
-            Dictionary<string, double[]> localdNB = CalculateShapeFunctionsLocalDerivatives(B);
-            Dictionary<string, double[]> localdNC = CalculateShapeFunctionsLocalDerivatives(C);
-            Dictionary<string, double[]> localdND = CalculateShapeFunctionsLocalDerivatives(D);
-            var gA = CalculategVectors(nodalXInitial, localdNA);
-            var gB = CalculategVectors(nodalXInitial, localdNB);
-            var gC = CalculategVectors(nodalXInitial, localdNC);
-            var gD = CalculategVectors(nodalXInitial, localdND);
-            for(int i = 0; i < 8; i++)
-            {
-                double[] e13A = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(gA[3], localdNA["ksi"][i]),
-                    VectorOperations.VectorScalarProductNew(gA[1], localdNA["mhi"][i]));
-
-                double[] e13C = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(gC[3], localdNC["ksi"][i]),
-                    VectorOperations.VectorScalarProductNew(gC[1], localdNC["mhi"][i]));
-
-                double[] e23B = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(gB[3], localdNB["ihta"][i]),
-                    VectorOperations.VectorScalarProductNew(gB[2], localdNB["mhi"][i]));
-
-                double[] e23D = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(gD[3], localdND["ihta"][i]),
-                    VectorOperations.VectorScalarProductNew(gD[2], localdND["mhi"][i]));
-
-                Dictionary<string, double[]> strainPoints = new Dictionary<string, double[]>();
-                strainPoints.Add("A", e13A);
-                strainPoints.Add("B", e23B);
-                strainPoints.Add("C", e13C);
-                strainPoints.Add("D", e23D);
-                assumedStrainPoints.Add(i, strainPoints);
-            }
-            return assumedStrainPoints;
-        }
-        private Dictionary<int, Dictionary<string, double[]>> AssumedStrainSamplingPointsDU()
-        {
-            Dictionary<int, Dictionary<string, double[]>> assumedStrainPoints = new Dictionary<int,
-                Dictionary<string, double[]>>();
-
-            double[] A = new double[] { 0.0, -1.0, 0.0 };
-            double[] B = new double[] { 1.0, 0.0, 0.0 };
-            double[] C = new double[] { 0.0, 1.0, 0.0 };
-            double[] D = new double[] { -1.0, 0.0, 0.0 };
-
-            Dictionary<string, double[]> localdNA = CalculateShapeFunctionsLocalDerivatives(A);
-            Dictionary<string, double[]> localdNB = CalculateShapeFunctionsLocalDerivatives(B);
-            Dictionary<string, double[]> localdNC = CalculateShapeFunctionsLocalDerivatives(C);
-            Dictionary<string, double[]> localdND = CalculateShapeFunctionsLocalDerivatives(D);
-            var dgA = CalculatedgdUVectors(localdNA);
-            var dgB = CalculatedgdUVectors(localdNB);
-            var dgC = CalculatedgdUVectors(localdNC);
-            var dgD = CalculatedgdUVectors(localdND);
-            for (int i = 0; i < 8; i++)
-            {
-                double[] e13A = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(dgA[3], localdNA["ksi"][i]),
-                    VectorOperations.VectorScalarProductNew(dgA[1], localdNA["mhi"][i]));
-
-                double[] e13C = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(dgC[3], localdNC["ksi"][i]),
-                    VectorOperations.VectorScalarProductNew(dgC[1], localdNC["mhi"][i]));
-
-                double[] e23B = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(dgB[3], localdNB["ihta"][i]),
-                    VectorOperations.VectorScalarProductNew(dgB[2], localdNB["mhi"][i]));
-
-                double[] e23D = VectorOperations.VectorVectorAddition(
-                    VectorOperations.VectorScalarProductNew(dgD[3], localdND["ihta"][i]),
-                    VectorOperations.VectorScalarProductNew(dgD[2], localdND["mhi"][i]));
-
-                Dictionary<string, double[]> strainPoints = new Dictionary<string, double[]>();
-                strainPoints.Add("A", e13A);
-                strainPoints.Add("B", e23B);
-                strainPoints.Add("C", e13C);
-                strainPoints.Add("D", e23D);
-                assumedStrainPoints.Add(i, strainPoints);
-            }
-            return assumedStrainPoints;
-        }
         private double[,] CalculateStressStrainMatrix(double E, double v)
         {
             double[,] Ematrix = new double[6, 6];
@@ -828,16 +896,10 @@ namespace GFEC
             Ematrix[5, 5] = G;
             return Ematrix;
         }
-        private double[] CalculateStressVector(double[,] E, double[] strain)
-        {
-            double[] stressVector = VectorOperations.MatrixVectorProduct(E, strain);
-            return stressVector;
-        }
         private Tuple<double[], double[]> GaussPoints(int i, int j, int k)
         {
             double[] gaussPoints = new double[] { -1.0 / Math.Sqrt(3), 1.0 / Math.Sqrt(3) };
             double[] gaussWeights = new double[] { 1.0, 1.0 };
-
             double[] vectorWithPoints = new double[] { gaussPoints[i], gaussPoints[j], gaussPoints[k] };
             double[] vectorWithWeights = new double[] { gaussWeights[i], gaussWeights[j], gaussWeights[k] };
             return new Tuple<double[], double[]>(vectorWithPoints, vectorWithWeights);
@@ -851,14 +913,16 @@ namespace GFEC
             double[] vectorWithWeights = new double[] { gaussWeights[i], gaussWeights[j], gaussWeights[k] };
             return new Tuple<double[], double[]>(vectorWithPoints, vectorWithWeights);
         }
-        //
         private double[,] CreateEnhancedStrainsInterpolationMatrix(double[] ksi)
         {
-            double[,] M = new double[6, 4];
-            M[2, 0] = ksi[2];
-            M[2, 1] = ksi[0] * ksi[2];
-            M[2, 2] = ksi[1] * ksi[2];
-            M[2, 3] = ksi[0] * ksi[1] * ksi[2];
+            double[,] M = new double[6, 7];
+            M[0, 0] = ksi[0];
+            M[1, 1] = ksi[1];
+            M[2, 2] = ksi[2];
+            M[2, 5] = ksi[0] * ksi[2];
+            M[2, 6] = ksi[1] * ksi[2];
+            M[3, 3] = ksi[0];
+            M[3, 4] = ksi[1];
             return M;
         }
         private double[,] CalculateEnhancedStrainMatrixGamma(double[,] transformationMat0, double[,] M,
@@ -870,7 +934,7 @@ namespace GFEC
         }
         private double[,] TransformationMatrixTransposed(double[,] jacobianMatrix)
         {
-            double[,] TransposedT = new double[6,6];
+            double[,] TransposedT = new double[6, 6];
             TransposedT[0, 0] = jacobianMatrix[0, 0] * jacobianMatrix[0, 0];
             TransposedT[0, 1] = jacobianMatrix[0, 1] * jacobianMatrix[0, 1];
             TransposedT[0, 2] = jacobianMatrix[0, 2] * jacobianMatrix[0, 2];
@@ -932,76 +996,19 @@ namespace GFEC
                                 jacobianMatrix[1, 2] * jacobianMatrix[2, 1];
             return TransposedT;
         }
-        private double[,] CalculateKGeoMatrix(Dictionary<string, double[]> localdN, double[] modifiedStressVector)
-        {
-            double[,] kGeoMatrix = new double[24, 24];
-            double[,] dNMatrix = CalculatedNMatrix(localdN);
-            double[,] stressMatrix = CalculateStressMatrix(modifiedStressVector);
-            for(int i = 0; i < 8; i++)
-            {
-                for(int j = 0; j < 8; j++)
-                {
-                    double s = 0.0;
-                    for(int k = 0; k < 3; k++)
-                    {
-                        for(int l = 0; l < 3; l++)
-                        {
-                            s += dNMatrix[i, k] * stressMatrix[k, l] * dNMatrix[j, l];
-                        }
-                    }
-                    kGeoMatrix[3 * i, 3 *  j] = s;
-                    kGeoMatrix[3 * i + 1, 3 * j + 1] = s;
-                    kGeoMatrix[3 * i + 2, 3 * j + 2] = s;
-
-                }
-            }
-            return kGeoMatrix;
-        }
-        private double[,] CalculatedNMatrix(Dictionary<string, double[]> localdN)
-        {
-            double[,] dNMatrix = new double[8, 3];
-            for(int i = 0; i < 8; i++)
-            {
-                dNMatrix[i, 0] = localdN["ksi"][i];
-                dNMatrix[i, 1] = localdN["ihta"][i];
-                dNMatrix[i, 2] = localdN["mhi"][i];
-            }
-            return dNMatrix;
-        }
-        private double[,] CalculateStressMatrix(double[] StressVector)
-        {
-            double[,] s = new double[3, 3];
-
-            s[0, 0] = StressVector[0];
-            s[0, 1] = StressVector[3];
-            s[0, 2] = StressVector[4];
-
-            s[1, 0] = StressVector[3];
-            s[1, 1] = StressVector[1];
-            s[1, 2] = StressVector[5];
-
-            s[2, 0] = StressVector[4];
-            s[2, 1] = StressVector[5];
-            s[2, 2] = StressVector[2];
-
-            return s;
-        }
         public double[,] CreateGlobalStiffnessMatrix()
         {
-            double[,] K1 = new double[24, 24];
-            double[,] K2 = new double[24, 24];
-            double[,] LeMatrix = Properties.EASLMatrix;
-            double[,] DeMatrixInv = Properties.EASDMatrix;
+            double[,] ansK = new double[24, 24];
+            double[,] LeMatrix = new double[7, 24];
+            double[,] DeMatrix = new double[7, 7];
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-            double[] nodalXInitial = InitialNodalCoordinates();
-            //double[] nodalX = UpdateNodalCoordinates(DisplacementVector);
-            double[] center = new double[3];
-            double[,] J0 = CalculateJacobian(nodalXInitial, CalculateShapeFunctionsLocalDerivatives(center));
-            double detJ0 = CalculateJacobianDet(J0);
-            double[,] transformationMat0 = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J0));
-            Dictionary<int, Dictionary<string, double[]>> aStrainPoints = AssumedStrainSamplingPoints(nodalXInitial);
-            Dictionary<int, Dictionary<string, double[]>> aStrainPointsDU = AssumedStrainSamplingPointsDU();
-
+            double[] centerNaturalCoordinates = new double[3];
+            Dictionary<string, double[]> localdN0 = CalculateShapeFunctionsLocalDerivatives(centerNaturalCoordinates);
+            var J0 = CalculateJacobian(localdN0);
+            var JInverse0 = CalculateInverseJacobian(J0);
+            double detJ0 = JInverse0.Item2;
+            double[,] invJacobian0 = JInverse0.Item1;
+            var transformationMat0 = CalculateTransformationMatrix(invJacobian0);
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 2; j++)
@@ -1011,48 +1018,41 @@ namespace GFEC
                         double[] gP = GaussPoints(i, j, k).Item1;
                         double[] gW = GaussPoints(i, j, k).Item2;
                         Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-                        double[,] J = CalculateJacobian(nodalXInitial, localdN);
-                        double[,] transformationMat =MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J));
-                        //double[,] invJ = CalculateInverseJacobian(J).Item1;
-                        double detJ = CalculateInverseJacobian(J).Item2;
-                        Dictionary<int, double[]> gVectors = CalculategVectors(nodalXInitial, localdN);
-                        Dictionary<int, double[]> gVectorsdU = CalculatedgdUVectors(localdN);
+                        double[,] J = CalculateJacobian(localdN);
+                        var invJacobian = CalculateInverseJacobian(J);
+                        var inverseJacobianMatrix = invJacobian.Item1;
+                        double detJ = invJacobian.Item2;
+                        var transformationMatrix = CalculateTransformationMatrix(inverseJacobianMatrix);
 
-                        var BMatrices = CalculateBANSMatrix(gP, localdN,transformationMat, gVectors, gVectorsdU,
-                            aStrainPoints, aStrainPointsDU);
-                        double[,] B = BMatrices.Item1;
-                        //double[,] dBdU = BMatrices.Item2;
-                        double[,] Gamma = CalculateEnhancedStrainMatrixGamma(transformationMat0, CreateEnhancedStrainsInterpolationMatrix(gP),
-                            detJ0, detJ);
-                        double[] alphaVector = Properties.EASVector;
-                        double[] EnhStrainVector = VectorOperations.MatrixVectorProduct(Gamma, alphaVector);
-                        double[] modifiedStrainVector = VectorOperations.VectorVectorAddition(CalculateStrainsVector(B), EnhStrainVector);
-                        double[] modifiedStressVector = CalculateStressVector(E, modifiedStrainVector);
-                        double[,] kGeoMatrix = CalculateKGeoMatrix(localdN, modifiedStressVector);
-                        K1 = MatrixOperations.MatrixAddition(K1, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
+                        double[,] B = CalculateBMatrix(localdN, J, gP, transformationMatrix);
+                        ansK = MatrixOperations.MatrixAddition(ansK, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
                             MatrixOperations.MatrixProduct(MatrixOperations.Transpose(B), MatrixOperations.MatrixProduct(E, B))));
-                        K2 = MatrixOperations.MatrixAddition(K2, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2], kGeoMatrix));
-                        //LeMatrix = MatrixOperations.MatrixAddition(LeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
-                        //    MatrixOperations.MatrixProduct(
-                        //    MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, B))));
-                        //DeMatrix = MatrixOperations.MatrixAddition(DeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
-                        //    MatrixOperations.MatrixProduct(
-                        //    MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, Gamma))));
+                        double[,] Gamma = CalculateEnhancedStrainMatrixGamma(transformationMat0, CreateEnhancedStrainsInterpolationMatrix(gP),
+                        detJ0, detJ);
+                        LeMatrix = MatrixOperations.MatrixAddition(LeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
+                            MatrixOperations.MatrixProduct(
+                            MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, B))));
+                        DeMatrix = MatrixOperations.MatrixAddition(DeMatrix, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
+                            MatrixOperations.MatrixProduct(
+                            MatrixOperations.Transpose(Gamma), MatrixOperations.MatrixProduct(E, Gamma))));
                     }
                 }
             }
-            //double[,]  = MatrixOperations.BlockMatrixInversion4X4(DeMatrix);
-            double[,] K = MatrixOperations.MatrixSubtraction(
-                MatrixOperations.MatrixAddition(K1, K2),
+            double[,] DeMatrixInv = MatrixOperations.CalculateInverseMatrixGaussJordanMethod(DeMatrix);
+            //DeMatrixInv[0, 0] = 1.0 / DeMatrix[0, 0];
+            double[,] tangentMatrix =
+                MatrixOperations.MatrixSubtraction(
+                ansK,
                 MatrixOperations.MatrixProduct(
                 MatrixOperations.MatrixProduct(MatrixOperations.Transpose(LeMatrix), DeMatrixInv), LeMatrix));
-            return K;
+            Properties.EASLMatrix = LeMatrix;
+            Properties.EASDMatrix = DeMatrixInv;
+            return tangentMatrix;
         }
-
         public double[,] CreateMassMatrix()
         {
             double[,] M = new double[24, 24];
-            double[] nodalXUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] nodalX = UpdateNodalCoordinates(DisplacementVector);
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 2; j++)
@@ -1062,7 +1062,7 @@ namespace GFEC
                         double[] lP = LobattoPoints(i, j, k).Item1;
                         double[] lW = LobattoPoints(i, j, k).Item2;
                         Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(lP);
-                        double[,] J = CalculateJacobian(nodalXUpdated, localdN);
+                        double[,] J = CalculateUpdatedJacobianMatrix(nodalX, localdN);
                         //double[,] invJ = CalculateInverseJacobian(J).Item1;
                         double detJ = CalculateInverseJacobian(J).Item2;
                         double[,] N = CalculateShapeFunctionMatrix(lP[0], lP[1], lP[2]);
@@ -1073,28 +1073,29 @@ namespace GFEC
             }
             return M;
         }
-
         public double[,] CreateDampingMatrix()
         {
             return new double[24, 24];
         }
-
+        private double[] CalculateStressVector(double[,] E, double[] strain)
+        {
+            double[] stressVector = VectorOperations.MatrixVectorProduct(E, strain);
+            return stressVector;
+        }
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] VectorRe = new double[24];
-            double[] vectorPe = Properties.EASFEnhancedVector;
+            double[] PeVector = new double[7];
             double[,] matrixLe = Properties.EASLMatrix;
             double[,] matrixDeInv = Properties.EASDMatrix;
-
-            double[] nodalXInitial = InitialNodalCoordinates();
-            //double[] nodalX = UpdateNodalCoordinates(DisplacementVector);
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
-            Dictionary<int, Dictionary<string, double[]>> aStrainPoints = AssumedStrainSamplingPoints(nodalXInitial);
-            Dictionary<int, Dictionary<string, double[]>> aStrainPointsDU = AssumedStrainSamplingPointsDU();
-            double[] center = new double[3];
-            double[,] J0 = CalculateJacobian(nodalXInitial, CalculateShapeFunctionsLocalDerivatives(center));
-            double detJ0 = CalculateJacobianDet(J0);
-            double[,] transformationMat0 = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J0));
+            double[] centerNaturalCoordinates = new double[3];
+            Dictionary<string, double[]> localdN0 = CalculateShapeFunctionsLocalDerivatives(centerNaturalCoordinates);
+            var J0 = CalculateJacobian(localdN0);
+            var JInverse0 = CalculateInverseJacobian(J0);
+            double detJ0 = JInverse0.Item2;
+            double[,] invJacobian0 = JInverse0.Item1;
+            var transformationMat0 = CalculateTransformationMatrix(invJacobian0);
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 2; j++)
@@ -1104,30 +1105,30 @@ namespace GFEC
                         double[] gP = GaussPoints(i, j, k).Item1;
                         double[] gW = GaussPoints(i, j, k).Item2;
                         Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-                        Dictionary<int, double[]> gVectors = CalculategVectors(nodalXInitial, localdN);
-                        Dictionary<int, double[]> gVectorsdU = CalculatedgdUVectors(localdN);
-                        double[,] J = CalculateJacobian(nodalXInitial, localdN);
-                        double[,] transformationMat = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J));
-                        double[,] invJ = CalculateInverseJacobian(J).Item1;
-                        double detJ = CalculateInverseJacobian(J).Item2;
-                        Dictionary<int, double[]> globaldN = CalculateShapeFunctionsGlobalDerivatives(localdN, invJ);
-                        var BMatrices = CalculateBANSMatrix(gP, localdN, transformationMat, gVectors, gVectorsdU,
-                            aStrainPoints, aStrainPointsDU);
-                        double[,] B = BMatrices.Item1;
+                        double[,] J = CalculateJacobian(localdN);
+                        var invJacobian = CalculateInverseJacobian(J);
+                        var inverseJacobianMatrix = invJacobian.Item1;
+                        double detJ = invJacobian.Item2;
+                        var transformationMatrix = CalculateTransformationMatrix(inverseJacobianMatrix);
+                        double[,] B = CalculateBMatrix(localdN, J, gP, transformationMatrix);
                         double[,] Gamma = CalculateEnhancedStrainMatrixGamma(transformationMat0, CreateEnhancedStrainsInterpolationMatrix(gP),
-                                                                             detJ0, detJ);
+                        detJ0, detJ);
                         double[] alphaVector = Properties.EASVector;
                         double[] EnhStrainVector = VectorOperations.MatrixVectorProduct(Gamma, alphaVector);
                         double[] modifiedStrainVector = VectorOperations.VectorVectorAddition(CalculateStrainsVector(B), EnhStrainVector);
                         double[] stressVectorModified = CalculateStressVector(E, modifiedStrainVector);
                         VectorRe = VectorOperations.VectorVectorAddition(VectorRe, VectorOperations.VectorScalarProductNew(
                             VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVectorModified), detJ * gW[0] * gW[1] * gW[2]));
+                        PeVector = VectorOperations.VectorVectorAddition(PeVector,
+                           VectorOperations.VectorScalarProductNew(
+                           VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(Gamma), stressVectorModified),
+                           detJ * gW[0] * gW[1] * gW[2]));
                     }
-
                 }
             }
             double[] fInt = VectorOperations.VectorVectorSubtraction(VectorRe,
-                VectorOperations.MatrixVectorProduct(MatrixOperations.MatrixProduct(MatrixOperations.Transpose(matrixLe), matrixDeInv), vectorPe));
+            VectorOperations.MatrixVectorProduct(MatrixOperations.MatrixProduct(MatrixOperations.Transpose(matrixLe), matrixDeInv), PeVector));
+            Properties.EASFEnhancedVector = PeVector;
             return fInt;
         }
     }

@@ -162,7 +162,7 @@ namespace GFEC
         {
             double E = YoungMod;
             double A = area;
-            string type = "ANSSolidShell8LEAS7";
+            string type = "ANSSolidShell8EAS";
 
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             for (int i = 1; i <= elementsNumber; i++)
@@ -191,7 +191,7 @@ namespace GFEC
             elementsAssembly.ActivateBoundaryConditions = true;
             ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
-            structuralSolution.LinearScheme = new CholeskyFactorization();
+            structuralSolution.LinearScheme = new Skyline();
             structuralSolution.ActivateNonLinearSolver = false;
             //structuralSolution.NonLinearScheme.Tolerance = 1e-5;//
             //structuralSolution.NonLinearScheme.MaxIterations = 100;//

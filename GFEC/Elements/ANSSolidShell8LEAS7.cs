@@ -995,37 +995,6 @@ namespace GFEC
             matricesB.Add("zitaKsi", BZitaKsi);
             return matricesB;
         }
-        private Dictionary<string, double[,]> HourglassComponentModification(Dictionary<string, double[,]> Bmatrices)
-        {
-            Dictionary<string, double[,]> matricesB = new Dictionary<string, double[,]>();
-            double[,] modificationMatrix = new double[6, 6];
-            modificationMatrix[0, 0] = 1.0;
-            modificationMatrix[0, 1] = 1.0;
-            modificationMatrix[0, 2] = 1.0;
-            modificationMatrix[1, 0] = 1.0;
-            modificationMatrix[1, 1] = 1.0;
-            modificationMatrix[1, 2] = 1.0;
-            modificationMatrix[2, 0] = 1.0;
-            modificationMatrix[2, 1] = 1.0;
-            modificationMatrix[2, 2] = 1.0;
-            double[,] BKsi = MatrixOperations.MatrixSubtraction(Bmatrices["ksi"],
-                             MatrixOperations.ScalarMatrixProductNew(1.0 / 3.0, MatrixOperations.MatrixProduct(modificationMatrix, Bmatrices["ksi"])));
-            double[,] BIhta = MatrixOperations.MatrixSubtraction(Bmatrices["ihta"],
-                 MatrixOperations.ScalarMatrixProductNew(1.0 / 3.0, MatrixOperations.MatrixProduct(modificationMatrix, Bmatrices["ihta"])));
-            double[,] BIhtaZita = MatrixOperations.MatrixSubtraction(Bmatrices["ihtaZita"],
-                 MatrixOperations.ScalarMatrixProductNew(1.0 / 3.0, MatrixOperations.MatrixProduct(modificationMatrix, Bmatrices["ihtaZita"])));
-            double[,] BZitaKsi = MatrixOperations.MatrixSubtraction(Bmatrices["zitaKsi"],
-                 MatrixOperations.ScalarMatrixProductNew(1.0 / 3.0, MatrixOperations.MatrixProduct(modificationMatrix, Bmatrices["zitaKsi"])));
-            BKsi = MatrixOperations.ΕliminateMatrixLine(BKsi, 4);
-            BKsi = MatrixOperations.ΕliminateMatrixLine(BKsi, 5);
-            BIhta = MatrixOperations.ΕliminateMatrixLine(BIhta, 4);
-            BIhta = MatrixOperations.ΕliminateMatrixLine(BIhta, 5);
-            matricesB.Add("ksi", BKsi);
-            matricesB.Add("ihta", BIhta);
-            matricesB.Add("ihtaZita", BIhtaZita);
-            matricesB.Add("zitaKsi", BZitaKsi);
-            return matricesB;
-        }
         private double[,] CalculateStressStrainMatrix(double E, double v)
         {
             double[,] Ematrix = new double[6, 6];
@@ -1045,26 +1014,6 @@ namespace GFEC
             Ematrix[4, 4] = G;
             Ematrix[5, 5] = G;
             return Ematrix;
-        }
-        private double[,] CalculateHourglassConstitutiveMatrix(double E, double v)
-        {
-            double[,] ConstitutiveMatrix = new double[6, 6];
-            double G = (1.0 / 2.0) * (E / (1.0 + v));
-
-            ConstitutiveMatrix[0, 0] = 4.0 / 3.0;
-            ConstitutiveMatrix[0, 1] = -2.0 / 3.0;
-            ConstitutiveMatrix[0, 2] = -2.0 / 3.0;
-            ConstitutiveMatrix[1, 0] = -2.0 / 3.0;
-            ConstitutiveMatrix[1, 1] = 4.0 / 3.0;
-            ConstitutiveMatrix[1, 2] = -2.0 / 3.0;
-            ConstitutiveMatrix[2, 0] = -2.0 / 3.0;
-            ConstitutiveMatrix[2, 1] = -2.0 / 3.0;
-            ConstitutiveMatrix[2, 2] = 4.0 / 3.0;
-            ConstitutiveMatrix[3, 3] = 1.0;
-            ConstitutiveMatrix[4, 4] = 1.0;
-            ConstitutiveMatrix[5, 5] = 1.0;
-            ConstitutiveMatrix = MatrixOperations.ScalarMatrixProductNew(G, ConstitutiveMatrix);
-            return ConstitutiveMatrix;
         }
         private Tuple<double[], double[]> GaussPoints(int i, int j, int k)
         {
@@ -1186,7 +1135,6 @@ namespace GFEC
             var transformationMatrices = StrainTransformationMatrixDecomposed(invJacobian0, J0Matrices["zero"],
                 J0Matrices["ksi"], J0Matrices["ihta"], J0Matrices["zita"]);
             var BMatricesCartesianSystem = CalculateCartesianCoordinateSystemBANSMatricesDecomposed(BMatricesNaturalSystem, transformationMatrices);
-            var BMatricesModified = HourglassComponentModification(BMatricesCartesianSystem);
             double[,] transformationMat0 = MatrixOperations.BlockMatrixInversion6X6(TransformationMatrixTransposed(J0Matrices["complete"]));
             for (int i = 0; i < 2; i++)
             {

@@ -392,7 +392,7 @@ namespace GFEC
         private static Dictionary<int, IElementProperties> CreateElementProperties(Dictionary<int, Dictionary<int, int>> elementsConnectivity)
         {
             double E = 200.0 * 1e9;
-            string type = "ANSSolidShell8LEAS1RI";
+            string type = "ANSSolidShell8EAS";
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             int totalElements = elementsConnectivity.Count;
             for (int i = 1; i <= totalElements; i++)
@@ -471,7 +471,7 @@ namespace GFEC
             //VectorOperations.PrintIntVectorToFile(indices, @"C:\Users\Public\Documents\" + "indices.dat");
             //VectorOperations.PrintIntVectorToFile(indices12, @"C:\Users\Public\Documents\" + "indices2.dat");
 
-            structuralSolution.LinearScheme = new CholeskyFactorization();
+            structuralSolution.LinearScheme = new Skyline();
             //structuralSolution.NonLinearScheme.Tolerance = 1e-4;
             structuralSolution.ActivateNonLinearSolver = false;
             //structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;

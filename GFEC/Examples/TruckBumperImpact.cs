@@ -64,11 +64,11 @@ namespace GFEC
         {
             double E1 = 200.0 * 1e9;
             double E2 = 1.0 * 1e12;
-            double density1 = 2780.0;
+            double density1 = 7850.0;
             double density2 = 7850.0;
-            double poissonRatio1 = 0.33;
+            double poissonRatio1 = 0.28;
             double poissonRatio2 = 0.20;
-            string type = "ANSSolidShell8LEAS7";
+            string type = "ANSSolidShell8EAS";
             string type2 = "Hex8";
             string type3 = "ContactStS3D";
 
@@ -84,7 +84,7 @@ namespace GFEC
             }
             for (int i = elmntsNumberSolidShell + elmntsNumberSolid + 1; i <= totalElements; i++)
             {
-                elementProperties[i] = new ElementProperties(E1, 1.0, type3, 2d, 3, 1, 1);
+                elementProperties[i] = new ElementProperties(E1, 1.0, type3, 4d, 3, 1, 1);
             }
             return elementProperties;
         }
@@ -276,7 +276,7 @@ namespace GFEC
             VectorOperations.PrintIntVectorToFile(indices, @"C:\Users\Public\Documents\" + "indices.dat");
             VectorOperations.PrintIntVectorToFile(indices12, @"C:\Users\Public\Documents\" + "indices2.dat");
 
-            structuralSolution.LinearScheme = new CholeskyFactorization();
+            structuralSolution.LinearScheme = new Skyline();
             //structuralSolution.NonLinearScheme.Tolerance = 1e-4;
             structuralSolution.ActivateNonLinearSolver = true;
             //structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;
@@ -367,7 +367,7 @@ namespace GFEC
             initialValues.InitialDisplacementVector = BoundaryConditionsImposition.ReducedVector(DisplacementVector, elementsAssembly.BoundedDOFsVector);
             initialValues.InitialVelocityVector = BoundaryConditionsImposition.ReducedVector(VelocityVector, elementsAssembly.BoundedDOFsVector);
             initialValues.InitialTime = 0.0;
-            ExplicitSolver newSolver = new ExplicitSolver(0.00415, 10);
+            ExplicitSolver newSolver = new ExplicitSolver(0.005, 12);
             newSolver.Assembler = elementsAssembly;
             double[] externalForces = externalForcesStructuralVector;
             newSolver.InitialValues = initialValues;
