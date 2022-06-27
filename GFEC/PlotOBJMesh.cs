@@ -50,10 +50,10 @@ namespace GFEC
 #endif
 
         // The change in CameraPhi when you press the up and down arrows.
-        private const double CameraDPhi = 0.1;
+        private const double CameraDPhi = 0.1*5;
 
         // The change in CameraTheta when you press the left and right arrows.
-        private const double CameraDTheta = 0.1;
+        private const double CameraDTheta = 0.1*5;
 
         // The change in CameraR when you press + or -.
 

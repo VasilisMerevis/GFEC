@@ -8,6 +8,7 @@ namespace GFEC
     //Example Based on Bathe's Example 9.1
     public static class ExplicitLinearExample
     {
+        private static Results finalresutls;
         public static void SolveExample()
         {
             double[,] M = new double[,]
@@ -30,7 +31,7 @@ namespace GFEC
             initialValues.InitialVelocityVector = new double[] { 0.0, 0.0 };
             initialValues.InitialTime = 0.0;
 
-            ExplicitSolver solver = new ExplicitSolver(2.8, 10);
+            ExplicitSolver solver = new ExplicitSolver(2.8, 9);
             solver.InitialValues = initialValues;
             solver.CustomMassMatrix = M;
             solver.CustomStiffnessMatrix = K;
@@ -39,7 +40,8 @@ namespace GFEC
             solver.ActivateNonLinearSolution = false;
             solver.LinearSolver = new LUFactorization();
             solver.SolveExplicit();
-            solver.PrintExplicitSolution();
+            finalresutls = new Results() { DynamicSolution = solver.displacement, TimeSteps = solver.TimeAtEachStep, SelectedDOF = 1, SelectedInterval = 1, SolutionType = "Dynamic" };
+            //solver.PrintExplicitSolution();
         }
 
         public static void SolveNewmarkExample()
@@ -73,7 +75,13 @@ namespace GFEC
             solver.ActivateNonLinearSolution = false;
             solver.LinearSolver = new LUFactorization();
             solver.SolveNewmark();
-            solver.PrintExplicitSolution();
+            
+            //solver.PrintExplicitSolution();
+        }
+
+        public static Results RunStaticExample()
+        {
+            return finalresutls;
         }
 
         public static Results RunStaticExample()

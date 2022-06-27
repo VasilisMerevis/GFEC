@@ -229,13 +229,17 @@ namespace GFEC
 
         public static double[,] MatrixAdditionParallel2(double[,] matrix1, double[,] matrix2)
         {
-            int totalRows = 2000;
+            int totalRows = matrix1.GetLength(0);
             TempVariable = matrix1;
-            Task first = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 0, 500));
-            Task second = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 500, 1000));
-            Task third= Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 1000, 1500));
-            Task fourth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 1500, 2000));
-            Task.WaitAll(first, second, third, fourth);
+            Task first = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 0, totalRows/8));
+            Task second = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, totalRows / 8, 2*totalRows / 8));
+            Task third= Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 2*totalRows / 8, 3* totalRows / 8));
+            Task fourth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 3* totalRows / 8, totalRows/2));
+            Task fifth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, totalRows/2, 5*totalRows / 8));
+            Task sixth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 5*totalRows / 8, 6*totalRows / 8));
+            Task seventh = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 6*totalRows / 8, 7 * totalRows / 8));
+            Task eightieth = Task.Run(() => MatrixAdditionParallel2Calculations(matrix2, 7 * totalRows / 8, totalRows));
+            Task.WaitAll(first, second, third, fourth, fifth, sixth, seventh, eightieth);
             return TempVariable;
         }
         private static void MatrixAdditionParallel2Calculations(double[,] matrix2, int min, int max)
@@ -521,6 +525,19 @@ namespace GFEC
             }
             return result;
         }
+
+        public static void FillMatrixWithDoubleValue(double[,] matrix, double value)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(0); j++)
+                {
+                    matrix[i, j] = value;
+                }
+            }
+           
+        }
+
         public static Tuple<double[,], double[,]> LUfactorizedMatrices(double[,] Matrix)
         {
             int rows = Matrix.GetLength(0);

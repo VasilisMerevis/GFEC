@@ -52,7 +52,7 @@
         </lvc:CartesianChart>
 
         <Button Content="Import OBJ File" Margin="0,67,154,0" VerticalAlignment="Top" Height="32" Click="ImportOBJFile" HorizontalAlignment="Right" Width="116"/>
-        <Button Content="Display object" Margin="0,67,275,0" VerticalAlignment="Top" Click="Button_Click_1" Height="32" HorizontalAlignment="Right" Width="133"/>
+        <Button Content="Display OBJ object" Margin="0,67,275,0" VerticalAlignment="Top" Click="Button_Plot_OBJ" Height="32" HorizontalAlignment="Right" Width="133"/>
         <Grid Name="viewport3DGrid" Margin="31,26,413,309">
             <Border BorderThickness="1" BorderBrush="Black">
                 <Viewport3D Name="ViewportGraphics"  />
@@ -65,6 +65,8 @@
         <Button Content="Down" HorizontalAlignment="Left" Margin="86,0,0,285" VerticalAlignment="Bottom" Width="50" Click="MoveCameraDown"/>
         <Button Content="Zoom +" HorizontalAlignment="Left" Margin="295,0,0,285" Width="50" Click="ZoomInCamera" Height="20" VerticalAlignment="Bottom"/>
         <Button Content="Zoom -" HorizontalAlignment="Left" Margin="350,0,0,285" VerticalAlignment="Bottom" Width="50" Click="ZoomOutCamera"/>
+        <Button Content="Display FE mesh object" Margin="0,104,275,0" VerticalAlignment="Top" Click="Button_Plot_Geometry" Height="32" HorizontalAlignment="Right" Width="133"/>
+        <Button Content="Plot results" HorizontalAlignment="Left" Margin="444,0,0,285" Click="Button_Click_1" Width="100" Height="20" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>

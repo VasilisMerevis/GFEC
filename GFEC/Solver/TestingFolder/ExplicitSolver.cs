@@ -20,6 +20,7 @@ namespace GFEC
         private double timeStep;
         private double a0, a1, a2, a3;
         public Dictionary<int, double[]> explicitSolution = new Dictionary<int, double[]>();
+        public Dictionary<int, double[]> displacement = new Dictionary<int, double[]>();
         private Dictionary<int, double[]> explicitVelocity = new Dictionary<int, double[]>();
         private Dictionary<int, double[]> explicitAcceleration = new Dictionary<int, double[]>();
         public bool ActivateNonLinearSolution { get; set; }
@@ -420,6 +421,22 @@ namespace GFEC
                 TimeAtEachStep.Add(i, time);
             }
             ExportToFile.ExportExplicitResults(explicitSolution, TimeAtEachStep, 1, 1);
+            var tempTimeAtEachStep = TimeAtEachStep;
+            TimeAtEachStep = new Dictionary<int, double>();
+            int k = 0;
+            foreach (var step in tempTimeAtEachStep)
+            {
+                TimeAtEachStep.Add(k, step.Value);
+                k = k + 1;
+            }
+            
+            
+            k = 0;
+            foreach (var step in explicitSolution)
+            {
+                displacement.Add(k, step.Value);
+                k = k + 1;
+            }
         }
 
         public void PrintExplicitSolution()

@@ -56,6 +56,7 @@ namespace GFEC
         const double T0 = 100.0;
         const double solidThermalCond = 3300;
         static double externalHeatLoad = -2 * T0 * (solidThermalCond / (6 * xIntervals * yIntervals)) * ((Math.Pow(xIntervals, 2) - 2 * Math.Pow(yIntervals, 2)) - (Math.Pow(xIntervals, 2) + Math.Pow(yIntervals, 2)));        //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
+
         //const double externalHeatLoad = 2500.0 * 1e-9;
 
 
