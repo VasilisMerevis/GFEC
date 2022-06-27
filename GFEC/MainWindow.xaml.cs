@@ -833,6 +833,7 @@ namespace GFEC
                 case "CylinderCheck":
                     CylinderCheck.structuralSolution = new StaticSolver();
                     finalResults = CylinderCheck.RunDynamicExample(nodes, elementsConnectivity, fixedNodes, masterConnectivity, slaveConnectivity);
+                    break;
                 case "LinearAlgebraTests":
                     LinearAlgebraTests.SolveExample();
                     finalResults = new Results();
