@@ -261,7 +261,7 @@ namespace GFEC
             nodalParametricCoordinates.Add(new double[] { 1.0, 0.0, 0.0 });
             nodalParametricCoordinates.Add(new double[] { 0.0, 0.0, 0.0 });
 
-            for (int i = 0; i< nodesCount; i++)
+            for (int i = 0; i < nodesCount; i++)
             {
                 double[] nodalParamCoord = nodalParametricCoordinates[i];
                 //double[] gW = GaussPoints(i, j, k).Item2;
@@ -306,7 +306,17 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] updatedCoor = new double[81];
+            for (int i = 1; i <= 27; i++)
+            {
+                updatedCoor[3 * i - 3] = Nodes[i].XCoordinate;
+                updatedCoor[3 * i - 2] = Nodes[i].YCoordinate;
+                updatedCoor[3 * i - 1] = Nodes[i].ZCoordinate;
+            }
+            return updatedCoor;
+        }
         private Dictionary<int, double> CalculateShapeFunctions(double ksi, double ihta, double zita)
         {
             Dictionary<int, double> shapeFunctions = new Dictionary<int, double>();
@@ -342,7 +352,7 @@ namespace GFEC
         }
         private double[,] CalculateShapeFunctionMatrix(double ksi, double ihta, double zita)
         {
-            double N1 = 1.0 / 8.0 * (Math.Pow(ksi,2.0) - ksi) * (Math.Pow(ihta, 2.0) - ihta) * (Math.Pow(zita, 2.0) - zita);
+            double N1 = 1.0 / 8.0 * (Math.Pow(ksi, 2.0) - ksi) * (Math.Pow(ihta, 2.0) - ihta) * (Math.Pow(zita, 2.0) - zita);
             double N2 = 1.0 / 8.0 * (Math.Pow(ksi, 2.0) + ksi) * (Math.Pow(ihta, 2.0) - ihta) * (Math.Pow(zita, 2.0) - zita);
             double N3 = 1.0 / 8.0 * (Math.Pow(ksi, 2.0) + ksi) * (Math.Pow(ihta, 2.0) + ihta) * (Math.Pow(zita, 2.0) - zita);
             double N4 = 1.0 / 8.0 * (Math.Pow(ksi, 2.0) - ksi) * (Math.Pow(ihta, 2.0) + ihta) * (Math.Pow(zita, 2.0) - zita);
@@ -490,62 +500,63 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[3, 3];
             //DisplacementVector = new double[24];
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            //double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xNodalInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xNodalInitial[k] * dN["ksi"][i];
                 k += 3;
             }
             k = 1;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xNodalInitial[k] * dN["ksi"][i];
                 k += 3;
             }
             k = 2;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xNodalInitial[k] * dN["ksi"][i];
                 k += 3;
             }
 
             k = 0;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xNodalInitial[k] * dN["ihta"][i];
                 k += 3;
             }
             k = 1;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xNodalInitial[k] * dN["ihta"][i];
                 k += 3;
             }
             k = 2;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xNodalInitial[k] * dN["ihta"][i];
                 k += 3;
             }
 
             k = 0;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xNodalInitial[k] * dN["mhi"][i];
                 k += 3;
             }
             k = 1;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xNodalInitial[k] * dN["mhi"][i];
                 k += 3;
             }
             k = 2;
             for (int i = 0; i < 27; i++)
             {
-                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xNodalInitial[k] * dN["mhi"][i];
                 k += 3;
             }
 
@@ -681,7 +692,6 @@ namespace GFEC
                         double[,] B = CalculateBMatrix(globaldN);
                         K = MatrixOperations.MatrixAddition(K, MatrixOperations.ScalarMatrixProductNew(detJ * gW[0] * gW[1] * gW[2],
                             MatrixOperations.MatrixProduct(MatrixOperations.Transpose(B), MatrixOperations.MatrixProduct(E, B))));
-
                     }
                 }
             }
@@ -728,14 +738,8 @@ namespace GFEC
                         fInt = VectorOperations.VectorVectorAddition(fInt, VectorOperations.VectorScalarProductNew(
                             VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * gW[2]));
                     }
-
                 }
             }
-
-            //double[,] Kstiff = CreateGlobalStiffnessMatrix();
-            //double[] uDisp = DisplacementVector;
-            //double[] fInt = VectorOperations.MatrixVectorProduct(Kstiff, uDisp);
-            //fInt = VectorOperations.VectorScalarProductNew(fInt, 1.0);
             return fInt;
         }
     }

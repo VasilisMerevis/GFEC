@@ -50,18 +50,12 @@ namespace GFEC
 
 
         //External loads
-
         private const int ThermalDof1 = 2;
         private const int ThermalDof2 = nodesInXCoor * (nodesInYCoor - 1) + 2;
-        //const double externalStructuralLoad = -2.85 * 81/totalContactElements;
-        //const double T0 = 100.0;
+        const double externalStructuralLoad = -2.85 * 81/totalContactElements;
+        const double T0 = 100.0;
         const double solidThermalCond = 3300;
-        //static double externalHeatLoad = -2 * T0 * (solidThermalCond / (6 * xIntervals * yIntervals)) * ((Math.Pow(xIntervals, 2) - 2 * Math.Pow(yIntervals, 2)) - (Math.Pow(xIntervals, 2) + Math.Pow(yIntervals, 2)));        //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
-
-        const double externalStructuralLoad = -2.6 / 100;
-        const double externalHeatLoad = 2500.0 * 1e-9;
-        //-----------------------------------------------------------------------------------
-        //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
+        static double externalHeatLoad = -2 * T0 * (solidThermalCond / (6 * xIntervals * yIntervals)) * ((Math.Pow(xIntervals, 2) - 2 * Math.Pow(yIntervals, 2)) - (Math.Pow(xIntervals, 2) + Math.Pow(yIntervals, 2)));        //const double externalStructuralLoad = -5 * 100000000.0 * 1e-18 * 0.3;
 
         //const double externalHeatLoad = 2500.0 * 1e-9;
 

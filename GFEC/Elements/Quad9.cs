@@ -193,7 +193,16 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] initialCoor = new double[18];
+            for (int i = 1; i <= 9; i++)
+            {
+                initialCoor[2 * i - 2] = Nodes[i].XCoordinate;
+                initialCoor[2 * i - 1] = Nodes[i].YCoordinate;
+            }
+            return initialCoor;
+        }
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -220,7 +229,7 @@ namespace GFEC
             double N6 = 1.0 / 2.0 * ihta * (1 - ksi) * (1 + ksi) * (1 + ihta); shapeFunctions.Add(6, N6);
             double N7 = -1.0 / 4.0 * ksi * ihta * (1 - ksi) * (1 + ihta); shapeFunctions.Add(7, N7);
             double N8 = -1.0 / 2.0 * ksi * (1 - ksi) * (1 + ihta) * (1 - ihta); shapeFunctions.Add(8, N8);
-            double N9 = (1 - Math.Pow(ksi,2)) * (1 + ihta) * (1 - ihta); shapeFunctions.Add(9, N9);
+            double N9 = (1 - Math.Pow(ksi, 2)) * (1 + ihta) * (1 - ihta); shapeFunctions.Add(9, N9);
             return shapeFunctions;
         }
 
@@ -274,31 +283,31 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[2, 2];
 
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 9; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 9; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
 
             k = 0;
             for (int i = 0; i < 9; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 9; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             return jacobianMatrix;
@@ -532,28 +541,28 @@ namespace GFEC
             return F;
         }
 
-//        private double[] nodalForces()
-//        {
-//            double[] nF = new double[18];
-//            double[] extSurfLoad = new double[] { 0.0, -1.0 };
-//            for (int i = 0; i <= 2; i++)
-//            {
-//                for (int j = 0; j <= 2; j++)
-//                {
-//                    double[] gP = GaussPoints(i, j).Item1;
-//                    double[] gW = GaussPoints(i, j).Item2;
-//                    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-//                    var matrixN = CalculateShapeFunctionMatrix(gP[0], gP[1]);
-//\                    double[,] J = CalculateJacobian(localdN);
-//                    //double[,] invJ = CalculateInverseJacobian(J).Item1;
-//                    double detJ = CalculateInverseJacobian(J).Item2;
-//                    nF = VectorOperations.VectorVectorAddition(nF, VectorOperations.VectorScalarProduct(
-//                        VectorOperations.MatrixVectorProduct(
-//                    MatrixOperations.Transpose(matrixN), extSurfLoad), detJ * gW[0] * gW[1]));
-//                }
-//            }
-//            return nF;
-//        }
+        //        private double[] nodalForces()
+        //        {
+        //            double[] nF = new double[18];
+        //            double[] extSurfLoad = new double[] { 0.0, -1.0 };
+        //            for (int i = 0; i <= 2; i++)
+        //            {
+        //                for (int j = 0; j <= 2; j++)
+        //                {
+        //                    double[] gP = GaussPoints(i, j).Item1;
+        //                    double[] gW = GaussPoints(i, j).Item2;
+        //                    Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
+        //                    var matrixN = CalculateShapeFunctionMatrix(gP[0], gP[1]);
+        //\                    double[,] J = CalculateJacobian(localdN);
+        //                    //double[,] invJ = CalculateInverseJacobian(J).Item1;
+        //                    double detJ = CalculateInverseJacobian(J).Item2;
+        //                    nF = VectorOperations.VectorVectorAddition(nF, VectorOperations.VectorScalarProduct(
+        //                        VectorOperations.MatrixVectorProduct(
+        //                    MatrixOperations.Transpose(matrixN), extSurfLoad), detJ * gW[0] * gW[1]));
+        //                }
+        //            }
+        //            return nF;
+        //        }
     }
 }
 

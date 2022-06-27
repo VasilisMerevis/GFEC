@@ -47,7 +47,6 @@ namespace GFEC
             ElementFreedomSignature[7] = new bool[] { true, true, true, false, false, false };
             ElementFreedomSignature[8] = new bool[] { true, true, true, false, false, false };
             DisplacementVector = new double[24];
-
         }
         public void CalculateElementEASMatrices()
         {
@@ -64,7 +63,6 @@ namespace GFEC
         public void StoreElementFinalStepDisplacementVector(double[] solutionVector)
         {
             throw new Exception("Needs to be removed. Has beeb used only for testing purposes");
-
         }
         public double ClosestPointProjection()
         {
@@ -198,7 +196,17 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] initialCoor = new double[24];
+            for (int i = 1; i <= 8; i++)
+            {
+                initialCoor[3 * i - 3] = Nodes[i].XCoordinate;
+                initialCoor[3 * i - 2] = Nodes[i].YCoordinate;
+                initialCoor[3 * i - 1] = Nodes[i].ZCoordinate;
+            }
+            return initialCoor;
+        }
         private Dictionary<int, double> CalculateShapeFunctions(double ksi, double ihta, double mhi)
         {
             Dictionary<int, double> shapeFunctions = new Dictionary<int, double>();
@@ -215,13 +223,13 @@ namespace GFEC
         }
         private double[,] CalculateShapeFunctionMatrix(double ksi, double ihta, double zita)
         {
-            double N1 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - zita); 
-            double N2 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - zita); 
-            double N3 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - zita); 
-            double N4 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - zita); 
-            double N5 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + zita); 
-            double N6 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + zita); 
-            double N7 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + zita); 
+            double N1 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 - zita);
+            double N2 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 - zita);
+            double N3 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 - zita);
+            double N4 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 - zita);
+            double N5 = 1.0 / 8.0 * (1 - ksi) * (1 - ihta) * (1 + zita);
+            double N6 = 1.0 / 8.0 * (1 + ksi) * (1 - ihta) * (1 + zita);
+            double N7 = 1.0 / 8.0 * (1 + ksi) * (1 + ihta) * (1 + zita);
             double N8 = 1.0 / 8.0 * (1 - ksi) * (1 + ihta) * (1 + zita);
             double[,] shapeFunctionsMat = new double[,] {
                 {N1, 0.0, 0.0, N2, 0.0, 0.0, N3, 0.0, 0.0, N4, 0.0, 0.0, N5, 0.0, 0.0, N6, 0.0, 0.0, N7, 0.0, 0.0, N8, 0.0, 0.0 },
@@ -284,62 +292,63 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[3, 3];
             //DisplacementVector = new double[24];
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            //double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xNodalInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xNodalInitial[k] * dN["ksi"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xNodalInitial[k] * dN["ksi"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 2] = jacobianMatrix[0, 2] + xNodalInitial[k] * dN["ksi"][i];
                 k = k + 3;
             }
 
             k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xNodalInitial[k] * dN["ihta"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xNodalInitial[k] * dN["ihta"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 2] = jacobianMatrix[1, 2] + xNodalInitial[k] * dN["ihta"][i];
                 k = k + 3;
             }
 
             k = 0;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 0] = jacobianMatrix[2, 0] + xNodalInitial[k] * dN["mhi"][i];
                 k = k + 3;
             }
             k = 1;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 1] = jacobianMatrix[2, 1] + xNodalInitial[k] * dN["mhi"][i];
                 k = k + 3;
             }
             k = 2;
             for (int i = 0; i < 8; i++)
             {
-                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xUpdated[k] * dN["mhi"][i];
+                jacobianMatrix[2, 2] = jacobianMatrix[2, 2] + xNodalInitial[k] * dN["mhi"][i];
                 k = k + 3;
             }
 
@@ -458,7 +467,7 @@ namespace GFEC
         //}
         private Tuple<double[], double[]> LobattoPoints(int i, int j, int k)
         {
-            double[] gaussPoints = new double[] { -1.0, 1.0};
+            double[] gaussPoints = new double[] { -1.0, 1.0 };
             double[] gaussWeights = new double[] { 1.0, 1.0 };
 
             double[] vectorWithPoints = new double[] { gaussPoints[i], gaussPoints[j], gaussPoints[k] };
@@ -468,7 +477,7 @@ namespace GFEC
         public double[,] CreateGlobalStiffnessMatrix()
         {
             double[,] K = new double[24, 24];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); 
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
 
             for (int i = 0; i < 2; i++)
             {
@@ -531,9 +540,7 @@ namespace GFEC
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] fInt = new double[24];
-
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); 
-
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
 
             for (int i = 0; i < 2; i++)
             {
@@ -554,10 +561,8 @@ namespace GFEC
                         fInt = VectorOperations.VectorVectorAddition(fInt, VectorOperations.VectorScalarProductNew(
                             VectorOperations.MatrixVectorProduct(MatrixOperations.Transpose(B), stressVector), detJ * gW[0] * gW[1] * gW[2]));
                     }
-
                 }
             }
-
             //double[,] Kstiff = CreateGlobalStiffnessMatrix();
             //double[] uDisp = DisplacementVector;
             //double[] fInt = VectorOperations.MatrixVectorProduct(Kstiff, uDisp);

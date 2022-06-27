@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace GFEC
 {
-    public static class BumperExample
+    public static class RefinedMeshBumperExample
     {
         public static ISolver structuralSolution;
         static int[] structuralBoundaryConditions;
@@ -17,367 +17,382 @@ namespace GFEC
         static List<int> loadedStructuralDOFs;
         static double[] externalForcesStructuralVector;
         const double externalStructuralLoad = 100.0;
-        const int nodesNumber = 3726;
-        const int elmntsNumber = 1760;
+        const int nodesNumber = 7272;
+        const int elmntsNumber = 4600;
         private static void CreateStructuralBoundaryConditions()
         {
             List<int> boundedDofs = new List<int>();
-            int initialNode = 1169;
+            int initialNode = 196;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1199;
+            initialNode = 2291;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1249;
+            initialNode = 2485;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1279;
+            initialNode = 2622;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1328;
+            initialNode = 2721;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1358;
+            initialNode = 2820;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1807;
+            initialNode = 2919;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1837;
+            initialNode = 3019;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1917;
+            initialNode = 3120;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1947;
+            initialNode = 3219;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 1997;
+            initialNode = 3283;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2027;
+            initialNode = 3421;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2076;
+            initialNode = 3482;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2106;
+            initialNode = 3619;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2156;
+            initialNode = 3718;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2186;
+            initialNode = 3783;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2236;
+            initialNode = 3926;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2266;
+            initialNode = 4124;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2316;
+            initialNode = 4185;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2346;
+            initialNode = 4520;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2395;
+            initialNode = 4619;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2425;
+            initialNode = 4718;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2475;
+            initialNode = 4817;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2505;
+            initialNode = 6113;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2555;
+            initialNode = 7139;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2585;
+            initialNode = 158;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2635;
+            initialNode = 2253;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2665;
+            initialNode = 2523;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2715;
+            initialNode = 2584;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2745;
+            initialNode = 2683;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2797;
+            initialNode = 2782;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2827;
+            initialNode = 2881;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2877;
+            initialNode = 2981;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2907;
+            initialNode = 3082;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2960;
+            initialNode = 3181;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 2990;
+            initialNode = 3321;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3039;
+            initialNode = 3383;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3069;
+            initialNode = 3520;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3197;
+            initialNode = 3581;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3227;
+            initialNode = 3680;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3276;
+            initialNode = 3821;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3306;
+            initialNode = 3888;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3513;
+            initialNode = 4086;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3543;
+            initialNode = 4223;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3592;
+            initialNode = 4482;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3622;
+            initialNode = 4581;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3671;
+            initialNode = 4680;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            initialNode = 3701;
+            initialNode = 4779;
             for (int node = initialNode; node <= initialNode + 2; node++)
             {
                 boundedDofs.Add(3 * node - 2);
                 boundedDofs.Add(3 * node - 1);
                 boundedDofs.Add(3 * node);
             }
-            bool duplicates = new bool();
+            initialNode = 6151;
+            for (int node = initialNode; node <= initialNode + 2; node++)
+            {
+                boundedDofs.Add(3 * node - 2);
+                boundedDofs.Add(3 * node - 1);
+                boundedDofs.Add(3 * node);
+            }
+            initialNode = 7101;
+            for (int node = initialNode; node <= initialNode + 2; node++)
+            {
+                boundedDofs.Add(3 * node - 2);
+                boundedDofs.Add(3 * node - 1);
+                boundedDofs.Add(3 * node);
+            }
+            //bool duplicates = new bool();
             if (boundedDofs.Count != boundedDofs.Distinct().Count())
             {
-                duplicates = true;
+                //duplicates = true;
                 boundedDofs = boundedDofs.Distinct().ToList();
             }
             structuralBoundaryConditions = boundedDofs.ToArray<int>();
+            //VectorOperations.PrintIntVectorToFile(structuralBoundaryConditions, @"C:\Users\Public\Documents\" + "BoundedDOF.dat");
         }
 
         private static void CreateStructuralLoadVector()
         {
             loadedStructuralDOFs = new List<int>();
-            for (int i = 744; i <= 986; i ++)
+            for (int i = 1720; i <= 2123; i++)
             {
                 loadedStructuralDOFs.Add(3 * i);
             }
-            externalForcesStructuralVector = new double[3726 * 3];
+            externalForcesStructuralVector = new double[nodesNumber * 3];
         }
 
-       
+
         private static Dictionary<int, bool[]> CreateNodeFAT(Dictionary<int, INode> nodes)
         {
             int totalNodes = nodes.Count;
@@ -392,7 +407,7 @@ namespace GFEC
         private static Dictionary<int, IElementProperties> CreateElementProperties(Dictionary<int, Dictionary<int, int>> elementsConnectivity)
         {
             double E = 200.0 * 1e9;
-            string type = "ANSSolidShell8EAS";
+            string type = "ANSSolidShell8LEAS7";
             Dictionary<int, IElementProperties> elementProperties = new Dictionary<int, IElementProperties>();
             int totalElements = elementsConnectivity.Count;
             for (int i = 1; i <= totalElements; i++)
@@ -401,7 +416,7 @@ namespace GFEC
             }
             return elementProperties;
         }
-        
+
 
         private static IAssembly CreateAssembly(Dictionary<int, INode> nodes, Dictionary<int, Dictionary<int, int>> elementsConnectivity)
         {
@@ -470,15 +485,15 @@ namespace GFEC
             //int[] indices12 = noDupes2.ToArray();
             //VectorOperations.PrintIntVectorToFile(indices, @"C:\Users\Public\Documents\" + "indices.dat");
             //VectorOperations.PrintIntVectorToFile(indices12, @"C:\Users\Public\Documents\" + "indices2.dat");
-
-            structuralSolution.LinearScheme = new Skyline();
+            //int maxLength = Array.MaxLength()
+            structuralSolution.LinearScheme = new CholeskyFactorization();
             //structuralSolution.NonLinearScheme.Tolerance = 1e-4;
             structuralSolution.ActivateNonLinearSolver = false;
             //structuralSolution.NonLinearScheme.numberOfLoadSteps = 40;
             double[] externalForces3 = externalForcesStructuralVector;
             foreach (var dof in loadedStructuralDOFs)
             {
-                externalForces3[dof - 1] =  externalStructuralLoad;
+                externalForces3[dof - 1] = externalStructuralLoad;
             }
             double[] reducedExternalForces3 = BoundaryConditionsImposition.ReducedVector(externalForces3, elementsAssembly.BoundedDOFsVector);
             structuralSolution.AssemblyData = elementsAssembly;
@@ -523,3 +538,4 @@ namespace GFEC
 
     }
 }
+

@@ -33,7 +33,12 @@ namespace GFEC
         public SeriesCollection Mesh { get; set; }
         private Results solverResults;
         private Dictionary<int, INode> nodes = new Dictionary<int, INode>();
+        private List<int> fixedNodes = new List<int>();
+        private List<int> loadedNodes = new List<int>();
         private Dictionary<int, Dictionary<int, int>> elementsConnectivity = new Dictionary<int, Dictionary<int, int>>();
+        private Dictionary<int, Dictionary<int, int>> masterConnectivity = new Dictionary<int, Dictionary<int, int>>();
+        private Dictionary<int, Dictionary<int, int>> slaveConnectivity = new Dictionary<int, Dictionary<int, int>>();
+
         public string selectedExample;
         public SeriesCollection Something { get; set; }
         public ChartValues<ConvergenceValues> ChartValues { get; set; }
@@ -81,7 +86,7 @@ namespace GFEC
             Window_Loaded();
             this.KeyDown += Window_KeyDown;
 
-            
+
         }
 
 
@@ -331,7 +336,7 @@ namespace GFEC
         private void RunButton(object sender, RoutedEventArgs args)
         {
             //SolveSelectedExample();
-           
+
             CoupledThermalStructural.diagramData = new ShowToGUI();
             CoupledThermalStructural.diagramData.TestEvent += TestEventMethod;
             CoupledThermalStructural.diagramData.TestEventMethod();
@@ -340,7 +345,7 @@ namespace GFEC
             thread1.SetApartmentState(ApartmentState.STA);
             thread1.Start();
 
-            
+
             //thread1.Join();
             //Graph = ShowToGUI.ShowResults(solverResults);
 
@@ -367,7 +372,7 @@ namespace GFEC
             //Mesh = ShowToGUI.DrawMesh(nodes, connectivity);
 
             DataContext = this;
-            
+
             return;
 
 
@@ -442,9 +447,14 @@ namespace GFEC
             exampleList.Add("CantileverAngleTest");
             exampleList.Add("ExplicitLinearExample");
             exampleList.Add("BatheExplicitLinearExample");
+            exampleList.Add("BumperExample");
+            exampleList.Add("RefinedMeshBumperExample");
+            exampleList.Add("SolidShellElementsThinCylinder");
+            exampleList.Add("SolidShellThinCylinderConnectivity2");
+            exampleList.Add("BumperExampleRefinedMesh");
+            exampleList.Add("TruckBumperImpact");
+            exampleList.Add("CylinderCheck");
             exampleList.Add("LinearAlgebraTests");
-
-
             ComboBox1.ItemsSource = exampleList;
         }
 
@@ -496,7 +506,7 @@ namespace GFEC
                     finalResults = CoupledThermalStructural2.RunStaticExample();
                     break;
                 case "CoupledThermalStructuralCNTs":
-                    CoupledThermalStructuralCNTs.structuralSolution = new StaticSolver(); 
+                    CoupledThermalStructuralCNTs.structuralSolution = new StaticSolver();
                     CoupledThermalStructuralCNTs.structuralSolution.NonLinearScheme = new LoadControlledNewtonRaphson();
                     CoupledThermalStructuralCNTs.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = CoupledThermalStructuralCNTs.RunStaticExample();
@@ -785,6 +795,9 @@ namespace GFEC
                     SolidShellElementsContactExample.structuralSolution.NonLinearScheme.convergenceResult += NonLinearScheme_convergenceResult;
                     finalResults = SolidShellElementsContactExample.RunStaticExample();
                     break;
+                case "SolidShellElementsImpact":
+                    finalResults = SolidShellElementsImpact.RunDynamicExample();
+                    break;
                 case "ExplicitLinearExample":
                     ExplicitLinearExample.SolveExample();
                     finalResults = ExplicitLinearExample.RunStaticExample();
@@ -793,6 +806,33 @@ namespace GFEC
                     BatheExplicitLinearExample.SolveExample();
                     finalResults = BatheExplicitLinearExample.RunStaticExample();
                     break;
+                case "BumperExample":
+                    BumperExample.structuralSolution = new StaticSolver();
+                    finalResults = BumperExample.RunStaticExample(nodes, elementsConnectivity);
+                    break;
+                case "RefinedMeshBumperExample":
+                    RefinedMeshBumperExample.structuralSolution = new StaticSolver();
+                    finalResults = RefinedMeshBumperExample.RunStaticExample(nodes, elementsConnectivity);
+                    break;
+                case "SolidShellElementsThinCylinder":
+                    SolidShellElementsThinCylinder.structuralSolution = new StaticSolver();
+                    finalResults = SolidShellElementsThinCylinder.RunStaticExample(nodes, elementsConnectivity);
+                    break;
+                case "SolidShellThinCylinderConnectivity2":
+                    SolidShellThinCylinderConnectivity2.structuralSolution = new StaticSolver();
+                    finalResults = SolidShellThinCylinderConnectivity2.RunStaticExample();
+                    break;
+                case "BumperExampleRefinedMesh":
+                    BumperExampleRefinedMesh.structuralSolution = new StaticSolver();
+                    finalResults = BumperExampleRefinedMesh.RunStaticExample(nodes, elementsConnectivity, fixedNodes, loadedNodes);
+                    break;
+                case "TruckBumperImpact":
+                    TruckBumperImpact.structuralSolution = new StaticSolver();
+                    finalResults = TruckBumperImpact.RunDynamicExample(nodes, elementsConnectivity, fixedNodes, masterConnectivity, slaveConnectivity);
+                    break;
+                case "CylinderCheck":
+                    CylinderCheck.structuralSolution = new StaticSolver();
+                    finalResults = CylinderCheck.RunDynamicExample(nodes, elementsConnectivity, fixedNodes, masterConnectivity, slaveConnectivity);
                 case "LinearAlgebraTests":
                     LinearAlgebraTests.SolveExample();
                     finalResults = new Results();
@@ -809,7 +849,7 @@ namespace GFEC
         public void NonLinearScheme_convergenceResult(object sender, ConvergenceValues e)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
-            { 
+            {
                 LogTool.Text = "Load Step " + e.LoadStep + "-Iteration " + e.Iteration + " : Convergence State: " + e.ConvergenceResult + " with residual " + e.ResidualNorm;
                 if (e.LoadStep > LoadStepNumber)
                 {
@@ -824,7 +864,7 @@ namespace GFEC
                 LoadStepNumber = e.LoadStep;
             }));
             SetAxisLimits(e.Iteration);
-            
+
             if (ChartValues.Count > 50) ChartValues.RemoveAt(0);
         }
 
@@ -866,15 +906,16 @@ namespace GFEC
                     StreamReader stream = new StreamReader(dialog1.FileName);
                     string file = await stream.ReadToEndAsync();
                     List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-                    lines.RemoveAt(0);
-
+                    //lines.RemoveAt(0);
+                    int nodeIndex = 1;
                     foreach (var line in lines)
                     {
                         // in case of first line ...
                         string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
-                        int nodeIndex = int.Parse(fields[0]);
-                        var node = new Node(double.Parse(fields[1]), double.Parse(fields[2]), double.Parse(fields[3]));
+                        //int nodeIndex = int.Parse(fields[0]);
+                        var node = new Node(double.Parse(fields[0]), double.Parse(fields[1]), double.Parse(fields[2]));
                         nodes[nodeIndex] = node;
+                        nodeIndex += 1;
                     }
                 }
 
@@ -885,7 +926,64 @@ namespace GFEC
                 throw ex;
             }
         }
+        
+        private async void Import_LoadedNodes_Button_Click(object sender, RoutedEventArgs args)
+        {
+            try
+            {
+                OpenFileDialog dialog1 = new OpenFileDialog();
+                if (dialog1.ShowDialog() == true)
+                {
+                    StreamReader stream = new StreamReader(dialog1.FileName);
+                    string file = await stream.ReadToEndAsync();
+                    List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+                    //lines.RemoveAt(0);
+                    int nodeIndex = 1;
+                    foreach (var line in lines)
+                    {
+                        // in case of first line ...
+                        string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
+                        //int nodeIndex = int.Parse(fields[0]);
+                        var node = (int)(double.Parse(fields[0]));
+                        loadedNodes.Add(node);
+                        nodeIndex += 1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        private async void Import_FixedNodes_Button_Click(object sender, RoutedEventArgs args)
+        {
+            try
+            {
+                OpenFileDialog dialog1 = new OpenFileDialog();
+                if (dialog1.ShowDialog() == true)
+                {
+                    StreamReader stream = new StreamReader(dialog1.FileName);
+                    string file = await stream.ReadToEndAsync();
+                    List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+                    //lines.RemoveAt(0);
+                    int nodeIndex = 1;
+                    foreach (var line in lines)
+                    {
+                        // in case of first line ...
+                        string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
+                        //int nodeIndex = int.Parse(fields[0]);
+                        var node = (int)(double.Parse(fields[0]));
+                        fixedNodes.Add(node);
+                        nodeIndex += 1;
+                    }
+                }
 
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         private async void Import_Connectivity_Button_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -896,25 +994,27 @@ namespace GFEC
                     StreamReader stream = new StreamReader(dialog1.FileName);
                     string file = await stream.ReadToEndAsync();
                     List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
-                    lines.RemoveAt(0);
-
+                    //lines.RemoveAt(0);
+                    int elementIndex = 1;
                     foreach (var line in lines)
                     {
                         // in case of first line ...
                         string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
-                        int elementIndex = int.Parse(fields[0]);
+                        //int elementIndex = int.Parse(fields[0]);
 
-                        var element = new Dictionary<int, int>() {
-                            { 1, int.Parse(fields[2]) },
-                            { 2, int.Parse(fields[3]) },
-                            { 3, int.Parse(fields[4]) },
-                            { 4, int.Parse(fields[5]) },
-                            { 5, int.Parse(fields[6]) },
-                            { 6, int.Parse(fields[7]) },
-                            { 7, int.Parse(fields[8]) },
-                            { 8, int.Parse(fields[9]) }
+                        var element = new Dictionary<int, int>()
+                        {
+                            { 1, int.Parse(fields[0]) },
+                            { 2, int.Parse(fields[1]) },
+                            { 3, int.Parse(fields[2]) },
+                            { 4, int.Parse(fields[3]) },
+                            { 5, int.Parse(fields[4]) },
+                            { 6, int.Parse(fields[5]) },
+                            { 7, int.Parse(fields[6]) },
+                            { 8, int.Parse(fields[7]) }
                         };
                         elementsConnectivity[elementIndex] = element;
+                        elementIndex += 1;
                     }
                 }
 
@@ -925,7 +1025,81 @@ namespace GFEC
                 throw ex;
             }
         }
+        
+        private async void Import_MasterSurfaceConnectivity_Button_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog dialog1 = new OpenFileDialog();
+                if (dialog1.ShowDialog() == true)
+                {
+                    StreamReader stream = new StreamReader(dialog1.FileName);
+                    string file = await stream.ReadToEndAsync();
+                    List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+                    //lines.RemoveAt(0);
+                    int elementIndex = 1;
+                    foreach (var line in lines)
+                    {
+                        // in case of first line ...
+                        string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
+                        //int elementIndex = int.Parse(fields[0]);
 
+                        var element = new Dictionary<int, int>()
+                        {
+                            { 1, int.Parse(fields[0]) },
+                            { 2, int.Parse(fields[1]) },
+                            { 3, int.Parse(fields[2]) },
+                            { 4, int.Parse(fields[3]) }
+                        };
+                        masterConnectivity[elementIndex] = element;
+                        elementIndex += 1;
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        private async void Import_SlaveSurfaceConnectivity_Button_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog dialog1 = new OpenFileDialog();
+                if (dialog1.ShowDialog() == true)
+                {
+                    StreamReader stream = new StreamReader(dialog1.FileName);
+                    string file = await stream.ReadToEndAsync();
+                    List<string> lines = new List<string>(file.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries));
+                    //lines.RemoveAt(0);
+                    int elementIndex = 1;
+                    foreach (var line in lines)
+                    {
+                        // in case of first line ...
+                        string[] fields = line.Split(new string[] { "\t" }, StringSplitOptions.None);
+                        //int elementIndex = int.Parse(fields[0]);
+
+                        var element = new Dictionary<int, int>()
+                        {
+                            { 1, int.Parse(fields[0]) },
+                            { 2, int.Parse(fields[1]) },
+                            { 3, int.Parse(fields[2]) },
+                            { 4, int.Parse(fields[3]) }
+                        };
+                        slaveConnectivity[elementIndex] = element;
+                        elementIndex += 1;
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             /// Declare scene objects.
@@ -1108,7 +1282,7 @@ namespace GFEC
             gnuplotImage.Source = new BitmapImage(new Uri("file://" + AppContext.BaseDirectory + "gnuplot.png"));
         }
 
-        
+
         private void Button_ParallelTest(object sender, RoutedEventArgs e)
         {
             MultiThreadingExample test1 = new MultiThreadingExample();
@@ -1119,7 +1293,7 @@ namespace GFEC
         private double _axisMax;
         private double _axisMin;
 
-        
+
         public Func<double, string> DateTimeFormatter { get; set; }
         public double AxisStep { get; set; }
         public double AxisUnit { get; set; }
@@ -1203,19 +1377,19 @@ namespace GFEC
                             var node = new Node(double.Parse(fields[1], CultureInfo.InvariantCulture), double.Parse(fields[2], CultureInfo.InvariantCulture), double.Parse(fields[3], CultureInfo.InvariantCulture));
                             nodes[nodeIndex] = node;
                         }
-                        else if(fields[0] == "f")
+                        else if (fields[0] == "f")
                         {
                             connectivityIndex = connectivityIndex + 1;
                             string separatorForNode = "/";
                             int[] elementNodes = new int[4];
                             for (int i = 0; i < 4; i++)
                             {
-                                string[] fieldsForNode = fields[i+1].Split(separatorForNode.ToCharArray());
+                                string[] fieldsForNode = fields[i + 1].Split(separatorForNode.ToCharArray());
                                 elementNodes[i] = Int16.Parse(fieldsForNode[0]);
                             }
                             elementsConnectivity[connectivityIndex] = new Dictionary<int, int>() { { 1, elementNodes[0] }, { 2, elementNodes[1] }, { 3, elementNodes[2] }, { 4, elementNodes[3] } };
                         }
-                        
+
                     }
                 }
 
@@ -1234,6 +1408,7 @@ namespace GFEC
             plotMesh.nodes = nodes;
             ViewportGraphics.Children.Clear();
             ViewportGraphics.InvalidateVisual();
+
             ViewportGraphics.Children.Add(plotMesh.GetModel());
         }
 

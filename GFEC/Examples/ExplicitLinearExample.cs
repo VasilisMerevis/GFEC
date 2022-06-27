@@ -83,5 +83,10 @@ namespace GFEC
         {
             return finalresutls;
         }
+
+        public static Results RunStaticExample()
+        {
+            return new Results();
+        }
     }
 }

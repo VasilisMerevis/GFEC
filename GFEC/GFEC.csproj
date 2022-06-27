@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -81,20 +82,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
+      <HintPath>packages\LiveCharts.0.9.7\lib\net40\LiveCharts.dll</HintPath>
     </Reference>
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
+      <HintPath>packages\LiveCharts.Wpf.0.9.7\lib\net40\LiveCharts.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.5.0.0\lib\net48\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=3.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
+      <HintPath>packages\OpenTK.3.1.0\lib\net20\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -116,12 +120,24 @@
     <Compile Include="Examples\LinearAlgebraTests.cs" />
     <Compile Include="Object3D.cs" />
     <Compile Include="Assemble\AssemblyHelpMethods.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS7.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS1FI.cs" />
+    <Compile Include="Elements\ANSSolidShell8LEAS1RI.cs" />
     <Compile Include="Examples\BatheExplicitLinearExample.cs" />
     <Compile Include="Examples\BumperExample.cs" />
     <Compile Include="Examples\CantileverAngleTest.cs" />
+    <Compile Include="Examples\BumperExampleRefinedMesh.cs" />
+    <Compile Include="Examples\CylinderCheck.cs" />
+    <Compile Include="Examples\TruckBumperImpact.cs" />
+    <Compile Include="Examples\SolidShellThinCylinderConnectivity2.cs" />
+    <Compile Include="Examples\SolidShellElementsThinCylinder.cs" />
+    <Compile Include="Examples\RefinedMeshBumperExample.cs" />
+    <Compile Include="Examples\SolidShellElementsImpact.cs" />
     <Compile Include="Examples\ParallelDoubleCantilever.cs" />
     <Compile Include="Examples\SolidShellElementsContactExample.cs" />
     <Compile Include="Examples\SolidShellLinearExample.cs" />
+    <Compile Include="LinearAlgebra\CheckEquality.cs" />
+    <Compile Include="PlotOBJMesh.cs" />
     <Compile Include="Elements\ANSSolidShell8EAS.cs" />
     <Compile Include="Elements\IsoparamShell18.cs" />
     <Compile Include="Elements\Shell2DQuadratic4.cs" />
@@ -231,6 +247,7 @@
     <Compile Include="Solver\ISolver.cs" />
     <Compile Include="Solver\Linear\BiCGSTABSolver.cs" />
     <Compile Include="Solver\Linear\CholeskyFactorization.cs" />
+    <Compile Include="Solver\Linear\Skyline.cs" />
     <Compile Include="Solver\Linear\MMCPCGSolver.cs" />
     <Compile Include="Solver\Linear\GaussSolver.cs" />
     <Compile Include="Solver\Linear\ILinearSolution.cs" />

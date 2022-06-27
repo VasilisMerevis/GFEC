@@ -51,6 +51,9 @@ namespace GFEC
         double[,] EASLMatrix { get; set; }
         double[,] EASDMatrix { get; set; }
         double[] DisplacementVectorPreviousStep { get; set; }
+        double[] DisplacementVectorPreviousIncrement { get; set; }
+        double[] HourglassInternalForceVector { get; set; }
+        double[] HourglassInternalForceVectorPreviousConvergedSolution { get; set; }
 
         //Dictionary<int, double> TangentMatrixInitStickPointUpdSlideCase1 { get; set; }
         //Dictionary<int, double> TangentMatrixinitStickPointUpdSlideCase2 { get; set; }

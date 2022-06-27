@@ -36,7 +36,7 @@ namespace GFEC
                         sumu = 0.0;
                         for (int k = 0; k < i; k++)
                         {
-                            sumu = sumu + lowerPart[i, k] * upperPart[k, j];
+                            sumu += lowerPart[i, k] * upperPart[k, j];
                         }
                         upperPart[i, j] = (stiffnessMatrix[i, j] - sumu) / lowerPart[i, i];
                     }
@@ -45,7 +45,7 @@ namespace GFEC
                         suml = 0.0;
                         for (int k = 0; k < j; k++)
                         {
-                            suml = suml + lowerPart[i, k] * upperPart[k, j];
+                            suml += lowerPart[i, k] * upperPart[k, j];
                         }
                         lowerPart[i, j] = (stiffnessMatrix[i, j] - suml) / upperPart[j, j];
                     }

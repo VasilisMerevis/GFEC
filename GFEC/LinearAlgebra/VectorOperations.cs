@@ -28,6 +28,16 @@ namespace GFEC
             }
             File.WriteAllLines(path, dataToPrint);
         }
+        public static void PrintIntVectorToFile(int[] vector, string path)
+        {
+            int rows = vector.Length;
+            string[] dataToPrint = new string[rows];
+            for (int i = 0; i < rows; i++)
+            {
+                dataToPrint[i] = vector[i].ToString();
+            }
+            File.WriteAllLines(path, dataToPrint);
+        }
         public static void PrintListofVectorsToFile(List<double[]> vectors, string path)
         {
             int size = new int();
@@ -327,6 +337,19 @@ namespace GFEC
                 }
             }
             return new Tuple<double[], double[]>(result1, result2);
+        }
+        public static bool CheckForNonZeroElements(double[] vector)
+        {
+            bool result = true;
+            for(int i =0; i< vector.GetLength(0); i++)
+            {
+                if (vector[i] != 0)
+                {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
         }
 
     }

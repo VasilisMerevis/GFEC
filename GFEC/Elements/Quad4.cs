@@ -76,7 +76,7 @@ namespace GFEC
             double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
             List<double[]> stressVectors = new List<double[]>();
             List<double[]> strainVectors = GetStrainVector();
-            foreach(var v in strainVectors)
+            foreach (var v in strainVectors)
             {
                 double[] stressV = CalculateStressVector(E, v);
                 stressVectors.Add(stressV);
@@ -113,7 +113,7 @@ namespace GFEC
                 for (int j = 0; j < 2; j++)
                 {
                     double[] gP = GaussPoints(i, j).Item1;
-                    double[] gaussPoint = VectorOperations.MatrixVectorProduct(CalculateShapeFunctionMatrix(gP[0], gP[1]), xUpdated) ;
+                    double[] gaussPoint = VectorOperations.MatrixVectorProduct(CalculateShapeFunctionMatrix(gP[0], gP[1]), xUpdated);
                     gaussPoints.Add(gaussPoint);
                 }
             }
@@ -136,11 +136,11 @@ namespace GFEC
             List<double[]> strainVectors = new List<double[]>();
             double[] ksi = new double[] { -1.0, 1.0, 1.0, -1.0 };
             int k = 0;
-            for (int i = 0; i <= 2; i+=2)
+            for (int i = 0; i <= 2; i += 2)
             {
                 for (int j = 1; j <= 2; j++)
                 {
-                    double[] node = new double[] {ksi[k], (double)(i) - 1.0 };
+                    double[] node = new double[] { ksi[k], (double)(i) - 1.0 };
                     Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(node);
                     double[,] J = CalculateJacobian(localdN);
                     double[,] invJ = CalculateInverseJacobian(J).Item1;
@@ -197,7 +197,16 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] initialCoor = new double[8];
+            for (int i = 1; i <= 4; i++)
+            {
+                initialCoor[2 * i - 2] = Nodes[i].XCoordinate;
+                initialCoor[2 * i - 1] = Nodes[i].YCoordinate;
+            }
+            return initialCoor;
+        }
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -261,31 +270,31 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[2, 2];
 
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 4; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 4; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
 
             k = 0;
             for (int i = 0; i < 4; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 4; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
 
@@ -344,7 +353,7 @@ namespace GFEC
             double[,] Ematrix = new double[3, 3];
             //v = 0.30;
             //v = Properties.PoissonRatio;
-            double Ehat = E / ((1.0 - Math.Pow(v, 2)));
+            double Ehat = E / (1.0 - Math.Pow(v, 2));
 
             Ematrix[0, 0] = Ehat;
             Ematrix[0, 1] = Ehat * v;
@@ -366,15 +375,15 @@ namespace GFEC
             double[] gaussPoints = new double[] { -1.0 / Math.Sqrt(3), 1.0 / Math.Sqrt(3) };
             double[] gaussWeights = new double[] { 1.0, 1.0 };
 
-            double[] vectorWithPoints = new double[] { gaussPoints[i], gaussPoints[j]};
-            double[] vectorWithWeights = new double[] { gaussWeights[i], gaussWeights[j]};
+            double[] vectorWithPoints = new double[] { gaussPoints[i], gaussPoints[j] };
+            double[] vectorWithWeights = new double[] { gaussWeights[i], gaussWeights[j] };
             return new Tuple<double[], double[]>(vectorWithPoints, vectorWithWeights);
         }
 
         public double[,] CreateGlobalStiffnessMatrixNew()
         {
             double[,] K = new double[8, 8];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); 
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
 
             for (int i = 0; i < 2; i++)
             {
@@ -417,30 +426,6 @@ namespace GFEC
 
         public double[,] CreateMassMatrix()
         {
-            //double[,] M = new double[8, 8];
-
-            //double[,] consinstentMass = new double[8, 8];
-            //for (int i = 0; i < 2; i++)
-            //{
-            //    for (int j = 0; j < 2; j++)
-            //    {
-            //        double[] gP = GaussPoints(i, j).Item1;
-            //        double[] gW = GaussPoints(i, j).Item2;
-            //        Dictionary<string, double[]> localdN = CalculateShapeFunctionsLocalDerivatives(gP);
-            //        double[,] J = CalculateJacobian(localdN);
-            //        double detJ = CalculateInverseJacobian(J).Item2;
-            //        double[,] Nmatrix = CalculateShapeFunctionMatrix(gP[0], gP[1]);
-            //        consinstentMass = MatrixOperations.MatrixAddition(consinstentMass, MatrixOperations.ScalarMatrixProductNew(Properties.Density * Properties.Thickness * detJ * gW[0] * gW[1],
-            //            MatrixOperations.MatrixProduct(MatrixOperations.Transpose(Nmatrix), Nmatrix)));
-            //    }
-            //}
-            //for (int i = 0; i <= 7; i++)
-            //{
-            //    for (int j = 0; j <= 7; j++)
-            //    {
-            //        M[i, i] += consinstentMass[i, j];
-            //    }
-            //}
             //-------------------------------------------------------------------
             double[,] tempM = MatrixOperations.CreateDiagonalMatrix(8, 1.0);
             double length = 0.3;

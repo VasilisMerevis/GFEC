@@ -10,12 +10,16 @@
 
         Title="GFEC" Height="572" Width="959">
     <Grid Name="gridBasic">
-        <TextBox Name="Results"  HorizontalAlignment="Right" Height="91" Margin="0,141,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
+        <TextBox Name="Results"  HorizontalAlignment="Right" Height="80" Margin="0,200,33,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="375"/>
         <Button Content="Run" Click="RunButton" Margin="0,26,33,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="85"/>
         <ComboBox Name="ComboBox1" Margin="0,26,123,0" VerticalAlignment="Top" Height="29" HorizontalAlignment="Right" Width="285"/>
         <Button Content="Import Nodes" Margin="0,67,33,0" VerticalAlignment="Top" Click="Import_Nodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
-        <Button Content="Import Connectivity" HorizontalAlignment="Right" Margin="0,104,33,0" VerticalAlignment="Top" Width="116" Click="Import_Connectivity_Button_Click" Height="32"/>
-        <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,104,154,0" VerticalAlignment="Top" Width="116" Click="Button_Click" Height="32"/>
+        <Button Content="Import Fixed Nodes" Margin="0,110,33,0" VerticalAlignment="Top" Click="Import_FixedNodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
+        <Button Content="Import Loaded Nodes" Margin="0,150,33,0" VerticalAlignment="Top" Click="Import_LoadedNodes_Button_Click" Height="32" HorizontalAlignment="Right" Width="116"/>
+        <Button Content="Import Connectivity" HorizontalAlignment="Right" Margin="0,110,154,0" VerticalAlignment="Top" Width="116" Click="Import_Connectivity_Button_Click" Height="32"/>
+        <Button Content="Import Master" HorizontalAlignment="Right" Margin="0,150,150,0" VerticalAlignment="Top" Width="116" Click="Import_MasterSurfaceConnectivity_Button_Click" Height="32"/>
+        <Button Content="Import Slave" HorizontalAlignment="Right" Margin="0,150,275,0" VerticalAlignment="Top" Width="133" Click="Import_SlaveSurfaceConnectivity_Button_Click" Height="32"/>
+        <Button Content="GraphicsGL" HorizontalAlignment="Right" Margin="0,110,275,0" VerticalAlignment="Top" Width="133" Click="Button_Click" Height="32"/>
         <Image Name="gnuplotImage" Height="239" Margin="31,276,710,0" VerticalAlignment="Top"/>
         <TextBox x:Name="LogTool" x:FieldModifier="public" Margin="31,0,33,10" TextWrapping="Wrap" Height="86" VerticalAlignment="Bottom"/>
         <Label Content="Convergence Results" Margin="31,0,0,247" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="375"/>

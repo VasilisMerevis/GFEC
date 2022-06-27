@@ -165,7 +165,16 @@ namespace GFEC
             }
             return updatedCoor;
         }
-
+        private double[] InitialNodalCoordinates()
+        {
+            double[] initialCoor = new double[6];
+            for (int i = 1; i <= 3; i++)
+            {
+                initialCoor[2 * i - 2] = Nodes[i].XCoordinate;
+                initialCoor[2 * i - 1] = Nodes[i].YCoordinate;
+            }
+            return initialCoor;
+        }
         public Dictionary<int, INode> NodesAtFinalState()
         {
             Dictionary<int, INode> finalNodes = new Dictionary<int, INode>();
@@ -224,31 +233,31 @@ namespace GFEC
         {
             double[,] jacobianMatrix = new double[2, 2];
 
-            double[] xUpdated = UpdateNodalCoordinates(DisplacementVector);
+            double[] xInitial = InitialNodalCoordinates();
 
             int k = 0;
             for (int i = 0; i < 3; i++)
             {
-                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 0] = jacobianMatrix[0, 0] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 3; i++)
             {
-                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xUpdated[k] * dN["ksi"][i];
+                jacobianMatrix[0, 1] = jacobianMatrix[0, 1] + xInitial[k] * dN["ksi"][i];
                 k = k + 2;
             }
 
             k = 0;
             for (int i = 0; i < 3; i++)
             {
-                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 0] = jacobianMatrix[1, 0] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
             k = 1;
             for (int i = 0; i < 3; i++)
             {
-                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xUpdated[k] * dN["ihta"][i];
+                jacobianMatrix[1, 1] = jacobianMatrix[1, 1] + xInitial[k] * dN["ihta"][i];
                 k = k + 2;
             }
 
@@ -324,7 +333,7 @@ namespace GFEC
             return stressVector;
         }
 
-        private Tuple<double[], double[]> GaussPoints(int i , int j)
+        private Tuple<double[], double[]> GaussPoints(int i, int j)
         {
             double[] gaussPoints = new double[] { 0.0571041961, 0.2768430136, 0.5835904324, 0.8602401957 };
             double[] gaussPoints2 = new double[] { 0.06546699465, 0.2386486597, 0.2789904635, 0.1300560792 };
@@ -382,7 +391,7 @@ namespace GFEC
         public double[] CreateInternalGlobalForcesVector()
         {
             double[] F = new double[6];
-            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio); 
+            double[,] E = CalculateStressStrainMatrix(Properties.YoungMod, Properties.PoissonRatio);
 
             for (int i = 0; i <= 3; i++)
             {

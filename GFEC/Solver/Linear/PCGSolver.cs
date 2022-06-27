@@ -31,6 +31,7 @@ namespace GFEC
                 double alpha = residualDotOld / VectorOperations.VectorDotProduct(preconVector, u);
                 solutionVector = VectorOperations.VectorVectorAddition(solutionVector, VectorOperations.VectorScalarProductNew(preconVector, alpha));
                 residual = VectorOperations.VectorVectorSubtraction(residual, VectorOperations.VectorScalarProductNew(u, alpha));
+                var residualDot = VectorOperations.VectorDotProduct(residual, residual);
                 if (VectorOperations.VectorDotProduct(residual, residual) < tolerance)
                 {
                     break;
