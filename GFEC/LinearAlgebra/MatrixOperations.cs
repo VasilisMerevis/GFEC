@@ -138,6 +138,26 @@ namespace GFEC
             }
         }
 
+        public static double[,] MatrixProductParallel(double[,] matrix1, double[,] matrix2)
+        {
+            int matrix1rows = matrix1.GetLength(0);
+            int matrix2cols = matrix2.GetLength(1);
+            double[,] productMatrix = new double[matrix1rows, matrix2cols];
+            Parallel.For(0, matrix1rows, i =>
+            {
+                for (int j = 0; j < matrix2cols; j++)
+                {
+                    double sum = 0;
+                    for (int k = 0; k < matrix2.GetLength(0); k++)
+                    {
+                        sum = sum + matrix1[i, k] * matrix2[k, j];
+                    }
+                    productMatrix[i, j] = sum;
+                }
+            });
+            return productMatrix;
+        }
+
         public static double[,] MatrixAddition(double[,] matrix1, double[,] matrix2)
         {
             int threads, threadsAsync;

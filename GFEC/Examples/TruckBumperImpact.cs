@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -232,7 +233,19 @@ namespace GFEC
             elementsAssembly.CreateElementsAssembly();
             ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             elementsAssembly.ActivateBoundaryConditions = true;
+
+            Stopwatch watch1 = new Stopwatch();
+            watch1.Start();
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
+            watch1.Stop();
+            long watch1Time = watch1.ElapsedMilliseconds;
+
+            Stopwatch watch2 = new Stopwatch();
+            watch2.Start();
+            double[,] globalStiffnessMatrixParallel = elementsAssembly.CreateTotalStiffnessMatrixParallel();
+            watch2.Stop();
+            long watch2Time = watch2.ElapsedMilliseconds;
+
             double[] stiffnessVector = new double[globalStiffnessMatrix.GetLength(1)];
             for (int i = 0; i < globalStiffnessMatrix.GetLength(1); i++)
             {

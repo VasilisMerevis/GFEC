@@ -434,6 +434,44 @@ namespace GFEC
                 return totalStiffnessMatrix;
             }
         }
+
+        public double[,] CreateTotalStiffnessMatrixParallel()
+        {
+            double[,] totalStiffnessMatrix = new double[totalDOF, totalDOF];
+            //List<int> falseStiffness = new List<int>();
+            Parallel.For(1, ElementsConnectivity.Count, element =>
+           {
+               int elementDofs = ElementsAssembly[element].ElementFreedomList.Count;
+               double[,] elementStiffnessMatrix = ElementsAssembly[element].CreateGlobalStiffnessMatrix();
+                //if (!MatrixOperations.CheckIfSymmetric(elementStiffnessMatrix))
+                //{
+                //    falseStiffness.Add(element);
+                //}
+                for (int i = 0; i < elementDofs; i++)
+               {
+                   int localRow = i;
+                   int globalRow = ElementsAssembly[element].ElementFreedomList[i];
+                   for (int j = 0; j < elementDofs; j++)
+                   {
+                       int localColumn = j;
+                       int globalColumn = ElementsAssembly[element].ElementFreedomList[j];
+                       totalStiffnessMatrix[globalRow, globalColumn] = totalStiffnessMatrix[globalRow, globalColumn] + elementStiffnessMatrix[localRow, localColumn];
+                   }
+               }
+           });
+            //var falseStiff = falseStiffness.ToArray();
+            //VectorOperations.PrintIntVectorToFile(falseStiff, @"C:\Users\Public\Documents\" + "nonSymmetricStiffnessElements.dat");
+
+            if (ActivateBoundaryConditions)
+            {
+                double[,] reducedStiffnessMatrix = BoundaryConditionsImposition.ReducedTotalStiff(totalStiffnessMatrix, BoundedDOFsVector);
+                return reducedStiffnessMatrix;
+            }
+            else
+            {
+                return totalStiffnessMatrix;
+            }
+        }
         public double[,] CreateStiffnessMatrixLinearPart()
         {
             double[,] totalStiffnessMatrix = new double[totalDOF, totalDOF];

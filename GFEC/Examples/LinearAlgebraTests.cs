@@ -20,12 +20,27 @@ namespace GFEC
             Stopwatch watch3 = new Stopwatch();
             Stopwatch watchS1 = new Stopwatch();
             Stopwatch watchS2 = new Stopwatch();
-            double[,] matrixA = new double[6000, 6000];
+
+            Stopwatch watchM1 = new Stopwatch();
+            Stopwatch watchM2 = new Stopwatch();
+            double[,] matrixA = new double[1000, 1000];
             double[] vectorA = VectorOperations.CreateRandomVector(6000);
             MatrixOperations.FillMatrixWithDoubleValue(matrixA, 1.0);
-            
-            
- 
+
+
+            double[,] productResult = null;
+            watchM1.Start();
+            productResult = MatrixOperations.MatrixProduct(matrixA, matrixA);
+            watchM1.Stop();
+            long watchM1Time = watchM1.ElapsedMilliseconds;
+
+            productResult = null;
+            watchM2.Start();
+            productResult = MatrixOperations.MatrixProductParallel(matrixA, matrixA);
+            watchM2.Stop();
+            long watchM2Time = watchM2.ElapsedMilliseconds;
+
+
             watch.Start();
             double[,] matrixC = MatrixOperations.MatrixAddition(matrixA, matrixA);
             watch.Stop();
@@ -56,6 +71,9 @@ namespace GFEC
             var x = matrixE.Solve(vectorB);
             watchS2.Stop();
             long time5 = watchS2.ElapsedMilliseconds;
+
+
+
         }
 
     }

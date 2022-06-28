@@ -52,6 +52,9 @@ namespace GFEC
         void UpdateEASParameters(double[] solutionVector);
         void StoreFinalStepDisplacementVector(double[] solutionVector);
 
+        double[,] CreateTotalStiffnessMatrixParallel();
+
+
         //void UpdateValues(double[] totalDisplacementVector);
         //double[,] CreateTotalStiffnessMatrix();
         //double[,] CreateTotalMassMatrix();
