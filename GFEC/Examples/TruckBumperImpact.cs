@@ -234,17 +234,11 @@ namespace GFEC
             ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
             elementsAssembly.ActivateBoundaryConditions = true;
 
-            Stopwatch watch1 = new Stopwatch();
-            watch1.Start();
+           
             double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
-            watch1.Stop();
-            long watch1Time = watch1.ElapsedMilliseconds;
+           
 
-            Stopwatch watch2 = new Stopwatch();
-            watch2.Start();
-            double[,] globalStiffnessMatrixParallel = elementsAssembly.CreateTotalStiffnessMatrixParallel();
-            watch2.Stop();
-            long watch2Time = watch2.ElapsedMilliseconds;
+           
 
             double[] stiffnessVector = new double[globalStiffnessMatrix.GetLength(1)];
             for (int i = 0; i < globalStiffnessMatrix.GetLength(1); i++)
@@ -322,6 +316,20 @@ namespace GFEC
             IAssembly elementsAssembly = CreateAssembly(nodes, elementsConnectivity, fixedNodes, masterElementsConnectivity, slaveElementsConnectivity);
             elementsAssembly.CreateElementsAssembly();
             ExportToFile.ExportMatlabInitialGeometry(elementsAssembly);
+
+            
+            Stopwatch watch1 = new Stopwatch();
+            watch1.Start();
+            double[,] globalStiffnessMatrix = elementsAssembly.CreateTotalStiffnessMatrix();
+            watch1.Stop();
+            long watch1Time = watch1.ElapsedMilliseconds;
+
+            elementsAssembly.ActivateParallelCalculations = true;
+            Stopwatch watch2 = new Stopwatch();
+            watch2.Start();
+            double[,] globalStiffnessMatrixParallel = elementsAssembly.CreateTotalStiffnessMatrix();
+            watch2.Stop();
+            long watch2Time = watch2.ElapsedMilliseconds;
             //double[,] massMatrix = elementsAssembly.CreateTotalMassMatrix();
             //double[] internalForces = elementsAssembly.CreateTotalInternalForcesVector();
             //VectorOperations.PrintVectorToFile(internalForces, @"C:\Users\Public\Documents\" + "internalForces.dat");

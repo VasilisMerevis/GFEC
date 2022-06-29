@@ -18,6 +18,12 @@ namespace GFEC
         public int[] BoundedDOFsVector { get; set; }
         public int[] ContactDOFsVector { get; set; }
         public int[] NoContactDOFsVector { get; set; }
+        public bool ActivateParallelCalculations { get; set; }
+
+        public Assembly()
+        {
+            ActivateParallelCalculations = false;
+        }
         //private int[] boundedDOFsVector;
 
         //public int[] BoundedDOFsVector
@@ -399,6 +405,20 @@ namespace GFEC
 
         public double[,] CreateTotalStiffnessMatrix()
         {
+            double[,] totalStiffnessMatrix;
+            if (ActivateParallelCalculations)
+            {
+                totalStiffnessMatrix = CalculateTotalStiffnessMatrixParallel();
+                return totalStiffnessMatrix;
+            }
+            else
+            {
+                totalStiffnessMatrix = CalculateTotalStiffnessMatrix();
+                return totalStiffnessMatrix;
+            }
+        }
+        private double[,] CalculateTotalStiffnessMatrix()
+        {
             double[,] totalStiffnessMatrix = new double[totalDOF, totalDOF];
             //List<int> falseStiffness = new List<int>();
             for (int element = 1; element <= ElementsConnectivity.Count; element++)
@@ -435,7 +455,7 @@ namespace GFEC
             }
         }
 
-        public double[,] CreateTotalStiffnessMatrixParallel()
+        private double[,] CalculateTotalStiffnessMatrixParallel()
         {
             double[,] totalStiffnessMatrix = new double[totalDOF, totalDOF];
             //List<int> falseStiffness = new List<int>();
